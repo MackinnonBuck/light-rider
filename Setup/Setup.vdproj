@@ -50,6 +50,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.6.1"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.6.1 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.6.1"
+                    }
+                }
             }
         }
         "Release"
@@ -112,7 +120,7 @@
         {
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_87C58A7367994D3AB25659457634B111"
             {
-            "DefaultLocation" = "8:[ProgramFilesFolder][Manufacturer]\\[ProductName]"
+            "DefaultLocation" = "8:[ProgramFilesFolder][ProductName]"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -183,7 +191,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:LightRider"
         "ProductCode" = "8:{77D36A26-F75E-48D1-A8C9-D11C4C437766}"
-        "PackageCode" = "8:{C85742A1-A26D-410C-A4A1-3A29041A13BA}"
+        "PackageCode" = "8:{351DB174-B422-4756-AC44-D7282D39BDCD}"
         "UpgradeCode" = "8:{D2CCD830-90A2-4658-B4A8-1C3AB631E710}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
@@ -194,9 +202,9 @@
         "Manufacturer" = "8:LightRider"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
-        "Title" = "8:Setup"
+        "Title" = "8:LightRiderSetup"
         "Subject" = "8:"
-        "ARPCONTACT" = "8:LightRider"
+        "ARPCONTACT" = "8:Mackinnon Buck"
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
         "ARPURLINFOABOUT" = "8:"
@@ -305,7 +313,7 @@
         {
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_D42520D23840497A8756C6264BC78824"
             {
-            "Name" = "8:LightRider Shortcut"
+            "Name" = "8:LightRider"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
@@ -313,7 +321,7 @@
             "Transitive" = "11:FALSE"
             "Target" = "8:_353B968F42174277ADBB729BBFD962F1"
             "Folder" = "8:_D0FD534289D349D8B39212B05B645EB6"
-            "WorkingFolder" = "8:_87C58A7367994D3AB25659457634B111"
+            "WorkingFolder" = "8:_90673C07381446DFAC2C63AF3308CC63"
             "Icon" = "8:"
             "Feature" = "8:"
             }

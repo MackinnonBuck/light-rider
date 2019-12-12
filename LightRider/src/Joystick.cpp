@@ -50,5 +50,5 @@ float Joystick::getAxis(int axis) const
 unsigned char Joystick::getButton(int button) const
 {
     assert(m_id != -1);
-    return button >= m_buttonCount ? 0.0f : m_buttons[button];
+    return button >= m_buttonCount ? (unsigned char)0 : m_buttons[button];
 }
