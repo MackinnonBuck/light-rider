@@ -56,7 +56,7 @@ private:
     GLuint m_primaryFrameBuffer;
 
     // The color buffer for the primary frame buffer.
-    GLuint m_primaryColorBuffer;
+    GLuint m_primaryColorAttachments[3];
 
     // The frame buffer to store the antialiased scene.
     GLuint m_fxaaFrameBuffer;

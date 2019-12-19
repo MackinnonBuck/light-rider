@@ -11,8 +11,8 @@ int main(int argc, char** argv)
     GameConfig config;
     config.argumentCount = argc;
     config.arguments = argv;
-    config.initialWindowWidth = 1280;
-    config.initialWindowHeight = 720;
+    config.initialWindowWidth = 1366;
+    config.initialWindowHeight = 768;
     config.initialIsFullscreen = false;
     config.windowTitle = "LightRider";
     config.physicsTickInterval = 1.0f / 60.0f;

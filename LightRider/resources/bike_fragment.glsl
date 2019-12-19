@@ -1,5 +1,7 @@
-#version 330 core
-out vec4 color;
+#version 400 core
+layout(location = 0) out vec4 color;
+layout(location = 1) out vec3 fragPos;
+layout(location = 2) out vec3 fragNor;
 
 in vec3 vertex_normal;
 in vec3 vertex_pos;
@@ -38,6 +40,9 @@ float getSpecFromLight(vec3 normal, vec3 lightPosition, float specularFactor)
 
 void main()
 {
+    fragPos = vertex_pos;
+    fragNor = vertex_normal;
+
     color.a = 1;
     color.rgb = texture(texture0, vertex_tex).rgb;// * bikeColor;
 
