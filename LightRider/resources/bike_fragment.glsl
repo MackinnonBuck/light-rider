@@ -2,6 +2,7 @@
 layout(location = 0) out vec4 color;
 layout(location = 1) out vec3 fragPos;
 layout(location = 2) out vec3 fragNor;
+layout(location = 3) out float fragReflect;
 
 in vec3 vertex_normal;
 in vec3 vertex_pos;
@@ -44,28 +45,35 @@ void main()
     fragNor = vertex_normal;
 
     color.a = 1;
-    color.rgb = texture(texture0, vertex_tex).rgb;// * bikeColor;
+    color.rgb = texture(texture0, vertex_tex).rgb;
 
     vec3 n = normalize(-vertex_normal);
 
     if (color.r < 0.1) // Bike body
     {
+        fragReflect = 1.0f;
+
         for (int i = 0; i < 4; i++)
             color.rgb += vec3(getSpecFromLight(n, lightPositions[i], 500) * 8);
     }
-    else if (color.g < 0.1) // Bike rider
+    else
     {
-        color.rgb = vec3(0);
+        fragReflect = 0.0f;
 
-        for (int i = 0; i < 4; i++)
-            color.rgb += vec3(getSpecFromLight(n, lightPositions[i], 80) * 0.5);
-    }
-    else if (color.b < 0.1) // Bike headlights
-    {
-        color.rgb = vec3(20);
-    }
-    else // Bike accent
-    {
-        color.rgb *= bikeColor * 6;
+        if (color.g < 0.1) // Bike rider
+        {
+            color.rgb = vec3(0);
+
+            for (int i = 0; i < 4; i++)
+                color.rgb += vec3(getSpecFromLight(n, lightPositions[i], 80) * 0.5);
+        }
+        else if (color.b < 0.1) // Bike headlights
+        {
+            color.rgb = vec3(20);
+        }
+        else // Bike accent
+        {
+            color.rgb *= bikeColor * 6;
+        }
     }
 }

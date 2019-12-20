@@ -206,7 +206,7 @@ void LightTrail::render()
 
     glBindVertexArray(m_trailVertexArray);
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBlendFunci(0, GL_SRC_ALPHA, GL_ONE);
     glDrawArrays(GL_TRIANGLES, 0, m_trailVertexCount);
 
     glBindVertexArray(0);

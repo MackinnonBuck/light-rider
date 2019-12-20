@@ -872,10 +872,10 @@
     <None Include="resources\plane.shape">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="resources\post_fragment.glsl">
+    <None Include="resources\hdr_fragment.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="resources\post_vertex.glsl">
+    <None Include="resources\hdr_vertex.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="resources\sky_fragment.glsl">
@@ -887,6 +887,8 @@
     <None Include="resources\sphere.shape">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="resources\ssr_fragment.glsl" />
+    <None Include="resources\ssr_vertex.glsl" />
     <None Include="resources\trail_fragment.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>

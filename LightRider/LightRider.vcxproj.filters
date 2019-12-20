@@ -699,8 +699,6 @@
     <None Include="resources\sky_vertex.glsl" />
     <None Include="resources\trail_fragment.glsl" />
     <None Include="resources\trail_vertex.glsl" />
-    <None Include="resources\post_fragment.glsl" />
-    <None Include="resources\post_vertex.glsl" />
     <None Include="resources\blur_fragment.glsl" />
     <None Include="resources\blur_vertex.glsl" />
     <None Include="resources\bloom_fragment.glsl" />
@@ -712,6 +710,10 @@
     <None Include="resources\light_cycle.shape" />
     <None Include="resources\plane.shape" />
     <None Include="resources\sphere.shape" />
+    <None Include="resources\hdr_fragment.glsl" />
+    <None Include="resources\hdr_vertex.glsl" />
+    <None Include="resources\ssr_fragment.glsl" />
+    <None Include="resources\ssr_vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ground_texture.png" />

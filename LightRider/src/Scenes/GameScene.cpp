@@ -146,7 +146,13 @@ void GameScene::loadAssets()
     pAssets->loadTexture("skyTexture", "sky.jpg", TextureType::BACKGROUND);
 
     // Miscellaneous assets.
-    Program* pPostShader = pAssets->loadShaderProgram("postShader", "post_vertex.glsl", "post_fragment.glsl", ShaderUniform::NONE);
+    Program* pSsrShader = pAssets->loadShaderProgram("ssrShader", "ssr_vertex.glsl", "ssr_fragment.glsl", ShaderUniform::NONE);
+    pSsrShader->addUniform("screenTexture");
+    pSsrShader->addUniform("screenPositions");
+    pSsrShader->addUniform("screenNormals");
+    pSsrShader->addUniform("reflectionMap");
+
+    Program* pPostShader = pAssets->loadShaderProgram("hdrShader", "hdr_vertex.glsl", "hdr_fragment.glsl", ShaderUniform::NONE);
     pPostShader->addUniform("screenTexture");
 
     Program* pFxaaShader = pAssets->loadShaderProgram("fxaaShader", "fxaa_vertex.glsl", "fxaa_fragment.glsl", ShaderUniform::NONE);

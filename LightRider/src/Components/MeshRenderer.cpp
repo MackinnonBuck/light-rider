@@ -38,7 +38,7 @@ void MeshRenderer::render()
     glUniformMatrix4fv(m_pShaderProgram->getUniform("M"), 1, GL_FALSE, &globalTransform[0][0]);
 
     if (usesBlending())
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     m_pShape->draw(m_pShaderProgram);
 

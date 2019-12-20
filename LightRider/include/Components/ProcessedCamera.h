@@ -39,8 +39,11 @@ protected:
 
 private:
 
-    // The shader program used to render the scene's first pass.
-    Program* m_pPostShader;
+    // The shader program used to apply SSR to the scene.
+    Program* m_pSsrShader;
+
+    // The shader program used to generate an HDR texture of the scene.
+    Program* m_pHdrShader;
 
     // The shader program used for performing FXAA antialiasing.
     Program* m_pFxaaShader;
@@ -56,7 +59,13 @@ private:
     GLuint m_primaryFrameBuffer;
 
     // The color buffer for the primary frame buffer.
-    GLuint m_primaryColorAttachments[3];
+    GLuint m_primaryColorAttachments[4];
+
+    // The frame buffer to render the scene to with SSR applied.
+    GLuint m_ssrFrameBuffer;
+
+    // The color buffer to store the scene with SSR applied.
+    GLuint m_ssrColorBuffer;
 
     // The frame buffer to store the antialiased scene.
     GLuint m_fxaaFrameBuffer;
