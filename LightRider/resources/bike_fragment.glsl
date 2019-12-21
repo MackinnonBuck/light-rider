@@ -42,7 +42,7 @@ float getSpecFromLight(vec3 normal, vec3 lightPosition, float specularFactor)
 void main()
 {
     fragPos = vertex_pos;
-    fragNor = vertex_normal;
+    fragNor = -vertex_normal;
 
     color.a = 1;
     color.rgb = texture(texture0, vertex_tex).rgb;

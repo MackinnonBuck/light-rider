@@ -1,5 +1,9 @@
 #version 330 core
-out vec4 color;
+//out vec4 color;
+layout(location = 0) out vec4 color;
+layout(location = 1) out vec3 fragPos;
+layout(location = 2) out vec3 fragNor;
+layout(location = 3) out float fragReflect;
 
 uniform vec3 baseColor;
 uniform float noiseSeed;
@@ -172,4 +176,6 @@ void main()
     noiseFactor += 0.35;
     color.rgb = nBaseColor * (edgeFactor + (1 - edgeFactor) * (timeFactor * gradientFactor + (1 - timeFactor) * noiseFactor));
     color.a = (color.r + color.g + color.b) / 3;
+
+    fragReflect = 0.0f;
 }

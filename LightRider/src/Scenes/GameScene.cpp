@@ -147,10 +147,14 @@ void GameScene::loadAssets()
 
     // Miscellaneous assets.
     Program* pSsrShader = pAssets->loadShaderProgram("ssrShader", "ssr_vertex.glsl", "ssr_fragment.glsl", ShaderUniform::NONE);
-    pSsrShader->addUniform("screenTexture");
-    pSsrShader->addUniform("screenPositions");
-    pSsrShader->addUniform("screenNormals");
+    pSsrShader->addUniform("gFinalImage");
+    pSsrShader->addUniform("gPosition");
+    pSsrShader->addUniform("gNormal");
     pSsrShader->addUniform("reflectionMap");
+    pSsrShader->addUniform("invView");
+    pSsrShader->addUniform("projection");
+    pSsrShader->addUniform("invprojection");
+    pSsrShader->addUniform("view");
 
     Program* pPostShader = pAssets->loadShaderProgram("hdrShader", "hdr_vertex.glsl", "hdr_fragment.glsl", ShaderUniform::NONE);
     pPostShader->addUniform("screenTexture");

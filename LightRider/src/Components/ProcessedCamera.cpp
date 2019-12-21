@@ -32,9 +32,9 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     m_pBloomShader = pAssets->getShaderProgram("bloomShader");
 
     m_pSsrShader->bind();
-    glUniform1i(m_pSsrShader->getUniform("screenTexture"), 0);
-    glUniform1i(m_pSsrShader->getUniform("screenPositions"), 1);
-    glUniform1i(m_pSsrShader->getUniform("screenNormals"), 2);
+    glUniform1i(m_pSsrShader->getUniform("gFinalImage"), 0);
+    glUniform1i(m_pSsrShader->getUniform("gPosition"), 1);
+    glUniform1i(m_pSsrShader->getUniform("gNormal"), 2);
     glUniform1i(m_pSsrShader->getUniform("reflectionMap"), 3);
     m_pSsrShader->unbind();
 
@@ -153,6 +153,9 @@ void ProcessedCamera::preRender()
 
 void ProcessedCamera::postRender()
 {
+    glm::mat4& viewMatrix = getViewMatrix();
+    glm::mat4& perspectiveMatrix = getPerspectiveMatrix();
+
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 
@@ -161,6 +164,12 @@ void ProcessedCamera::postRender()
     glBindFramebuffer(GL_FRAMEBUFFER, m_ssrFrameBuffer);
 
     m_pSsrShader->bind();
+    
+    //glUniform3fv(m_pSsrShader->getUniform("viewPos"), 1, &glm::vec3(getViewMatrix()[3])[0]);
+    glUniformMatrix4fv(m_pSsrShader->getUniform("projection"), 1, GL_FALSE, &perspectiveMatrix[0][0]);
+    glUniformMatrix4fv(m_pSsrShader->getUniform("view"), 1, GL_FALSE, &viewMatrix[0][0]);
+    glUniformMatrix4fv(m_pSsrShader->getUniform("invprojection"), 1, GL_FALSE, &glm::inverse(perspectiveMatrix)[0][0]);
+    glUniformMatrix4fv(m_pSsrShader->getUniform("invView"), 1, GL_FALSE, &glm::inverse(viewMatrix)[0][0]);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_primaryColorAttachments[0]);

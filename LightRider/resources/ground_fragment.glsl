@@ -20,6 +20,6 @@ void main()
     color.a = 0.75;
 
     fragPos = vertex_pos;
-    fragNor = vertex_normal;
+    fragNor = vec3(0.0f, 1.0f, 0.0f);//vertex_normal;
     fragReflect = 1.0f;
 }
