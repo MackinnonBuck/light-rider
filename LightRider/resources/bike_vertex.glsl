@@ -10,12 +10,14 @@ uniform mat4 M;
 out vec3 vertex_pos;
 out vec3 vertex_normal;
 out vec2 vertex_tex;
+out vec3 screen_pos;
 
 void main()
 {
-	vertex_normal = vec4(M * vec4(vertexNormal ,0.0)).xyz;
+	vertex_normal = vec4(M * vec4(vertexNormal, 0.0)).xyz;
 	vec4 tpos =  M * vec4(vertexPosition, 1.0);
 	vertex_pos = tpos.xyz;
 	gl_Position = P * V * tpos;
+	screen_pos = gl_Position.xyz;
 	vertex_tex = vec2(vertexTexture.x, -vertexTexture.y);
 }

@@ -12,6 +12,7 @@ uniform float currentTime;
 in vec3 fragmentPosition;
 in float fragmentHeight;
 in float fragmentTimeStamp;
+in vec3 screen_pos;
 
 vec4 permute(vec4 x)
 {
@@ -178,4 +179,5 @@ void main()
     color.a = (color.r + color.g + color.b) / 3;
 
     fragReflect = 0.0f;
+    fragPos = screen_pos;
 }

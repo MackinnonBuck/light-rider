@@ -7,6 +7,7 @@ layout(location = 3) out float fragReflect;
 in vec3 vertex_normal;
 in vec3 vertex_pos;
 in vec2 vertex_tex;
+in vec3 screen_pos;
 
 uniform vec3 campos;
 uniform vec3 bikeColor;
@@ -41,7 +42,7 @@ float getSpecFromLight(vec3 normal, vec3 lightPosition, float specularFactor)
 
 void main()
 {
-    fragPos = vertex_pos;
+    fragPos = screen_pos;//vertex_pos;
     fragNor = -vertex_normal;
 
     color.a = 1;

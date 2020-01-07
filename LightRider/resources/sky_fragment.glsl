@@ -8,13 +8,14 @@ layout(location = 3) out float fragReflect;
 in vec3 vertex_normal;
 in vec3 vertex_pos;
 in vec2 vertex_tex;
+in vec3 screen_pos;
 
 uniform sampler2D texture3;
 
 void main()
 {
     color = texture(texture3, vertex_tex);
-    fragPos = vertex_pos;
+    fragPos = screen_pos;//vertex_pos;
     fragNor = vertex_normal;
     fragReflect = 0.0f;
 }

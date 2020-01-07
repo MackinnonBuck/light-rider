@@ -52,9 +52,8 @@ vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)
         projectedCoord.xy /= projectedCoord.w;
         projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
  
-        //depth = texture(gPosition, projectedCoord.xy).z;
-//        depth = (texture(gPosition, projectedCoord.xy) * invView).z;
-        depth = length(view[3].xyz - texture(gPosition, projectedCoord.xy).xyz);
+        depth = texture(gPosition, projectedCoord.xy).z;
+
  
         dDepth = hitCoord.z - depth;
 
@@ -74,7 +73,9 @@ vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)
 
 vec4 RayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth)
 {
+
     dir *= step;
+ 
  
     float depth;
     int steps;
@@ -89,11 +90,7 @@ vec4 RayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth)
         projectedCoord.xy /= projectedCoord.w;
         projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
  
-//        depth = texture(gPosition, projectedCoord.xy).z;
-//        depth = (texture(gPosition, projectedCoord.xy) * invView).z;
-
-        depth = length(view[3].xyz - texture(gPosition, projectedCoord.xy).xyz);
-
+        depth = texture(gPosition, projectedCoord.xy).z;
         if(depth > 1000.0)
             continue;
  
@@ -122,6 +119,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
+
 vec3 hash(vec3 a)
 {
     a = fract(a * Scale);
@@ -131,31 +129,27 @@ vec3 hash(vec3 a)
 
 void main()
 {
-//    if (texture(reflectionMap, TexCoords).r < 0.1f)
-//    {
-//        outColor.rgb = texture(gFinalImage, TexCoords).rgb;
-//        outColor.a = 1.0f;
-//        return;
-//    }
+//    outColor.rgb = texture(gPosition, TexCoords).rgb * 0.01f;
+//    outColor.a = 1.0;
+//
+//    return;
 //
     float reflection = texture(reflectionMap, TexCoords).r;
 
     outColor.rgb = texture(gFinalImage, TexCoords).rgb;
     outColor.a = 1.0f;
 
-    vec2 MetallicEmmissive = vec2(1);//texture(gExtraComponents, TexCoords).rg;
+    vec2 MetallicEmmissive = vec2(1, 1);//texture2D(gExtraComponents, TexCoords).rg;
     Metallic = MetallicEmmissive.r;
 
     if(Metallic < 0.01)
         discard;
  
-    vec3 viewNormal = vec3(texture(gNormal, TexCoords));
-//    vec3 viewNormal = vec3(texture(gNormal, TexCoords));
-    vec3 viewPos = vec3(texture(gPosition, TexCoords));//textureLod(gPosition, TexCoords, 2).xyz;
+    vec3 viewNormal = vec3(texture(gNormal, TexCoords) * invView);
+    vec3 viewPos = texture(gPosition, TexCoords).xyz;
     vec3 albedo = texture(gFinalImage, TexCoords).rgb;
 
-    float spec = 0.0;
-//    float spec = texture(ColorBuffer, TexCoords).w;
+    float spec = 0.0f;//texture(ColorBuffer, TexCoords).w;
 
     vec3 F0 = vec3(0.04); 
     F0      = mix(F0, albedo, Metallic);
@@ -167,12 +161,11 @@ void main()
     vec3 hitPos = viewPos;
     float dDepth;
  
-    vec3 wp = vec3(vec4(viewPos, 1.0));
+    vec3 wp = vec3(vec4(viewPos, 1.0) * invView);
     vec3 jitt = mix(vec3(0.0), vec3(hash(wp)), spec);
     vec4 coords = RayMarch((vec3(jitt) + reflected * max(minRayStep, -viewPos.z)), hitPos, dDepth);
  
     vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - coords.xy));
- 
  
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
 
@@ -181,7 +174,6 @@ void main()
                 -reflected.z;
  
     // Get color
-//    vec3 SSR = textureLod(gFinalImage, coords.xy, 0).rgb * clamp(ReflectionMultiplier, 0.0, 0.9) * Fresnel;  
     vec3 SSR = texture(gFinalImage, coords.xy).rgb * clamp(ReflectionMultiplier, 0.0, 0.9) * Fresnel;  
 
     outColor += vec4(SSR, Metallic) * reflection;

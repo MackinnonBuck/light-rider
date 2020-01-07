@@ -9,6 +9,7 @@ uniform mat4 V;
 out vec3 fragmentPosition;
 out float fragmentHeight;
 out float fragmentTimeStamp;
+out vec3 screen_pos;
 
 void main()
 {
@@ -17,4 +18,5 @@ void main()
     fragmentTimeStamp = vertexTimeStamp;
 
 	gl_Position = P * V * vec4(vertexPosition, 1.0);
+    screen_pos = gl_Position.xyz;
 }

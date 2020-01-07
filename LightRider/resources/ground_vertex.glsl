@@ -9,6 +9,7 @@ uniform mat4 M;
 
 out vec3 vertex_pos;
 out vec3 vertex_normal;
+out vec3 screen_pos;
 
 void main()
 {
@@ -16,4 +17,5 @@ void main()
 	vec4 tpos =  M * vec4(vertexPosition, 1.0);
 	vertex_pos = tpos.xyz;
 	gl_Position = P * V * tpos;
+	screen_pos = gl_Position.xyz;
 }

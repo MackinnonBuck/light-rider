@@ -164,12 +164,15 @@ void ProcessedCamera::postRender()
     glBindFramebuffer(GL_FRAMEBUFFER, m_ssrFrameBuffer);
 
     m_pSsrShader->bind();
+
+    glm::mat4 invView = glm::inverse(viewMatrix);
+    glm::mat4 invProj = glm::inverse(perspectiveMatrix);
     
     //glUniform3fv(m_pSsrShader->getUniform("viewPos"), 1, &glm::vec3(getViewMatrix()[3])[0]);
     glUniformMatrix4fv(m_pSsrShader->getUniform("projection"), 1, GL_FALSE, &perspectiveMatrix[0][0]);
     glUniformMatrix4fv(m_pSsrShader->getUniform("view"), 1, GL_FALSE, &viewMatrix[0][0]);
-    glUniformMatrix4fv(m_pSsrShader->getUniform("invprojection"), 1, GL_FALSE, &glm::inverse(perspectiveMatrix)[0][0]);
-    glUniformMatrix4fv(m_pSsrShader->getUniform("invView"), 1, GL_FALSE, &glm::inverse(viewMatrix)[0][0]);
+    glUniformMatrix4fv(m_pSsrShader->getUniform("invprojection"), 1, GL_FALSE, &invProj[0][0]);
+    glUniformMatrix4fv(m_pSsrShader->getUniform("invView"), 1, GL_FALSE, &invView[0][0]);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_primaryColorAttachments[0]);

@@ -1,17 +1,17 @@
 #pragma once
 
-#include "Camera.h"
+#include "ProcessedCamera.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
 // Useful for efficiently exploring the scene.
 // Usage: addComponent(bool enabled = true, float layerDepth = 0.0f)
-class FreeroamCamera : public Camera
+class FreeroamCamera : public ProcessedCamera
 {
 public:
 
     // Creates a new FreeroamCamera instance.
-    FreeroamCamera(bool enabled = true, float layerDepth = 0.0f) : Camera(enabled, layerDepth),
+    FreeroamCamera(bool enabled = true, float layerDepth = 0.0f) : ProcessedCamera(enabled, layerDepth),
         m_eulerAngles(0.0f, 0.0f, 0.0f), m_isMoving(false),
         m_initialCursorX(0.0f), m_initialCursorY(0.0f) { }
 

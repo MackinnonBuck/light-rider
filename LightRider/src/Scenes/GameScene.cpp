@@ -24,6 +24,7 @@ void GameScene::initialize()
 
     GameObject* pFreeroamCameraObject = GameObject::create("Camera");
     m_pFreeroamCamera = pFreeroamCameraObject->addComponent<FreeroamCamera>(false);
+    m_pFreeroamCamera->setSky("skyShader", "skyTexture", "sphereShape");
     pFreeroamCameraObject->getTransform()->setPosition(glm::vec3(0.0f, 5.0f, 20.0f));
 
     initScene();
@@ -45,7 +46,7 @@ void GameScene::update(float deltaTime)
         m_pPlayer2Camera->disable();
         m_pFreeroamCamera->enable(0.0f);
 
-        setDebugDrawEnabled(true);
+        //setDebugDrawEnabled(true);
     }
 
     Scene::update(deltaTime);
