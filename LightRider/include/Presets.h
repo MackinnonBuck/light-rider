@@ -16,4 +16,8 @@ namespace Presets
     // Creates a new LightRider bike object.
     GameObject* createLightRiderBike(const std::string& name, const glm::vec3& color, const BikeControls& bikeControls,
         const glm::vec3& position, float yaw);
+
+    // Creates a new LightRider bike display object.
+    GameObject* createLightRiderBikeDisplay(const std::string& name, const glm::vec3& color,
+        const glm::vec3& position, float yaw);
 }

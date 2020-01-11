@@ -13,7 +13,12 @@ namespace GameConstants
     constexpr float mapHalfWidth = 200.0f;
     constexpr float mapHalfHeight = 5.0f;
 
-    // Camera constants.
+    // Menu camera constants.
+    constexpr float orbitCameraSpeed = 0.25f;
+    constexpr float orbitCameraHeight = 1.5f;
+    constexpr float orbitCameraDistance = 5.0f;
+
+    // Game camera constants.
     constexpr float cameraTranslationStiffness = 16.0f;
     constexpr float cameraRotationStiffness = 12.0f;
     constexpr float cameraHeight = 3.0f;

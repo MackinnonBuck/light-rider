@@ -247,6 +247,9 @@
     <ClCompile Include="src\Components\DeathCamera.cpp" />
     <ClCompile Include="src\Joystick.cpp" />
     <ClCompile Include="src\Components\ProcessedCamera.cpp" />
+    <ClCompile Include="src\Scenes\LightRiderScene.cpp" />
+    <ClCompile Include="src\Scenes\MenuScene.cpp" />
+    <ClCompile Include="src\Components\OrbitCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.h" />
@@ -688,6 +691,9 @@
     <ClInclude Include="include\ContactInfo.h" />
     <ClInclude Include="include\Joystick.h" />
     <ClInclude Include="include\Components\ProcessedCamera.h" />
+    <ClInclude Include="include\Scenes\LightRiderScene.h" />
+    <ClInclude Include="include\Scenes\MenuScene.h" />
+    <ClInclude Include="include\Components\OrbitCamera.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\line_fragment.glsl" />

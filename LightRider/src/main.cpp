@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "GameConfig.h"
 #include "Scenes/GameScene.h"
+#include "Scenes/MenuScene.h"
 #include "Tests/TestScene.h"
 
 int main(int argc, char** argv)
@@ -22,7 +23,8 @@ int main(int argc, char** argv)
     // Initialize and run the game.
     Game& game = Game::getInstance();
     game.init(config);
-    game.run(new GameScene());
+    game.run(new MenuScene());
+    //game.run(new GameScene());
     //game.run(new TestScene());
 
     return 0;

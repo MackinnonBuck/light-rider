@@ -90,4 +90,18 @@ namespace Presets
 
         return pBikeObject;
     }
+
+    GameObject* createLightRiderBikeDisplay(const std::string& name, const glm::vec3& color,
+        const glm::vec3& position, float yaw)
+    {
+        GameObject* pBikeDisplayObject = GameObject::create(name);
+        pBikeDisplayObject->getTransform()->setTransformMatrix(
+            glm::translate(glm::mat4(1.0f), position) *
+            glm::rotate(glm::mat4(1.0f), yaw, glm::vec3(0.0f, 1.0f, 0.0f)) *
+            glm::rotate(glm::mat4(1.0f), -glm::pi<float>() * 0.5f, glm::vec3(1.0f, 0.0f, 0.0f))
+        );
+        pBikeDisplayObject->addComponent<BikeRenderer>(color);
+
+        return pBikeDisplayObject;
+    }
 }
