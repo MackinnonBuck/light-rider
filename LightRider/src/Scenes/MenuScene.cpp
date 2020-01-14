@@ -4,6 +4,7 @@
 #include "Presets.h"
 #include "Components/OrbitCamera.h"
 #include "Components/BikeRenderer.h"
+#include "Components/GuiImageRenderer.h"
 
 namespace GC = GameConstants;
 
@@ -22,4 +23,22 @@ void MenuScene::initialize()
     GameObject* pCamera = GameObject::create("Camera");
     OrbitCamera* pOrbitCamera = pCamera->addComponent<OrbitCamera>(true);
     pOrbitCamera->setSky("skyShader", "skyTexture", "sphereShape");
+
+    GameObject* pTitleImage = GameObject::create("TitleImage");
+    pTitleImage->addComponent<GuiImageRenderer>("guiImageShader", "titleTexture");
+}
+
+void MenuScene::loadAssets()
+{
+    LightRiderScene::loadAssets();
+
+    AssetManager* pAssets = getAssetManager();
+
+    // UI assets.
+    Program* pGuiImageShader = pAssets->loadShaderProgram("guiImageShader", "gui_image_vertex.glsl", "gui_image_fragment.glsl",
+        ShaderUniform::M_MATRIX
+      | ShaderUniform::TEXTURE_0
+    );
+
+    Texture* pTitleTexture = pAssets->loadTexture("titleTexture", "title_image.png", TextureType::IMAGE);
 }

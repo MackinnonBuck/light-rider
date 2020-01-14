@@ -8,6 +8,6 @@ class LightRiderScene : public Scene
 protected:
 
     // Loads common LightRider game assets.
-    void loadAssets();
+    virtual void loadAssets();
 };
 

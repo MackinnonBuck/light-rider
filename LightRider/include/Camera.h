@@ -61,11 +61,11 @@ public:
 
     // Renders scene from this camera.
     void render();
-    
-protected:
 
     // Gets the viewport dimensions.
     virtual void getViewport(int& x, int& y, int& width, int& height);
+    
+protected:
 
     // Called just before the camera renders the scene.
     virtual void preRender() { }

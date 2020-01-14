@@ -11,5 +11,9 @@ public:
 
     // Initializes the MenuScene.
     virtual void initialize();
+
+protected:
+
+    virtual void loadAssets();
 };
 

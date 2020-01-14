@@ -39,7 +39,8 @@ namespace Presets
         pGroundMeshRenderer->setDepthFunction([](Camera* pCamera) { return 1000.0f; });
         pGroundMeshRenderer->setLocalTransform(
             glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, GC::mapHalfHeight, 0.0f)) *
-            glm::scale(glm::mat4(1.0f), glm::vec3(GC::mapHalfWidth, 1.0f, GC::mapHalfWidth))
+            glm::scale(glm::mat4(1.0f), glm::vec3(GC::mapHalfWidth, 1.0f, GC::mapHalfWidth)) *
+            glm::rotate(glm::mat4(1.0f), glm::pi<float>() * 0.5f, glm::vec3(1.0f, 0.0f, 0.0f))
         );
 
         return pGroundObject;

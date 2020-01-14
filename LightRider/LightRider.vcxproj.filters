@@ -250,6 +250,7 @@
     <ClCompile Include="src\Scenes\LightRiderScene.cpp" />
     <ClCompile Include="src\Scenes\MenuScene.cpp" />
     <ClCompile Include="src\Components\OrbitCamera.cpp" />
+    <ClCompile Include="src\Components\GuiImageRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.h" />
@@ -694,6 +695,7 @@
     <ClInclude Include="include\Scenes\LightRiderScene.h" />
     <ClInclude Include="include\Scenes\MenuScene.h" />
     <ClInclude Include="include\Components\OrbitCamera.h" />
+    <ClInclude Include="include\Components\GuiImageRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\line_fragment.glsl" />
@@ -718,10 +720,13 @@
     <None Include="resources\light_cycle.shape" />
     <None Include="resources\plane.shape" />
     <None Include="resources\sphere.shape" />
+    <None Include="resources\gui_image_fragment.glsl" />
+    <None Include="resources\gui_image_vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ground_texture.png" />
     <Image Include="resources\light_cycle_texture.png" />
     <Image Include="resources\sky.jpg" />
+    <Image Include="resources\title_image.png" />
   </ItemGroup>
 </Project>

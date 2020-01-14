@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Components\GuiImageRenderer.cpp" />
     <ClCompile Include="src\Components\OrbitCamera.cpp" />
     <ClCompile Include="src\Scenes\MenuScene.cpp" />
     <ClCompile Include="src\Scenes\LightRiderScene.cpp" />
@@ -390,6 +391,7 @@
     <ClCompile Include="src\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Components\GuiImageRenderer.h" />
     <ClInclude Include="include\ContactInfo.h" />
     <ClInclude Include="include\Components\DeathCamera.h" />
     <ClInclude Include="include\Components\BikeRenderer.h" />
@@ -865,6 +867,12 @@
     <None Include="resources\ground_vertex.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="resources\gui_image_fragment.glsl">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+    </None>
+    <None Include="resources\gui_image_vertex.glsl">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+    </None>
     <None Include="resources\light_cycle.shape">
       <DeploymentContent>true</DeploymentContent>
       <FileType>Text</FileType>
@@ -908,6 +916,9 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="resources\sky.jpg">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="resources\title_image.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
   </ItemGroup>
