@@ -728,5 +728,6 @@
     <Image Include="resources\light_cycle_texture.png" />
     <Image Include="resources\sky.jpg" />
     <Image Include="resources\title_image.png" />
+    <Image Include="resources\press_to_begin.png" />
   </ItemGroup>
 </Project>

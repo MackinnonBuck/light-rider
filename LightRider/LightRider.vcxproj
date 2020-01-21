@@ -915,6 +915,9 @@
     <Image Include="resources\light_cycle_texture.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="resources\press_to_begin.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="resources\sky.jpg">
       <DeploymentContent>true</DeploymentContent>
     </Image>

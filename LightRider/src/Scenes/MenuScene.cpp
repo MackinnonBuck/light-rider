@@ -5,6 +5,7 @@
 #include "Components/OrbitCamera.h"
 #include "Components/BikeRenderer.h"
 #include "Components/GuiImageRenderer.h"
+#include "Scenes/GameScene.h"
 
 namespace GC = GameConstants;
 
@@ -25,7 +26,18 @@ void MenuScene::initialize()
     pOrbitCamera->setSky("skyShader", "skyTexture", "sphereShape");
 
     GameObject* pTitleImage = GameObject::create("TitleImage");
-    pTitleImage->addComponent<GuiImageRenderer>("guiImageShader", "titleTexture");
+    GuiImageRenderer* titleImage = pTitleImage->addComponent<GuiImageRenderer>("guiImageShader", "titleTexture", pOrbitCamera);
+    titleImage->setVerticalAnchor(VerticalAnchor::STRETCH);
+    titleImage->setHorizontalAnchor(HorizontalAnchor::CENTER);
+    titleImage->getTransform()->setPosition(glm::vec3(0, 0.7f, 0.0f));
+}
+
+void MenuScene::postUpdate(float deltaTime)
+{
+    LightRiderScene::postUpdate(deltaTime);
+
+    if (Game::getInstance().wasAnyKeyPressed())
+        Game::getInstance().changeScene(new GameScene());
 }
 
 void MenuScene::loadAssets()

@@ -15,9 +15,6 @@ void main()
 	vec4 tpos =  M * vec4(vertexPosition, 1.0);
 	vertex_pos = tpos.xyz;
 
-//	float aspect = P[1][1] / P[0][0];
-//	tpos.y *= aspect;
-
 	gl_Position = tpos;
 	vertex_tex = vec2(vertexTexture.x, -vertexTexture.y);
 }

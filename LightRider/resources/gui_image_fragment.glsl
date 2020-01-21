@@ -10,4 +10,5 @@ uniform sampler2D texture0;
 void main()
 {
     color = texture(texture0, vertex_tex);
+    color.rgb *= pow((color.r + color.g + color.b), 3);
 }

@@ -12,6 +12,8 @@ public:
     // Initializes the MenuScene.
     virtual void initialize();
 
+    virtual void postUpdate(float deltaTime);
+
 protected:
 
     virtual void loadAssets();
