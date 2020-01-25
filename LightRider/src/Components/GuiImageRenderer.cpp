@@ -6,7 +6,8 @@ GuiImageRenderer::GuiImageRenderer(const std::string& shaderId, const std::strin
     Renderable(shaderId, textureId, true),
     m_horizontalAnchor(HorizontalAnchor::LEFT),
     m_verticalAnchor(VerticalAnchor::BOTTOM),
-    m_scale(1.0f, 1.0f)
+    m_scale(1.0f, 1.0f),
+    m_bloomFactor(1.0f)
 {
     AssetManager* pAssets = Game::getInstance().getScene()->getAssetManager();
 
@@ -104,6 +105,7 @@ void GuiImageRenderer::render()
             1.0f
         ));
 
+    glUniform1f(m_pShaderProgram->getUniform("bloomFactor"), m_bloomFactor);
     glUniformMatrix4fv(m_pShaderProgram->getUniform("M"), 1, GL_FALSE, &transformMatrix[0][0]);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

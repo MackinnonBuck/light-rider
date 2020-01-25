@@ -386,9 +386,12 @@
     <ClCompile Include="src\GLSL.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Shape.cpp" />
+    <ClCompile Include="src\State.cpp" />
     <ClCompile Include="src\Tests\TestScene.cpp" />
     <ClCompile Include="src\Tests\TestComponent.cpp" />
     <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\StateMachine.cpp" />
+    <ClCompile Include="src\States\TitleScreenState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Components\GuiImageRenderer.h" />
@@ -816,6 +819,7 @@
     <ClInclude Include="include\Program.h" />
     <ClInclude Include="include\Scene.h" />
     <ClInclude Include="include\Shape.h" />
+    <ClInclude Include="include\State.h" />
     <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="include\Tests\TestScene.h" />
     <ClInclude Include="include\Tests\TestComponent.h" />
@@ -834,6 +838,8 @@
     <ClInclude Include="include\Scenes\LightRiderScene.h" />
     <ClInclude Include="include\Scenes\MenuScene.h" />
     <ClInclude Include="include\Components\OrbitCamera.h" />
+    <ClInclude Include="include\StateMachine.h" />
+    <ClInclude Include="include\States\TitleScreenState.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\.gitignore" />

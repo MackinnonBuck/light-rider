@@ -7,8 +7,10 @@ in vec2 vertex_tex;
 
 uniform sampler2D texture0;
 
+uniform float bloomFactor;
+
 void main()
 {
     color = texture(texture0, vertex_tex);
-    color.rgb *= pow((color.r + color.g + color.b), 3);
+    color.rgb *= pow((color.r + color.g + color.b), bloomFactor);
 }

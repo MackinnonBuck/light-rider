@@ -39,6 +39,10 @@ public:
     
     void setScale(const glm::vec2& scale) { m_scale = scale; };
 
+    float getBloomFactor() const { return m_bloomFactor; }
+
+    void setBloomFactor(float bloomFactor) { m_bloomFactor = bloomFactor; }
+
     glm::vec2 getScreenPosition() const;
 
     glm::vec2 getScreenSize() const;
@@ -68,6 +72,8 @@ private:
     glm::ivec2 m_viewPosition;
 
     glm::ivec2 m_viewSize;
+
+    float m_bloomFactor;
 
     inline void updateViewTransform();
 };
