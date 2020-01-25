@@ -1,8 +1,8 @@
-#include "Components/GuiImageRenderer.h"
+#include "Components/GuiElement.h"
 
 #include "Game.h"
 
-GuiImageRenderer::GuiImageRenderer(const std::string& shaderId, const std::string& textureId, Camera* pCamera) : 
+GuiElement::GuiElement(const std::string& shaderId, const std::string& textureId, Camera* pCamera) : 
     Renderable(shaderId, textureId, true),
     m_horizontalAnchor(HorizontalAnchor::LEFT),
     m_verticalAnchor(VerticalAnchor::BOTTOM),
@@ -34,7 +34,7 @@ GuiImageRenderer::GuiImageRenderer(const std::string& shaderId, const std::strin
     updateViewTransform();
 }
 
-glm::vec2 GuiImageRenderer::getScreenPosition() const
+glm::vec2 GuiElement::getScreenPosition() const
 {
     glm::vec2 transformPosition = getTransform()->getPosition();
     glm::vec2 screenPosition = glm::vec2();
@@ -74,19 +74,19 @@ glm::vec2 GuiImageRenderer::getScreenPosition() const
     return screenPosition;
 }
 
-glm::vec2 GuiImageRenderer::getScreenSize() const
+glm::vec2 GuiElement::getScreenSize() const
 {
     return m_scale * glm::vec2(m_pTexture->getWidth(), m_pTexture->getHeight());
 }
 
-void GuiImageRenderer::update(float deltaTime)
+void GuiElement::update(float deltaTime)
 {
     Renderable::update(deltaTime);
 
     updateViewTransform();
 }
 
-void GuiImageRenderer::render()
+void GuiElement::render()
 {
     if (Game::getInstance().getScene()->getActiveCamera() != m_pCamera)
         return;
@@ -113,12 +113,12 @@ void GuiImageRenderer::render()
     m_pShape->draw(m_pShaderProgram);
 }
 
-float GuiImageRenderer::getDepth(Camera* pCamera) const
+float GuiElement::getDepth(Camera* pCamera) const
 {
     return getTransform()->getPosition().z;
 }
 
-void GuiImageRenderer::updateViewTransform()
+void GuiElement::updateViewTransform()
 {
     m_pCamera->getViewport(m_viewPosition.x, m_viewPosition.y, m_viewSize.x, m_viewSize.y);
 }

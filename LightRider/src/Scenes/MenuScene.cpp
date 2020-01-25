@@ -5,7 +5,6 @@
 #include "Presets.h"
 #include "Components/OrbitCamera.h"
 #include "Components/BikeRenderer.h"
-#include "Components/GuiImageRenderer.h"
 #include "Scenes/GameScene.h"
 #include "States/TitleScreenState.h"
 
@@ -24,20 +23,12 @@ void MenuScene::initialize()
         glm::vec3(-1.0f, 0.4f, 0.0f), -glm::pi<float>() * 0.5f + 0.2f);
 
     GameObject* pCamera = GameObject::create("Camera");
-    OrbitCamera* pOrbitCamera = pCamera->addComponent<OrbitCamera>(true);
+    ProcessedCamera* pOrbitCamera = pCamera->addComponent<ProcessedCamera>(true);
     pOrbitCamera->setSky("skyShader", "skyTexture", "sphereShape");
 
     GameObject* pStateMachineObject = GameObject::create("StateMachine");
     StateMachine* pStateMachine = pStateMachineObject->addComponent<StateMachine>();
     pStateMachine->pushState(new TitleScreenState());
-}
-
-void MenuScene::postUpdate(float deltaTime)
-{
-    LightRiderScene::postUpdate(deltaTime);
-
-    //if (Game::getInstance().wasAnyKeyPressed())
-    //    Game::getInstance().changeScene(new GameScene());
 }
 
 void MenuScene::loadAssets()

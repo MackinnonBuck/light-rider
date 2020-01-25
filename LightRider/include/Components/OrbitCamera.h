@@ -2,14 +2,12 @@
 
 #include "Components/ProcessedCamera.h"
 
-class OrbitCamera : public ProcessedCamera
+class OrbitCamera : public Component
 {
 public:
 
     // Initializes a new OrbitCamera instance.
-    OrbitCamera(bool enabled = false, float layerDepth = 0.0f) :
-        ProcessedCamera(enabled, layerDepth),
-        m_angle(0.0f) { }
+    OrbitCamera() : m_angle(0.0f) { }
 
     // Initializes the OrbitCamera.
     virtual bool initialize();

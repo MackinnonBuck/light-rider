@@ -41,7 +41,7 @@ public:
 
     // Finds the first Component of the given type from the GameObject.
     template<typename T>
-    T* getComponent() const { return m_components.find<T>(); }
+    T* getComponent() const { return m_pComponents->find<T>(); }
 
     // Adds a Component of the given type to the GameObject. If the Component could not be
     // initialized, a null pointer is returned.
@@ -52,7 +52,7 @@ public:
 
         if (pComponent->_registerGameObject(this))
         {
-            m_components.add(pComponent);
+            m_pComponents->add(pComponent);
             return pComponent;
         }
         else
@@ -66,14 +66,14 @@ public:
     template<typename T>
     void removeComponent()
     {
-        T* pComponent = m_components.find<T>();
+        T* pComponent = m_pComponents->find<T>();
 
         if (pComponent)
-            m_components.remove(pComponent);
+            m_pComponents->remove(pComponent);
     }
 
     // Frees the GameObject.
-    virtual ~GameObject() { }
+    virtual ~GameObject();
 
     // Initializes the GameObject.
     virtual void initialize() { }
@@ -105,14 +105,15 @@ private:
     Transform* m_pTransform;
 
     // The container for child GameObjects.
-    EntityContainer m_children;
+    EntityContainer* m_pChildren;
 
     // The container for Components.
-    EntityContainer m_components;
+    EntityContainer* m_pComponents;
 
     // Creates a new GameObject instance.
     GameObject(std::string name, GameObject* pParent) : m_name(name), m_pParent(pParent),
-        m_defaultTransform(), m_pTransform(&m_defaultTransform), m_children(), m_components() { }
+        m_defaultTransform(), m_pTransform(&m_defaultTransform),
+        m_pChildren(new EntityContainer()), m_pComponents(new EntityContainer()) { }
 
     // Registers a new chlid GameObject.
     void registerChild(GameObject* pGameObject);

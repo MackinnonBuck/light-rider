@@ -10,8 +10,14 @@ StateMachine::StateMachine() :
 
 StateMachine::~StateMachine()
 {
+    if (m_pState)
+        m_pState->pause();
+
     while (!m_states.empty())
-        popState();
+    {
+        delete m_states.top();
+        m_states.pop();
+    }
 }
 
 void StateMachine::pushState(State* pState)

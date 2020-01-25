@@ -139,7 +139,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Components\GuiImageRenderer.cpp" />
+    <ClCompile Include="src\States\MenuState.cpp" />
+    <ClCompile Include="src\Components\MenuCamera.cpp" />
+    <ClCompile Include="src\Components\GuiElement.cpp" />
     <ClCompile Include="src\Components\OrbitCamera.cpp" />
     <ClCompile Include="src\Scenes\MenuScene.cpp" />
     <ClCompile Include="src\Scenes\LightRiderScene.cpp" />
@@ -394,7 +396,7 @@
     <ClCompile Include="src\States\TitleScreenState.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Components\GuiImageRenderer.h" />
+    <ClInclude Include="include\Components\GuiElement.h" />
     <ClInclude Include="include\ContactInfo.h" />
     <ClInclude Include="include\Components\DeathCamera.h" />
     <ClInclude Include="include\Components\BikeRenderer.h" />
@@ -840,6 +842,8 @@
     <ClInclude Include="include\Components\OrbitCamera.h" />
     <ClInclude Include="include\StateMachine.h" />
     <ClInclude Include="include\States\TitleScreenState.h" />
+    <ClInclude Include="include\Components\MenuCamera.h" />
+    <ClInclude Include="include\States\MenuState.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\.gitignore" />

@@ -4,9 +4,11 @@
 
 class TitleScreenState : public State
 {
-    virtual ~TitleScreenState();
+public:
 
-    virtual void initialize();
+    virtual void resume();
+
+    virtual void pause();
 
     virtual void update(float deltaTime);
 };

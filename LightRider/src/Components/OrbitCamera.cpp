@@ -6,7 +6,7 @@ namespace GC = GameConstants;
 
 bool OrbitCamera::initialize()
 {
-    if (!ProcessedCamera::initialize())
+    if (!Component::initialize())
         return false;
 
     updatePosition();
@@ -20,7 +20,7 @@ void OrbitCamera::postUpdate(float deltaTime)
 
     updatePosition();
 
-    ProcessedCamera::postUpdate(deltaTime);
+    Component::postUpdate(deltaTime);
 }
 
 void OrbitCamera::updatePosition()

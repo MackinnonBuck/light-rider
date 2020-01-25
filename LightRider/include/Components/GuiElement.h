@@ -21,11 +21,11 @@ enum class VerticalAnchor : unsigned char
     STRETCH = 3
 };
 
-class GuiImageRenderer : public Renderable
+class GuiElement : public Renderable
 {
 public:
 
-    GuiImageRenderer(const std::string& shaderId, const std::string& textureId, Camera* pCamera);
+    GuiElement(const std::string& shaderId, const std::string& textureId, Camera* pCamera);
 
     HorizontalAnchor getHorizontalAnchor() const { return m_horizontalAnchor; }
 
