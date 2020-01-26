@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Components\GuiButton.cpp" />
     <ClCompile Include="src\States\MenuState.cpp" />
     <ClCompile Include="src\Components\MenuCamera.cpp" />
     <ClCompile Include="src\Components\GuiElement.cpp" />
@@ -396,6 +397,7 @@
     <ClCompile Include="src\States\TitleScreenState.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Components\GuiButton.h" />
     <ClInclude Include="include\Components\GuiElement.h" />
     <ClInclude Include="include\ContactInfo.h" />
     <ClInclude Include="include\Components\DeathCamera.h" />
@@ -919,13 +921,22 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="resources\exit.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="resources\ground_texture.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="resources\light_cycle_texture.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="resources\play.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="resources\press_to_begin.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="resources\settings.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="resources\sky.jpg">

@@ -14,6 +14,9 @@ public:
     // Gets the parent state machine.
     StateMachine* getStateMachine() const;
 
+    // Gets the game object running this state.
+    GameObject* getGameObject() const;
+
     // Called when the state initializes for the first time.
     virtual void initialize() { };
 

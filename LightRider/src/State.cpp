@@ -7,6 +7,11 @@ StateMachine* State::getStateMachine() const
     return m_pStateMachine;
 }
 
+GameObject* State::getGameObject() const
+{
+    return m_pStateMachine->getGameObject();
+}
+
 void State::_setStateMachine(StateMachine* pParent)
 {
     if (m_pStateMachine)

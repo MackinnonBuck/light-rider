@@ -22,12 +22,13 @@ void MenuScene::initialize()
     Presets::createLightRiderBikeDisplay("Player2BikeDisplay", GC::player2Color,
         glm::vec3(-1.0f, 0.4f, 0.0f), -glm::pi<float>() * 0.5f + 0.2f);
 
-    GameObject* pCamera = GameObject::create("Camera");
+    GameObject* pStateMachineObject = GameObject::create("StateMachine");
+    StateMachine* pStateMachine = pStateMachineObject->addComponent<StateMachine>();
+
+    GameObject* pCamera = GameObject::create("Camera", pStateMachineObject);
     ProcessedCamera* pOrbitCamera = pCamera->addComponent<ProcessedCamera>(true);
     pOrbitCamera->setSky("skyShader", "skyTexture", "sphereShape");
 
-    GameObject* pStateMachineObject = GameObject::create("StateMachine");
-    StateMachine* pStateMachine = pStateMachineObject->addComponent<StateMachine>();
     pStateMachine->pushState(new TitleScreenState());
 }
 
@@ -47,4 +48,7 @@ void MenuScene::loadAssets()
 
     pAssets->loadTexture("titleTexture", "title_image.png", TextureType::IMAGE);
     pAssets->loadTexture("pressToBeginTexture", "press_to_begin.png", TextureType::IMAGE);
+    pAssets->loadTexture("playTexture", "play.png", TextureType::IMAGE);
+    pAssets->loadTexture("settingsTexture", "settings.png", TextureType::IMAGE);
+    pAssets->loadTexture("exitTexture", "exit.png", TextureType::IMAGE);
 }
