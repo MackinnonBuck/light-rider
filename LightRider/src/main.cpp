@@ -13,7 +13,7 @@ int main(int argc, char** argv)
     config.argumentCount = argc;
     config.arguments = argv;
     config.initialWindowWidth = 1280;
-    config.initialWindowHeight = 720;
+    config.initialWindowHeight = 1080;
     config.initialIsFullscreen = false;
     config.windowTitle = "LightRider";
     config.physicsTickInterval = 1.0f / 60.0f;

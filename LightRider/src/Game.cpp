@@ -53,7 +53,7 @@ bool Game::init(GameConfig config)
         return false;
     }
 
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
 
     glfwSetWindowCloseCallback(m_pWindow, Game::glfwWindowCloseCallback);
     glfwSetWindowSizeCallback(m_pWindow, Game::glfwWindowSizeCallback);
