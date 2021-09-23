@@ -39,6 +39,8 @@ protected:
 
 private:
 
+    Program* m_pDeferredShader;
+
     // The shader program used to render the scene's first pass.
     Program* m_pPostShader;
 
@@ -52,11 +54,26 @@ private:
     // "bloom" effect.
     Program* m_pBloomShader;
 
-    // The frame buffer that the scene gets rnedered to.
+    // The frame buffer that the scene gets rendered to.
     GLuint m_primaryFrameBuffer;
 
     // The color buffer for the primary frame buffer.
     GLuint m_primaryColorBuffer;
+
+    // The position buffer for the primary frame buffer.
+    GLuint m_primaryPositionBuffer;
+
+    // The normal buffer for the primary frame buffer.
+    GLuint m_primaryNormalBuffer;
+
+    // The material info buffer for the primary frame buffer.
+    GLuint m_primaryMaterialBuffer;
+
+    // The frame buffer that handles deferred rendering.
+    GLuint m_deferredFrameBuffer;
+
+    // The color buffer for the deferred frame buffer.
+    GLuint m_deferredColorBuffer;
 
     // The frame buffer to store the antialiased scene.
     GLuint m_fxaaFrameBuffer;

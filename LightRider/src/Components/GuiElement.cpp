@@ -3,7 +3,7 @@
 #include "Game.h"
 
 GuiElement::GuiElement(const std::string& shaderId, const std::string& textureId, Camera* pCamera) : 
-    Renderable(shaderId, textureId, true),
+    Renderable(shaderId, textureId, false),
     m_horizontalAnchor(HorizontalAnchor::LEFT),
     m_verticalAnchor(VerticalAnchor::BOTTOM),
     m_scale(1.0f, 1.0f),

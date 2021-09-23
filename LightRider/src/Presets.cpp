@@ -35,7 +35,7 @@ namespace Presets
         pGroundComponent->getRigidBody()->setFriction(1.0f);
         pGroundComponent->getRigidBody()->setRestitution(1.0f);
 
-        MeshRenderer* pGroundMeshRenderer = pGroundObject->addComponent<MeshRenderer>("groundShader", "groundTexture", "planeShape", true);
+        MeshRenderer* pGroundMeshRenderer = pGroundObject->addComponent<MeshRenderer>("groundShader", "groundTexture", "planeShape", false);
         pGroundMeshRenderer->setDepthFunction([](Camera* pCamera) { return 1000.0f; });
         pGroundMeshRenderer->setLocalTransform(
             glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, GC::mapHalfHeight, 0.0f)) *
@@ -46,7 +46,7 @@ namespace Presets
         return pGroundObject;
     }
 
-    GameObject* createLightRiderBike(const std::string& name, const glm::vec3& color, const BikeControls& bikeControls,
+    GameObject* createLightRiderBike(const std::string& name, int playerId, const BikeControls& bikeControls,
         const glm::vec3& position, float yaw)
     {
         GameObject* pBikeObject = GameObject::create(name);
@@ -81,7 +81,7 @@ namespace Presets
         pBikeObject->addComponent<RigidBodyComponent>(rbInfo);
         pBikeObject->addComponent<BikeController>(bikeControls);
 
-        BikeRenderer* pBikeRenderer = pBikeObject->addComponent<BikeRenderer>(color);
+        BikeRenderer* pBikeRenderer = pBikeObject->addComponent<BikeRenderer>(playerId);
         pBikeRenderer->setLocalTransform(
             glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, GC::bikeShapeVerticalOffset, 0.0f)) *
             glm::rotate(glm::mat4(1.0f), -glm::pi<float>() * 0.5f, glm::vec3(1.0f, 0.0f, 0.0f)) *
@@ -92,7 +92,7 @@ namespace Presets
         return pBikeObject;
     }
 
-    GameObject* createLightRiderBikeDisplay(const std::string& name, const glm::vec3& color,
+    GameObject* createLightRiderBikeDisplay(const std::string& name, int playerId,
         const glm::vec3& position, float yaw)
     {
         GameObject* pBikeDisplayObject = GameObject::create(name);
@@ -101,7 +101,7 @@ namespace Presets
             glm::rotate(glm::mat4(1.0f), yaw, glm::vec3(0.0f, 1.0f, 0.0f)) *
             glm::rotate(glm::mat4(1.0f), -glm::pi<float>() * 0.5f, glm::vec3(1.0f, 0.0f, 0.0f))
         );
-        pBikeDisplayObject->addComponent<BikeRenderer>(color);
+        pBikeDisplayObject->addComponent<BikeRenderer>(playerId);
 
         return pBikeDisplayObject;
     }

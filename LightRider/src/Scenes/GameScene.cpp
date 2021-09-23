@@ -31,7 +31,7 @@ void GameScene::initialize()
 
 void GameScene::update(float deltaTime)
 {
-    if (Game::getInstance().isKeyDown(GLFW_KEY_KP_0))
+    if (Game::getInstance().isKeyDown(GLFW_KEY_0))
     {
         m_pFreeroamCamera->disable();
         m_pPlayer1Camera->enable(0.0f);
@@ -39,7 +39,7 @@ void GameScene::update(float deltaTime)
 
         setDebugDrawEnabled(false);
     }
-    else if (Game::getInstance().isKeyDown(GLFW_KEY_KP_1))
+    else if (Game::getInstance().isKeyDown(GLFW_KEY_1))
     {
         m_pPlayer1Camera->disable();
         m_pPlayer2Camera->disable();
@@ -60,8 +60,8 @@ void GameScene::physicsTick(float physicsTimeStep)
         switch (m_introTick)
         {
         case GC::introLightTrailFrame:
-            m_pPlayer1Bike->addComponent<LightTrail>(GC::player1Color);
-            m_pPlayer2Bike->addComponent<LightTrail>(GC::player2Color);
+            m_pPlayer1Bike->addComponent<LightTrail>(0);
+            m_pPlayer2Bike->addComponent<LightTrail>(1);
             break;
         case GC::introCameraFocusFrame:
             m_pPlayer1Camera->setCameraMode(PlayerCameraMode::FOLLOW);
@@ -127,10 +127,10 @@ void GameScene::initScene()
     PlayerCameraControls player1CameraControls{ GLFW_JOYSTICK_1, GLFW_KEY_LEFT_SHIFT };
     PlayerCameraControls player2CameraControls{ GLFW_JOYSTICK_2, GLFW_KEY_RIGHT_SHIFT };
 
-    m_pPlayer1Bike = Presets::createLightRiderBike("Player1Bike", GC::player1Color,
+    m_pPlayer1Bike = Presets::createLightRiderBike("Player1Bike", 0,
         player1BikeControls, glm::vec3(-190.0f, 1.0f, 0.0f), -glm::pi<float>() * 0.5f);
 
-    m_pPlayer2Bike = Presets::createLightRiderBike("Player2Bike", GC::player2Color,
+    m_pPlayer2Bike = Presets::createLightRiderBike("Player2Bike", 1,
         player2BikeControls, glm::vec3(190.0f, 1.0f, 0.0f), glm::pi<float>() * 0.5f);
     
     GameObject* pPlayer1CameraObject = GameObject::create("Player1Camera");

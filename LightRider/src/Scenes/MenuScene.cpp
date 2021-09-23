@@ -17,9 +17,9 @@ void MenuScene::initialize()
     loadAssets();
 
     Presets::createLightRiderGround("Ground");
-    Presets::createLightRiderBikeDisplay("Player1BikeDisplay", GC::player1Color,
+    Presets::createLightRiderBikeDisplay("Player1BikeDisplay", 0,
         glm::vec3(1.0f, 0.4f, 0.0f), -glm::pi<float>() * 0.5f - 0.2f);
-    Presets::createLightRiderBikeDisplay("Player2BikeDisplay", GC::player2Color,
+    Presets::createLightRiderBikeDisplay("Player2BikeDisplay", 1,
         glm::vec3(-1.0f, 0.4f, 0.0f), -glm::pi<float>() * 0.5f + 0.2f);
 
     GameObject* pStateMachineObject = GameObject::create("StateMachine");

@@ -734,6 +734,8 @@
     <None Include="resources\sphere.shape" />
     <None Include="resources\gui_image_fragment.glsl" />
     <None Include="resources\gui_image_vertex.glsl" />
+    <None Include="resources\deferred_fragment.glsl" />
+    <None Include="resources\deferred_vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ground_texture.png" />

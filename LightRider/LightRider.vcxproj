@@ -867,6 +867,8 @@
     <None Include="resources\blur_vertex.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="resources\deferred_fragment.glsl" />
+    <None Include="resources\deferred_vertex.glsl" />
     <None Include="resources\fxaa_fragment.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>

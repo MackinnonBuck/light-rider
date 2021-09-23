@@ -6,14 +6,14 @@ void LightRiderScene::loadAssets()
 
     // Bike assets.
     Program* pBikeShader = pAssets->loadShaderProgram("bikeShader", "bike_vertex.glsl", "bike_fragment.glsl");
-    pBikeShader->addUniform("bikeColor");
+    pBikeShader->addUniform("playerId");
     pBikeShader->addUniform("campos");
 
     Program* pTrailShader = pAssets->loadShaderProgram("trailShader", "trail_vertex.glsl", "trail_fragment.glsl",
         ShaderUniform::P_MATRIX
       | ShaderUniform::V_MATRIX
     );
-    pTrailShader->addUniform("baseColor");
+    pTrailShader->addUniform("playerId");
     pTrailShader->addUniform("noiseSeed");
     pTrailShader->addUniform("currentTime");
 
@@ -34,6 +34,13 @@ void LightRiderScene::loadAssets()
     pAssets->loadTexture("skyTexture", "sky.jpg", TextureType::BACKGROUND);
 
     // Miscellaneous assets.
+    Program* pDeferredShader = pAssets->loadShaderProgram("deferredShader", "deferred_vertex.glsl", "deferred_fragment.glsl", ShaderUniform::NONE);
+    pDeferredShader->addUniform("gColor");
+    pDeferredShader->addUniform("gPosition");
+    pDeferredShader->addUniform("gNormal");
+    pDeferredShader->addUniform("gMaterial");
+    pDeferredShader->addUniform("campos");
+
     Program* pPostShader = pAssets->loadShaderProgram("postShader", "post_vertex.glsl", "post_fragment.glsl", ShaderUniform::NONE);
     pPostShader->addUniform("screenTexture");
 

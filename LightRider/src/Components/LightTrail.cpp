@@ -6,9 +6,9 @@
 
 namespace GC = GameConstants;
 
-LightTrail::LightTrail(const glm::vec3& color) :
-    Renderable("trailShader", "", true),
-    m_color(color),
+LightTrail::LightTrail(int playerId) :
+    Renderable("trailShader", "", false),
+    m_playerId(playerId),
     m_pShaderProgram(Game::getInstance().getScene()->getAssetManager()->getShaderProgram(getShaderProgramId())),
     m_pRigidBody(nullptr),
     m_pCompoundShape(nullptr),
@@ -200,7 +200,7 @@ void LightTrail::render()
     if (!m_isInitialized)
         return;
     
-    glUniform3fv(m_pShaderProgram->getUniform("baseColor"), 1, &m_color[0]);
+    glUniform1i(m_pShaderProgram->getUniform("playerId"), m_playerId);
     glUniform1f(m_pShaderProgram->getUniform("noiseSeed"), m_continuousTime);
     glUniform1f(m_pShaderProgram->getUniform("currentTime"), m_physicsTime);
 
