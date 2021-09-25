@@ -35,7 +35,7 @@ namespace Presets
         pGroundComponent->getRigidBody()->setFriction(1.0f);
         pGroundComponent->getRigidBody()->setRestitution(1.0f);
 
-        MeshRenderer* pGroundMeshRenderer = pGroundObject->addComponent<MeshRenderer>("groundShader", "groundTexture", "planeShape", false);
+        MeshRenderer* pGroundMeshRenderer = pGroundObject->addComponent<MeshRenderer>("groundShader", "groundTexture", "planeShape", true);
         pGroundMeshRenderer->setDepthFunction([](Camera* pCamera) { return 1000.0f; });
         pGroundMeshRenderer->setLocalTransform(
             glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, GC::mapHalfHeight, 0.0f)) *

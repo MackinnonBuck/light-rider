@@ -96,6 +96,8 @@ private:
     // The depth render buffer.
     GLuint m_depthRenderBuffer;
 
+    GLuint m_blendedDepthRenderBuffer;
+
     // The VAO for the quad to display the texture.
     GLuint m_quadVertexArrayObject;
 

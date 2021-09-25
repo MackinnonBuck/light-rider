@@ -89,20 +89,17 @@ void Camera::render()
     m_viewMatrix = glm::inverse(transformMatrix);
     m_perspectiveMatrix = glm::perspective(m_fieldOfView, aspectRatio, m_nearPlane, m_farPlane);
 
+    glDepthMask(GL_FALSE);
+
     if (m_pSkyShaderProgram && m_pSkyTexture && m_pSkyShape)
         renderSky(transformMatrix);
+
+    glDepthMask(GL_TRUE);
 
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 
     renderUnblendedRenderables();
-
-    glDepthMask(GL_FALSE);
-    glEnable(GL_BLEND);
-
-    renderBlendedRenderables();
-
-    glDepthMask(GL_TRUE);
 
     Scene* pScene = Game::getInstance().getScene();
     

@@ -73,6 +73,12 @@ protected:
     // Called just after the camera renders the scene.
     virtual void postRender() { }
 
+    // Renders Renderables with blending disabled.
+    void renderUnblendedRenderables();
+
+    // Renders Renderables with blending enabled.
+    void renderBlendedRenderables();
+
 private:
 
     // The shader program used to render the sky.
@@ -108,12 +114,6 @@ private:
 
     // Renders the sky.
     void renderSky(const glm::mat4& transformMatrix);
-
-    // Renders Renderables with blending disabled.
-    void renderUnblendedRenderables();
-
-    // Renders Renderables with blending enabled.
-    void renderBlendedRenderables();
 
     // Sets up the given shader program for use.
     void setUpShaderProgram(Program* pShaderProgram);

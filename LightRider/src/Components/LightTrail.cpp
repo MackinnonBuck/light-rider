@@ -7,7 +7,7 @@
 namespace GC = GameConstants;
 
 LightTrail::LightTrail(int playerId) :
-    Renderable("trailShader", "", false),
+    Renderable("trailShader", "", true),
     m_playerId(playerId),
     m_pShaderProgram(Game::getInstance().getScene()->getAssetManager()->getShaderProgram(getShaderProgramId())),
     m_pRigidBody(nullptr),

@@ -1,6 +1,5 @@
 #version 330 core
-layout(location = 0) out vec3 color;
-layout(location = 3) out float material;
+out vec4 color;
 
 in vec3 vertex_normal;
 in vec3 vertex_pos;
@@ -12,7 +11,6 @@ uniform float bloomFactor;
 
 void main()
 {
-    color = texture(texture0, vertex_tex).rgb;
+    color = texture(texture0, vertex_tex);
     color.rgb *= pow((color.r + color.g + color.b), bloomFactor);
-    material = 0.0;
 }

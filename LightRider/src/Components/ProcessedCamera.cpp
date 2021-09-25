@@ -12,6 +12,7 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     m_bufferWidth(-1),
     m_bufferHeight(-1),
     m_depthRenderBuffer(0),
+    m_blendedDepthRenderBuffer(0),
     m_deferredFrameBuffer(0),
     m_deferredColorBuffer(0),
     m_primaryFrameBuffer(0),
@@ -148,9 +149,9 @@ void ProcessedCamera::preRender()
         m_areFrameBuffersDirty = false;
         createFrameBuffers();
     }
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, m_primaryFrameBuffer);
 
+    glBindFramebuffer(GL_FRAMEBUFFER, m_primaryFrameBuffer);
+    
     unsigned int attachments[4] =
     {
         GL_COLOR_ATTACHMENT0,
@@ -166,12 +167,19 @@ void ProcessedCamera::preRender()
 
 void ProcessedCamera::postRender()
 {
-    glDisable(GL_DEPTH_TEST);
+    unsigned int attachments[1] =
+    {
+        GL_COLOR_ATTACHMENT0,
+    };
+    glDrawBuffers(1, attachments);
+
+    glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 
     glBindVertexArray(m_quadVertexArrayObject);
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFrameBuffer);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_pDeferredShader->bind();
 
@@ -191,6 +199,7 @@ void ProcessedCamera::postRender()
     m_pDeferredShader->unbind();
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_fxaaFrameBuffer);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_pFxaaShader->bind();
 
@@ -199,11 +208,26 @@ void ProcessedCamera::postRender()
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_deferredColorBuffer);
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     m_pFxaaShader->unbind();
 
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_primaryFrameBuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fxaaFrameBuffer);
+    glBlitFramebuffer(0, 0, m_bufferWidth, m_bufferHeight, 0, 0, m_bufferWidth, m_bufferHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_fxaaFrameBuffer);
+
+    glBindVertexArray(0);
+
+    glEnable(GL_BLEND);
+    renderBlendedRenderables();
+    glDisable(GL_BLEND);
+
+    glBindVertexArray(m_quadVertexArrayObject);
+
     glBindFramebuffer(GL_FRAMEBUFFER, m_hdrFrameBuffer);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_pPostShader->bind();
 
@@ -213,8 +237,6 @@ void ProcessedCamera::postRender()
 
     m_pPostShader->unbind();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
     bool horizontal = true, firstIteration = true;
     int amount = 10;
 
@@ -223,9 +245,10 @@ void ProcessedCamera::postRender()
     for (int i = 0; i < amount; i++)
     {
         glBindFramebuffer(GL_FRAMEBUFFER, m_pingPongFrameBuffers[horizontal]);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUniform1i(m_pBlurShader->getUniform("horizontal"), horizontal);
 
-    glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, firstIteration ? m_hdrColorBuffer : m_pingPongColorBuffers[!horizontal]);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -309,15 +332,6 @@ void ProcessedCamera::createFrameBuffers()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_primaryMaterialBuffer, 0);
 
-    unsigned int attachments[4] =
-    {
-        GL_COLOR_ATTACHMENT0,
-        GL_COLOR_ATTACHMENT1,
-        GL_COLOR_ATTACHMENT2,
-        GL_COLOR_ATTACHMENT3,
-    };
-    glDrawBuffers(4, attachments);
-
     glGenRenderbuffers(1, &m_depthRenderBuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, m_depthRenderBuffer);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_bufferWidth, m_bufferHeight);
@@ -357,12 +371,18 @@ void ProcessedCamera::createFrameBuffers()
     glGenTextures(1, &m_fxaaColorBuffer);
 
     glBindTexture(GL_TEXTURE_2D, m_fxaaColorBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_bufferWidth, m_bufferHeight, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_bufferWidth, m_bufferHeight, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fxaaColorBuffer, 0);
+
+    glGenRenderbuffers(1, &m_blendedDepthRenderBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_blendedDepthRenderBuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_bufferWidth, m_bufferHeight);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_blendedDepthRenderBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
@@ -422,6 +442,7 @@ void ProcessedCamera::deleteBuffers()
     glDeleteFramebuffers(1, &m_hdrFrameBuffer);
     glDeleteFramebuffers(2, m_pingPongFrameBuffers);
     glDeleteRenderbuffers(1, &m_depthRenderBuffer);
+    glDeleteRenderbuffers(1, &m_blendedDepthRenderBuffer);
     glDeleteTextures(1, &m_deferredColorBuffer);
     glDeleteTextures(1, &m_primaryColorBuffer);
     glDeleteTextures(1, &m_primaryPositionBuffer);
