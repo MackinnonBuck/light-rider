@@ -17,5 +17,5 @@ void main()
     color.rgb = texture(texture0, vertex_tex).rgb;
     position = vertex_pos;
     normal = vertex_normal;
-    material = 2 + float(playerId); // 2 or 3 depending on orange or blue bike.
+    material = 1 + float(playerId); // 1 or 2 depending on blue or orange bike.
 }
