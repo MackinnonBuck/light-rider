@@ -11,6 +11,7 @@ layout(location = 0) uniform sampler2D gColor;
 layout(location = 1) uniform sampler2D gPosition;
 layout(location = 2) uniform sampler2D gNormal;
 layout(location = 3) uniform sampler2D gMaterial;
+layout(location = 4) uniform sampler2D shadowMap;
 
 uniform vec3 campos;
 
@@ -72,6 +73,11 @@ void processBike(vec3 bikeColor)
 
 void main()
 {
+    //float depth = texture(shadowMap, texCoords).r;
+    //fragColor = vec3(1 - depth);
+
+    //return;
+
 	float materialId = texture(gMaterial, texCoords).r;
 
 	if (materialId < 0.5) // ID 0

@@ -32,9 +32,9 @@ namespace GameConstants
     constexpr int introLightTrailFrame = 60;
     constexpr int introCameraFocusFrame = 100;
     constexpr int introEndFrame = 130;
-    constexpr glm::vec3 introCamera1Position = glm::vec3(-180.0f, 1.0f, -1.0f);
-    constexpr glm::vec3 introCamera2Position = glm::vec3(180.0f, 1.0f, -1.0f);
-    constexpr float introCameraSpeed = 20.0f;
+    constexpr glm::vec3 introCamera1Position = glm::vec3(-188.0f, 0.6f, -0.8f);
+    constexpr glm::vec3 introCamera2Position = glm::vec3(188.0f, 0.6f, -0.8f);
+    constexpr float introCameraSpeed = 25.0f;
 
     // Player constants.
     constexpr glm::vec3 player1Color = glm::vec3(0.0f, 0.75f, 1.0f);

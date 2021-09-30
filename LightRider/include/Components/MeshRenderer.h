@@ -23,8 +23,15 @@ public:
     // Sets the depth of the mesh renderer to the provided depth function pointer.
     void setDepthFunction(float (*pDepthFunc)(Camera*)) { m_pDepthFunc = pDepthFunc; }
 
+    // Sets whether forward shadow rendering is being used.
+    // This is intended for objects that use blending or otherwise don't participate in deferred shading.
+    void setUsingForwardShadowRendering(bool isUsingForwardShadowRendering) { m_isUsingForwardShadowRendering = isUsingForwardShadowRendering; }
+
     // Renders the mesh.
     virtual void render();
+
+    // Renders the mesh to a depth buffer given the shader program to do so.
+    virtual bool renderDepth(Program* pDepthProgram);
 
     // Gets the depth of this mesh renderer relative to the given camera.
     virtual float getDepth(Camera* pCamera) const;
@@ -47,6 +54,9 @@ private:
 
     // The local transform of the mesh relative to the parent GameObject.
     glm::mat4 m_localTransform;
+    
+	// Whether forward shadow rendering is being used
+    bool m_isUsingForwardShadowRendering;
 
     // A custom depth function that can be used to override the default depth function.
     float (*m_pDepthFunc)(Camera*);

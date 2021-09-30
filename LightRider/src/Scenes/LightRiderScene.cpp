@@ -21,7 +21,15 @@ void LightRiderScene::loadAssets()
     pAssets->loadShape("bikeShape", "light_cycle.shape");
 
     // Ground assets.
-    pAssets->loadShaderProgram("groundShader", "ground_vertex.glsl", "ground_fragment.glsl");
+    Program* pGroundShader = pAssets->loadShaderProgram("groundShader", "ground_vertex.glsl", "ground_fragment.glsl");
+    pGroundShader->addUniform("lightPV");
+    pGroundShader->addUniform("shadowMap");
+    //pGroundShader->addUniform("lightPosition");
+    //pGroundShader->addUniform("lightDirection");
+    pGroundShader->bind();
+	glUniform1i(pGroundShader->getUniform("shadowMap"), 4);
+    pGroundShader->unbind();
+    
     pAssets->loadTexture("groundTexture", "ground_texture.png", TextureType::IMAGE);
 
     // Sky assets.
@@ -34,11 +42,18 @@ void LightRiderScene::loadAssets()
     pAssets->loadTexture("skyTexture", "sky.jpg", TextureType::BACKGROUND);
 
     // Miscellaneous assets.
+    Program* pShadowShader = pAssets->loadShaderProgram("shadowShader", "shadow_vertex.glsl", "shadow_fragment.glsl",
+        ShaderUniform::P_MATRIX
+      | ShaderUniform::V_MATRIX
+      | ShaderUniform::M_MATRIX);
+	pShadowShader->addAttribute("vertexPosition");
+
     Program* pDeferredShader = pAssets->loadShaderProgram("deferredShader", "deferred_vertex.glsl", "deferred_fragment.glsl", ShaderUniform::NONE);
     pDeferredShader->addUniform("gColor");
     pDeferredShader->addUniform("gPosition");
     pDeferredShader->addUniform("gNormal");
     pDeferredShader->addUniform("gMaterial");
+    pDeferredShader->addUniform("shadowMap");
     pDeferredShader->addUniform("campos");
 
     Program* pPostShader = pAssets->loadShaderProgram("postShader", "post_vertex.glsl", "post_fragment.glsl", ShaderUniform::NONE);

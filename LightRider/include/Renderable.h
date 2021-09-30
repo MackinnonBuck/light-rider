@@ -2,6 +2,7 @@
 
 #include "Component.h"
 #include "Camera.h"
+#include "Program.h"
 
 // A base Component that exposes render functionality.
 class Renderable : public Component
@@ -25,6 +26,9 @@ public:
 
     // Renders the Renderable.
     virtual void render() = 0;
+
+    // Renders the Renderable to a depth buffer given the shader program to do so.
+    virtual bool renderDepth(Program* pDepthProgram) { return false; }
 
     // Returns the depth of the object relative to the camera provided.
     virtual float getDepth(Camera* pCamera) const;

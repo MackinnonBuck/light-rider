@@ -25,6 +25,9 @@ public:
 
     // Returns the size ratio of the camera to screen size.
     glm::vec2 getSizeRatio() const { return m_sizeRatio; }
+    
+    // Gets the shadow map texture ID.
+    virtual GLuint getShadowMapTextureId() const { return m_shadowMapDepthBuffer; }
 
 protected:
 
@@ -39,6 +42,10 @@ protected:
 
 private:
 
+    // The shader used to render objects that cast shadows.
+    Program* m_pShadowShader;
+
+    // The shader program used for deferred rendering.
     Program* m_pDeferredShader;
 
     // The shader program used to render the scene's first pass.
@@ -69,6 +76,9 @@ private:
     // The material info buffer for the primary frame buffer.
     GLuint m_primaryMaterialBuffer;
 
+    // The frame buffer used to store the shadow map.
+    GLuint m_shadowMapFrameBuffer;
+
     // The frame buffer that handles deferred rendering.
     GLuint m_deferredFrameBuffer;
 
@@ -96,7 +106,11 @@ private:
     // The depth render buffer.
     GLuint m_depthRenderBuffer;
 
+    // The depth render buffer for blended objects.
     GLuint m_blendedDepthRenderBuffer;
+
+    // The depth render buffer for the shadow map.
+    GLuint m_shadowMapDepthBuffer;
 
     // The VAO for the quad to display the texture.
     GLuint m_quadVertexArrayObject;
@@ -134,4 +148,7 @@ private:
 
     // Deltes all frame buffers and textures.
     inline void deleteBuffers();
+    
+    // Renders the current scene to the shadow map.
+    void renderShadowMap();
 };

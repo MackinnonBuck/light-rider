@@ -2,6 +2,9 @@
 
 #include "Game.h"
 
+constexpr int SHADOW_MAP_WIDTH = 4096;
+constexpr int SHADOW_MAP_HEIGHT = 4096;
+
 ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     Camera(enabled, layerDepth),
     m_offsetRatio(glm::zero<glm::vec2>()),
@@ -20,6 +23,8 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     m_primaryPositionBuffer(0),
     m_primaryNormalBuffer(0),
     m_primaryMaterialBuffer(0),
+    m_shadowMapFrameBuffer(0),
+    m_shadowMapDepthBuffer(0),
     m_fxaaFrameBuffer(0),
     m_fxaaColorBuffer(0),
     m_hdrFrameBuffer(0),
@@ -29,6 +34,7 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
 {
     AssetManager* pAssets = Game::getInstance().getScene()->getAssetManager();
 
+    m_pShadowShader = pAssets->getShaderProgram("shadowShader");
     m_pDeferredShader = pAssets->getShaderProgram("deferredShader");
     m_pPostShader = pAssets->getShaderProgram("postShader");
     m_pFxaaShader = pAssets->getShaderProgram("fxaaShader");
@@ -40,6 +46,7 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     glUniform1i(m_pDeferredShader->getUniform("gPosition"), 1);
     glUniform1i(m_pDeferredShader->getUniform("gNormal"), 2);
     glUniform1i(m_pDeferredShader->getUniform("gMaterial"), 3);
+    glUniform1i(m_pDeferredShader->getUniform("shadowMap"), 4);
     m_pDeferredShader->unbind();
 
     m_pPostShader->bind();
@@ -150,6 +157,10 @@ void ProcessedCamera::preRender()
         createFrameBuffers();
     }
 
+    // Shadow map pass
+    renderShadowMap();
+
+    // First render pass
     glBindFramebuffer(GL_FRAMEBUFFER, m_primaryFrameBuffer);
     
     unsigned int attachments[4] =
@@ -163,6 +174,35 @@ void ProcessedCamera::preRender()
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void ProcessedCamera::renderShadowMap()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMapFrameBuffer);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
+
+    glDisable(GL_BLEND);
+
+    m_pShadowShader->bind();
+    glUniformMatrix4fv(m_pShadowShader->getUniform("P"), 1, GL_FALSE, &getSunPMatrix()[0][0]);
+    glUniformMatrix4fv(m_pShadowShader->getUniform("V"), 1, GL_FALSE, &getSunVMatrix()[0][0]);
+
+    for (auto shaderProgramNode : Game::getInstance().getScene()->getAssetManager()->getRenderTree())
+    {
+        for (auto textureNode : *shaderProgramNode.second)
+        {
+            for (auto renderable : *textureNode.second)
+                renderable->renderDepth(m_pShadowShader);
+        }
+    }
+
+    m_pShadowShader->unbind();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void ProcessedCamera::postRender()
@@ -193,6 +233,8 @@ void ProcessedCamera::postRender()
     glBindTexture(GL_TEXTURE_2D, m_primaryNormalBuffer);
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, m_primaryMaterialBuffer);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, m_shadowMapDepthBuffer);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -289,6 +331,7 @@ void ProcessedCamera::createFrameBuffers()
     m_bufferWidth = (int)(m_defaultBufferWidth * m_sizeRatio.x);
     m_bufferHeight = (int)(m_defaultBufferHeight * m_sizeRatio.y);
 
+    // Primary frame buffer
     glGenFramebuffers(1, &m_primaryFrameBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, m_primaryFrameBuffer);
 
@@ -345,6 +388,29 @@ void ProcessedCamera::createFrameBuffers()
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    // Shadow map frame buffer
+    glGenFramebuffers(1, &m_shadowMapFrameBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMapFrameBuffer);
+
+    glGenTextures(1, &m_shadowMapDepthBuffer);
+
+    glBindTexture(GL_TEXTURE_2D, m_shadowMapDepthBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec3(1.0)));
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowMapDepthBuffer, 0);
+
+    frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+    if (frameBufferStatus != GL_FRAMEBUFFER_COMPLETE)
+        std::cerr << "Unable to create shadow map frame buffer: " << frameBufferStatus << std::endl;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Deferred frame buffer
     glGenFramebuffers(1, &m_deferredFrameBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFrameBuffer);
 
@@ -365,6 +431,7 @@ void ProcessedCamera::createFrameBuffers()
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
+    // FXAA frame buffer
     glGenFramebuffers(1, &m_fxaaFrameBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, m_fxaaFrameBuffer);
 
@@ -391,6 +458,7 @@ void ProcessedCamera::createFrameBuffers()
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    // HDR frame buffer
     glGenFramebuffers(1, &m_hdrFrameBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, m_hdrFrameBuffer);
 
@@ -411,6 +479,7 @@ void ProcessedCamera::createFrameBuffers()
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    // Ping-pong frame buffers.
     glGenFramebuffers(2, m_pingPongFrameBuffers);
     glGenTextures(2, m_pingPongColorBuffers);
 
@@ -437,12 +506,14 @@ void ProcessedCamera::createFrameBuffers()
 void ProcessedCamera::deleteBuffers()
 {
     glDeleteFramebuffers(1, &m_primaryFrameBuffer);
+    glDeleteFramebuffers(1, &m_shadowMapFrameBuffer);
     glDeleteFramebuffers(1, &m_deferredFrameBuffer);
     glDeleteFramebuffers(1, &m_fxaaFrameBuffer);
     glDeleteFramebuffers(1, &m_hdrFrameBuffer);
     glDeleteFramebuffers(2, m_pingPongFrameBuffers);
     glDeleteRenderbuffers(1, &m_depthRenderBuffer);
     glDeleteRenderbuffers(1, &m_blendedDepthRenderBuffer);
+    glDeleteTextures(1, &m_shadowMapDepthBuffer);
     glDeleteTextures(1, &m_deferredColorBuffer);
     glDeleteTextures(1, &m_primaryColorBuffer);
     glDeleteTextures(1, &m_primaryPositionBuffer);

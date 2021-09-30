@@ -13,12 +13,27 @@ Camera::Camera(bool enabled, float layerDepth) :
     m_layerDepth(0.0f),
     m_viewMatrix(1.0f),
     m_perspectiveMatrix(1.0f),
+    m_sunPosition(glm::vec3(0.0f, 0.0f, 0.0f)),
+    m_sunDirection(glm::normalize(glm::vec3(1.0f, -0.5f, -1.0f))),
+    m_sunDistance(300.0f),
+    m_sunVMatrix(1.0f),
+    m_sunPvMatrix(1.0f),
     m_fieldOfView(glm::pi<float>() / 4.0f),
     m_nearPlane(0.1f),
     m_farPlane(1000.0f)
 {
     if (enabled)
         enable(layerDepth);
+
+    const float fov = 30.0f;
+	const float left = -fov;
+	const float right = fov;
+	const float bottom = -fov;
+	const float top = fov;
+	const float zNear = 0.1f;
+	const float zFar = 500.0f;
+
+    m_sunPMatrix = glm::ortho(left, right, bottom, top, zNear, zFar);
 }
 
 Camera::~Camera()
@@ -84,7 +99,10 @@ void Camera::render()
 
     float aspectRatio = (float)width / (float)height;
 
-    glm::mat4& transformMatrix = getGameObject()->getTransform()->getTransformMatrix();
+    Transform* pTransform = getGameObject()->getTransform();
+    glm::mat4& transformMatrix = pTransform->getTransformMatrix();
+
+    computeSunPvMatrix();
 
     m_viewMatrix = glm::inverse(transformMatrix);
     m_perspectiveMatrix = glm::perspective(m_fieldOfView, aspectRatio, m_nearPlane, m_farPlane);
@@ -112,6 +130,14 @@ void Camera::render()
     }
 
     postRender();
+}
+
+void Camera::computeSunPvMatrix()
+{
+    Transform* pTransform = getGameObject()->getTransform();
+    m_sunPosition = pTransform->getPosition() - m_sunDirection * m_sunDistance;
+    m_sunVMatrix = glm::lookAt(m_sunPosition, m_sunPosition + m_sunDirection, glm::vec3(0.0f, 1.0f, 0.0f));
+    m_sunPvMatrix = m_sunPMatrix * m_sunVMatrix;
 }
 
 void Camera::getViewport(int& x, int& y, int& width, int& height)

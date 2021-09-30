@@ -7,6 +7,7 @@ MeshRenderer::MeshRenderer(const std::string& shaderProgramId, const std::string
     : Renderable(shaderProgramId, primaryTextureId, useBlending),
     m_shapeId(shapeId),
     m_localTransform(1.0f),
+    m_isUsingForwardShadowRendering(false),
     m_pDepthFunc(nullptr)
 {
     AssetManager* pAssets = Game::getInstance().getScene()->getAssetManager();
@@ -34,8 +35,23 @@ void MeshRenderer::render()
     glCullFace(GL_BACK);
 
     glm::mat4 globalTransform = getGameObject()->getTransform()->getTransformMatrix() * m_localTransform;
-
     glUniformMatrix4fv(m_pShaderProgram->getUniform("M"), 1, GL_FALSE, &globalTransform[0][0]);
+
+    if (m_isUsingForwardShadowRendering)
+    {
+        Camera* pCamera = Game::getInstance().getScene()->getActiveCamera();
+        GLuint shadowMapTextureId = pCamera->getShadowMapTextureId();
+
+        if (shadowMapTextureId != 0)
+        {
+			glActiveTexture(GL_TEXTURE4);
+            glBindTexture(GL_TEXTURE_2D, shadowMapTextureId);
+
+            //glUniform3fv(m_pShaderProgram->getUniform("lightPosition"), 1, &pCamera->getSunPosition()[0]);
+            //glUniform3fv(m_pShaderProgram->getUniform("lightDirection"), 1, &pCamera->getSunDirection()[0]);
+            glUniformMatrix4fv(m_pShaderProgram->getUniform("lightPV"), 1, GL_FALSE, &pCamera->getSunPvMatrix()[0][0]);
+        }
+    }
 
     if (usesBlending())
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -43,6 +59,24 @@ void MeshRenderer::render()
     m_pShape->draw(m_pShaderProgram);
 
     glDisable(GL_CULL_FACE);
+}
+
+bool MeshRenderer::renderDepth(Program* pDepthProgram)
+{
+    if (usesBlending())
+        return false;
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+    glm::mat4 globalTransform = getGameObject()->getTransform()->getTransformMatrix() * m_localTransform;
+    glUniformMatrix4fv(pDepthProgram->getUniform("M"), 1, GL_FALSE, &globalTransform[0][0]);
+    
+    m_pShape->drawDepth(pDepthProgram);
+
+    glDisable(GL_CULL_FACE);
+
+    return true;
 }
 
 float MeshRenderer::getDepth(Camera* pCamera) const

@@ -26,6 +26,7 @@ public:
 	void init();
 	void resize();
 	void draw(const Program* prog) const;
+	void drawDepth(const Program* prog) const;
 	unsigned int *textureIDs = NULL;
 
 
