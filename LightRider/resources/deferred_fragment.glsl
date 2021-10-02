@@ -14,6 +14,39 @@ layout(location = 3) uniform sampler2D gMaterial;
 layout(location = 4) uniform sampler2D shadowMap;
 
 uniform vec3 campos;
+uniform mat4 lightPV;
+
+// Evaluates how shadowed a point is using PCF with 5 samples
+// Credit: Sam Freed - https://github.com/sfreed141/vct/blob/master/shaders/phong.frag
+float calcShadowFactor(vec4 lightSpacePosition)
+{
+    vec3 shifted = (lightSpacePosition.xyz / lightSpacePosition.w + 1.0) * 0.5;
+
+    float shadowFactor = 0;
+    float bias = 0.00001;
+    float fragDepth = shifted.z - bias;
+
+    if (fragDepth > 1.0)
+    {
+        return 0.0;
+    }
+
+    const int numSamples = 5;
+    const ivec2 offsets[numSamples] = ivec2[](
+        ivec2(0, 0), ivec2(1, 0), ivec2(0, 1), ivec2(-1, 0), ivec2(0, -1)
+    );
+
+    for (int i = 0; i < numSamples; i++)
+    {
+        if (fragDepth > textureOffset(shadowMap, shifted.xy, offsets[i]).r)
+        {
+            shadowFactor += 1;
+        }
+    }
+    shadowFactor /= numSamples;
+
+    return shadowFactor;
+}
 
 // Bike colors:
 // Body: 0, 0, 0
@@ -49,17 +82,21 @@ void processBike(vec3 bikeColor)
 
     vec3 n = normalize(-fragNormal);
 
+    vec4 lightSpacePosition = lightPV * vec4(fragPosition, 1.0);
+    float shadowFactor = calcShadowFactor(lightSpacePosition);
+    float lightFactor = 1 - shadowFactor;
+
     if (fragColor.r < 0.1) // Bike body
     {
         for (int i = 0; i < 4; i++)
-            fragColor.rgb += vec3(getSpecFromLight(fragPosition, n, lightPositions[i], 500) * 8);
+            fragColor.rgb += vec3(getSpecFromLight(fragPosition, n, lightPositions[i], 500) * 8) * lightFactor;
     }
     else if (fragColor.g < 0.1) // Bike rider
     {
         fragColor.rgb = vec3(0);
 
         for (int i = 0; i < 4; i++)
-            fragColor.rgb += vec3(getSpecFromLight(fragPosition, n, lightPositions[i], 80) * 0.5);
+            fragColor.rgb += vec3(getSpecFromLight(fragPosition, n, lightPositions[i], 80) * 0.5) * lightFactor;
     }
     else if (fragColor.b < 0.1) // Bike headlights
     {
@@ -85,12 +122,12 @@ void main()
 		// No material; in color = out color.
 		fragColor = texture(gColor, texCoords).rgb;
 	}
-	else if (materialId < 1.5) // ID 2
+	else if (materialId < 1.5) // ID 1
 	{
 		// Player 1 bike
         processBike(player1Color);
 	}
-    else if (materialId < 2.5) // ID 3
+    else if (materialId < 2.5) // ID 2
     {
         // Player 2 bike
         processBike(player2Color);

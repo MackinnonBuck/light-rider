@@ -738,6 +738,10 @@
     <None Include="resources\deferred_vertex.glsl" />
     <None Include="resources\shadow_fragment.glsl" />
     <None Include="resources\shadow_vertex.glsl" />
+    <None Include="resources\ramp_fragment.glsl" />
+    <None Include="resources\ramp_vertex.glsl" />
+    <None Include="resources\ramp.mtl" />
+    <None Include="resources\ramp.shape" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ground_texture.png" />

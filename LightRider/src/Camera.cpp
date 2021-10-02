@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <glm/gtx/euler_angles.hpp>
+
 #include "Game.h"
 #include "AssetManager.h"
 
@@ -25,7 +27,7 @@ Camera::Camera(bool enabled, float layerDepth) :
     if (enabled)
         enable(layerDepth);
 
-    const float fov = 30.0f;
+    const float fov = 40.0f;
 	const float left = -fov;
 	const float right = fov;
 	const float bottom = -fov;
@@ -89,6 +91,13 @@ void Camera::disable()
 
 void Camera::render()
 {
+    Transform* pTransform = getGameObject()->getTransform();
+    glm::mat4& transformMatrix = pTransform->getTransformMatrix();
+
+    m_viewMatrix = glm::inverse(transformMatrix);
+
+    computeSunPvMatrix();
+
     preRender();
 
     int x, y, width, height;
@@ -98,13 +107,6 @@ void Camera::render()
     glDisable(GL_DEPTH_TEST);
 
     float aspectRatio = (float)width / (float)height;
-
-    Transform* pTransform = getGameObject()->getTransform();
-    glm::mat4& transformMatrix = pTransform->getTransformMatrix();
-
-    computeSunPvMatrix();
-
-    m_viewMatrix = glm::inverse(transformMatrix);
     m_perspectiveMatrix = glm::perspective(m_fieldOfView, aspectRatio, m_nearPlane, m_farPlane);
 
     glDepthMask(GL_FALSE);

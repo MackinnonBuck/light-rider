@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <btBulletDynamicsCommon.h>
+#include <glm/gtx/euler_angles.hpp>
 
 #include "Game.h"
 #include "GameConstants.h"
@@ -47,6 +48,51 @@ namespace Presets
         return pGroundObject;
     }
 
+    GameObject* createLightRiderRamp(const glm::vec3& position, float rotation)
+    {
+        GameObject* pRampObject = GameObject::create("Ramp");
+
+        glm::vec3 scale = glm::vec3(10.0f, 10.0f, 10.0f);
+        glm::mat4 localTransform = glm::scale(glm::mat4(1.0f), scale);
+
+        MeshRenderer* pGroundMeshRenderer = pRampObject->addComponent<MeshRenderer>("rampShader", "", "rampShape", false);
+        pGroundMeshRenderer->setLocalTransform(localTransform);
+
+        btTriangleMesh* rampMesh = new btTriangleMesh();
+        btIndexedMesh indexedMesh;
+        auto& vertices = pGroundMeshRenderer->getShape()->getVertices(0);
+        auto& indices = pGroundMeshRenderer->getShape()->getIndices(0);
+        indexedMesh.m_numTriangles = indices.size() / 3;
+        indexedMesh.m_numVertices = vertices.size();
+        indexedMesh.m_indexType = PHY_INTEGER;
+        indexedMesh.m_vertexType = PHY_FLOAT;
+        indexedMesh.m_triangleIndexStride = 3 * sizeof(unsigned int);
+        indexedMesh.m_vertexStride = 3 * sizeof(float);
+        indexedMesh.m_triangleIndexBase = (unsigned char*)indices.data();
+        indexedMesh.m_vertexBase = (unsigned char*)vertices.data();
+        rampMesh->addIndexedMesh(indexedMesh);
+
+        btCollisionShape* rampShape = new btBvhTriangleMeshShape(rampMesh, false, true);
+        rampShape->setLocalScaling(toBullet(scale));
+        rampShape->setMargin(0.25f);
+
+		btTransform rampTransform;
+		rampTransform.setIdentity();
+		rampTransform.setOrigin(toBullet(position + glm::vec3(0.0f, 0.6175f, 0.0f)));
+        rampTransform.setRotation(toBullet(glm::eulerAngleY(rotation)));
+
+        btVector3 rampLocalInertia(0.0f, 0.0f, 0.0f);
+
+        btDefaultMotionState* rampMotionState = new btDefaultMotionState(rampTransform);
+        btRigidBody::btRigidBodyConstructionInfo rampRbInfo(0, rampMotionState, rampShape, rampLocalInertia);
+
+        RigidBodyComponent* pRampRigidBody = pRampObject->addComponent<RigidBodyComponent>(rampRbInfo);
+        pRampRigidBody->getRigidBody()->setFriction(0.0f);
+        pRampRigidBody->getRigidBody()->setRestitution(0.0f);
+
+        return pRampObject;
+    }
+
     GameObject* createLightRiderBike(const std::string& name, int playerId, const BikeControls& bikeControls,
         const glm::vec3& position, float yaw)
     {
@@ -64,6 +110,9 @@ namespace Presets
         btBoxShape* pFrameShape = new btBoxShape(btVector3(btScalar(GC::bikeHalfWidth), btScalar(GC::bikeHalfHeight), btScalar(GC::bikeHalfLength)));
         btSphereShape* pFrontWheelShape = new btSphereShape(btScalar(GC::bikeWheelRadius));
         btSphereShape* pBackWheelShape = new btSphereShape(btScalar(GC::bikeWheelRadius));
+
+        pFrontWheelShape->setMargin(0.5f);
+        pBackWheelShape->setMargin(0.5f);
 
         btVector3 localIntertia(0, 0, 0);
 

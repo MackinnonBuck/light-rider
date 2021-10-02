@@ -1,7 +1,7 @@
 #version 430 core
 
-#define SHADOW_STRENGTH 0.5
-#define OPACITY 0.5
+#define SHADOW_STRENGTH 0.7
+#define OPACITY 0.4
 
 out vec4 color;
 
@@ -55,6 +55,7 @@ void main()
     float lightness = (color.r + color.g + color.b) / 3;
     lightness = pow(lightness, 4);
     lightness *= 0.5f;
+    lightness += 0.15f;
     color.rgb = vec3(lightness);
     color.rgb *= 1 - shadowFactor * SHADOW_STRENGTH;
     color.a = OPACITY + (shadowFactor * SHADOW_STRENGTH) * (1 - OPACITY);

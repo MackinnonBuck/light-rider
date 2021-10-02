@@ -2,8 +2,8 @@
 
 #include "Game.h"
 
-constexpr int SHADOW_MAP_WIDTH = 4096;
-constexpr int SHADOW_MAP_HEIGHT = 4096;
+constexpr int SHADOW_MAP_WIDTH = 8192;
+constexpr int SHADOW_MAP_HEIGHT = 8192;
 
 ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     Camera(enabled, layerDepth),
@@ -224,6 +224,7 @@ void ProcessedCamera::postRender()
     m_pDeferredShader->bind();
 
     glUniform3fv(m_pDeferredShader->getUniform("campos"), 1, &getTransform()->getPosition()[0]);
+    glUniformMatrix4fv(m_pDeferredShader->getUniform("lightPV"), 1, GL_FALSE, &getSunPvMatrix()[0][0]);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_primaryColorBuffer);

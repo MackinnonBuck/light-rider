@@ -21,9 +21,14 @@ void GameScene::initialize()
     loadAssets();
 
     Presets::createLightRiderGround("Ground");
+    Presets::createLightRiderRamp(glm::vec3(50.0f, 0.0f, 50.0), glm::pi<float>() * 0.25f * 3);
+    Presets::createLightRiderRamp(glm::vec3(50.0f, 0.0f, -50.0), glm::pi<float>() * 0.25f * 5);
+    Presets::createLightRiderRamp(glm::vec3(-50.0f, 0.0f, 50.0), glm::pi<float>() * 0.25f);
+    Presets::createLightRiderRamp(glm::vec3(-50.0f, 0.0f, -50.0), glm::pi<float>() * 0.25f * 7);
 
     GameObject* pFreeroamCameraObject = GameObject::create("Camera");
     m_pFreeroamCamera = pFreeroamCameraObject->addComponent<FreeroamCamera>(false);
+    m_pFreeroamCamera->setSky("skyShader", "skyTexture", "sphereShape");
     pFreeroamCameraObject->getTransform()->setPosition(glm::vec3(0.0f, 5.0f, 20.0f));
 
     initScene();

@@ -32,6 +32,11 @@ void LightRiderScene::loadAssets()
     
     pAssets->loadTexture("groundTexture", "ground_texture.png", TextureType::IMAGE);
 
+    Program* pRampShader = pAssets->loadShaderProgram("rampShader", "ramp_vertex.glsl", "ramp_fragment.glsl",
+        ShaderUniform::P_MATRIX
+      | ShaderUniform::V_MATRIX
+      | ShaderUniform::M_MATRIX);
+
     // Sky assets.
     pAssets->loadShaderProgram("skyShader", "sky_vertex.glsl", "sky_fragment.glsl",
         ShaderUniform::P_MATRIX
@@ -55,6 +60,7 @@ void LightRiderScene::loadAssets()
     pDeferredShader->addUniform("gMaterial");
     pDeferredShader->addUniform("shadowMap");
     pDeferredShader->addUniform("campos");
+    pDeferredShader->addUniform("lightPV");
 
     Program* pPostShader = pAssets->loadShaderProgram("postShader", "post_vertex.glsl", "post_fragment.glsl", ShaderUniform::NONE);
     pPostShader->addUniform("screenTexture");
@@ -76,4 +82,5 @@ void LightRiderScene::loadAssets()
 
     pAssets->loadShape("sphereShape", "sphere.shape");
     pAssets->loadShape("planeShape", "plane.shape");
+    pAssets->loadShape("rampShape", "ramp.shape");
 }

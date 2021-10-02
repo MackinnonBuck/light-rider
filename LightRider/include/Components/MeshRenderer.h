@@ -17,6 +17,9 @@ public:
     // Gets the transform of the mesh relative to the parent GameObject.
     glm::mat4& getLocalTransform() { return m_localTransform; }
 
+    // Gets the shape representing the mesh.
+    const Shape* getShape() const { return m_pShape; }
+
     // Sets the local transform of the mesh relative to the parent GameObject.
     void setLocalTransform(glm::mat4 localTransform) { m_localTransform = localTransform; }
 
