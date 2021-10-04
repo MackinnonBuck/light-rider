@@ -272,3 +272,29 @@ void Shape::draw(const Program* prog) const
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 }
+
+void Shape::drawDepth(const Program* prog) const
+{
+	for (int i = 0; i < obj_count; i++)
+	{
+		int h_pos;
+		h_pos = -1;
+
+		glBindVertexArray(vaoID[i]);
+		// Bind position buffer
+		h_pos = prog->getAttribute("vertexPosition");
+		GLSL::enableVertexAttribArray(h_pos);
+		glBindBuffer(GL_ARRAY_BUFFER, posBufID[i]);
+		glVertexAttribPointer(h_pos, 3, GL_FLOAT, GL_FALSE, 0, (const void*)0);
+
+		// Bind element buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eleBufID[i]);
+
+		// Draw
+		glDrawElements(GL_TRIANGLES, (int)eleBuf[i].size(), GL_UNSIGNED_INT, (const void*)0);
+
+		GLSL::disableVertexAttribArray(h_pos);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+}

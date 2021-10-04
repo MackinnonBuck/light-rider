@@ -81,8 +81,11 @@ void DebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btV
 void DebugDrawer::drawContactPoint(const btVector3& pointOnB, const btVector3& normalOnB,
     btScalar distance, int lifeTime, const btVector3& color)
 {
-    m_pointVertices.push_back(toGlm(pointOnB));
-    m_pointColors.push_back(toGlm(color));
+    if (distance <= 0.0f)
+    {
+		m_pointVertices.push_back(toGlm(pointOnB));
+		m_pointColors.push_back(toGlm(color));
+    }
 }
 
 void DebugDrawer::flushLines()

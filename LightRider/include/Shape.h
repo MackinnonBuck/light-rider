@@ -26,6 +26,9 @@ public:
 	void init();
 	void resize();
 	void draw(const Program* prog) const;
+	void drawDepth(const Program* prog) const;
+	const std::vector<float>& getVertices(int shapeId) const { return posBuf[shapeId]; }
+	const std::vector<unsigned int>& getIndices(int shapeId) const { return eleBuf[shapeId]; }
 	unsigned int *textureIDs = NULL;
 
 

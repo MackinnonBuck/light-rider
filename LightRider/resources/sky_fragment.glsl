@@ -1,5 +1,6 @@
-#version 330 core
-out vec4 color;
+#version 430 core
+layout(location = 0) out vec3 color;
+layout(location = 3) out int material;
 
 in vec3 vertex_normal;
 in vec3 vertex_pos;
@@ -9,5 +10,6 @@ uniform sampler2D texture3;
 
 void main()
 {
-    color = texture(texture3, vertex_tex);
+    color = texture(texture3, vertex_tex).rgb;
+    material = 0;
 }

@@ -15,7 +15,7 @@ void DeathCamera::setDeadObject(GameObject* pDeadObject)
 
 bool DeathCamera::initialize()
 {
-    if (!Camera::initialize())
+    if (!ProcessedCamera::initialize())
         return false;
 
     getTransform()->setRotation(glm::eulerAngleX(GC::cameraDeathAngle));
@@ -28,7 +28,7 @@ void DeathCamera::postUpdate(float deltaTime)
     if (m_pDeadObject)
         updatePosition();
 
-    Camera::postUpdate(deltaTime);
+    ProcessedCamera::postUpdate(deltaTime);
 }
 
 void DeathCamera::updatePosition()

@@ -12,7 +12,7 @@ class LightTrail : public Renderable
 public:
 
     // Creates a new LightTrail instance.
-    LightTrail(const glm::vec3& color);
+    LightTrail(int playerId);
 
     // Destroys the LightTrail instance.
     virtual ~LightTrail();
@@ -38,8 +38,8 @@ public:
 
 private:
 
-    // The color of the trail.
-    glm::vec3 m_color;
+    // The ID of the player emitting the trail.
+    int m_playerId;
 
     // The shader program used to render the trail.
     Program* m_pShaderProgram;

@@ -53,7 +53,7 @@ bool Game::init(GameConfig config)
         return false;
     }
 
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
 
     glfwSetWindowCloseCallback(m_pWindow, Game::glfwWindowCloseCallback);
     glfwSetWindowSizeCallback(m_pWindow, Game::glfwWindowSizeCallback);
@@ -129,6 +129,8 @@ void Game::run(Scene *pScene)
         if (deltaTime > maxDeltaTime)
             deltaTime = maxDeltaTime;
 
+        m_wasAnyKeyPressed = false;
+
         glfwPollEvents();
 
         for (int i = 0; i < m_joystickCount; i++)
@@ -156,6 +158,14 @@ void Game::run(Scene *pScene)
 
     glfwDestroyWindow(m_pWindow);
     glfwTerminate();
+}
+
+void Game::changeScene(Scene* pScene)
+{
+    if (m_gameState == GameState::RUNNING)
+        m_pNextScene = pScene;
+    else
+        std::cerr << "Cannot change the scene of a game that is not running!" << std::endl;
 }
 
 void Game::exit()
@@ -186,6 +196,7 @@ void Game::glfwKeyCallback(GLFWwindow* pWindow, int key, int scancode, int actio
     switch (action)
     {
     case GLFW_PRESS:
+        game.m_wasAnyKeyPressed = true;
         game.m_keys[key] = true;
         break;
     case GLFW_RELEASE:
@@ -201,6 +212,7 @@ void Game::glfwMouseButtonCallback(GLFWwindow* pWindow, int button, int action, 
     switch (action)
     {
     case GLFW_PRESS:
+        game.m_wasAnyKeyPressed = true;
         game.m_mouseButtons[button] = true;
         break;
     case GLFW_RELEASE:

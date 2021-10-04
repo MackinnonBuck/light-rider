@@ -247,6 +247,17 @@
     <ClCompile Include="src\Components\DeathCamera.cpp" />
     <ClCompile Include="src\Joystick.cpp" />
     <ClCompile Include="src\Components\ProcessedCamera.cpp" />
+    <ClCompile Include="src\Scenes\LightRiderScene.cpp" />
+    <ClCompile Include="src\Scenes\MenuScene.cpp" />
+    <ClCompile Include="src\Components\OrbitCamera.cpp" />
+    <ClCompile Include="src\StateMachine.cpp" />
+    <ClCompile Include="src\State.cpp" />
+    <ClCompile Include="src\States\TitleScreenState.cpp" />
+    <ClCompile Include="src\Components\GuiElement.cpp" />
+    <ClCompile Include="src\Components\MenuCamera.cpp" />
+    <ClCompile Include="src\States\MenuState.cpp" />
+    <ClCompile Include="src\Components\GuiButton.cpp" />
+    <ClCompile Include="src\Components\RampRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.h" />
@@ -688,6 +699,17 @@
     <ClInclude Include="include\ContactInfo.h" />
     <ClInclude Include="include\Joystick.h" />
     <ClInclude Include="include\Components\ProcessedCamera.h" />
+    <ClInclude Include="include\Scenes\LightRiderScene.h" />
+    <ClInclude Include="include\Scenes\MenuScene.h" />
+    <ClInclude Include="include\Components\OrbitCamera.h" />
+    <ClInclude Include="include\StateMachine.h" />
+    <ClInclude Include="include\State.h" />
+    <ClInclude Include="include\States\TitleScreenState.h" />
+    <ClInclude Include="include\Components\GuiElement.h" />
+    <ClInclude Include="include\Components\MenuCamera.h" />
+    <ClInclude Include="include\States\MenuState.h" />
+    <ClInclude Include="include\Components\GuiButton.h" />
+    <ClInclude Include="include\Components\RampRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\line_fragment.glsl" />
@@ -712,10 +734,25 @@
     <None Include="resources\light_cycle.shape" />
     <None Include="resources\plane.shape" />
     <None Include="resources\sphere.shape" />
+    <None Include="resources\gui_image_fragment.glsl" />
+    <None Include="resources\gui_image_vertex.glsl" />
+    <None Include="resources\deferred_fragment.glsl" />
+    <None Include="resources\deferred_vertex.glsl" />
+    <None Include="resources\shadow_fragment.glsl" />
+    <None Include="resources\shadow_vertex.glsl" />
+    <None Include="resources\ramp_fragment.glsl" />
+    <None Include="resources\ramp_vertex.glsl" />
+    <None Include="resources\ramp.mtl" />
+    <None Include="resources\ramp.shape" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ground_texture.png" />
     <Image Include="resources\light_cycle_texture.png" />
     <Image Include="resources\sky.jpg" />
+    <Image Include="resources\title_image.png" />
+    <Image Include="resources\press_to_begin.png" />
+    <Image Include="resources\play.png" />
+    <Image Include="resources\exit.png" />
+    <Image Include="resources\settings.png" />
   </ItemGroup>
 </Project>

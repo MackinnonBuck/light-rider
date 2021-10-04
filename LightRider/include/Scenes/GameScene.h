@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Scene.h"
+#include "Scenes/LightRiderScene.h"
 #include "Components/PlayerCamera.h"
 #include "Components/DeathCamera.h"
 
 // The game's main scene.
-class GameScene : public Scene
+class GameScene : public LightRiderScene
 {
 public:
 
@@ -46,14 +46,12 @@ private:
     // The player 2 bike GameObject.
     GameObject* m_pPlayer2Bike;
 
+    // The number of ticks since the scene was initialized.
     int m_introTick;
 
     // The number of physics ticks until the scene gets reset. A value of -1 indicates that the
     // scene will stay active indefinitely.
     int m_ticksUntilReset;
-
-    // Loads assets to be used in the GameScene.
-    void loadAssets();
 
     // Initializes the scene.
     void initScene();

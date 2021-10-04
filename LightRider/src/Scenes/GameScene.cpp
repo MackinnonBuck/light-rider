@@ -7,6 +7,7 @@
 #include "GameObject.h"
 #include "Presets.h"
 #include "Components/BikeController.h"
+#include "Components/BikeRenderer.h"
 #include "Components/LightTrail.h"
 #include "Components/FreeroamCamera.h"
 #include "Components/PlayerCamera.h"
@@ -16,14 +17,19 @@ namespace GC = GameConstants;
 
 void GameScene::initialize()
 {
-    Scene::initialize();
+    LightRiderScene::initialize();
 
     loadAssets();
 
     Presets::createLightRiderGround("Ground");
+    Presets::createLightRiderRamp(glm::vec3(50.0f, 0.0f, 50.0), glm::pi<float>() * 0.25f * 3);
+    Presets::createLightRiderRamp(glm::vec3(50.0f, 0.0f, -50.0), glm::pi<float>() * 0.25f * 5);
+    Presets::createLightRiderRamp(glm::vec3(-50.0f, 0.0f, 50.0), glm::pi<float>() * 0.25f);
+    Presets::createLightRiderRamp(glm::vec3(-50.0f, 0.0f, -50.0), glm::pi<float>() * 0.25f * 7);
 
     GameObject* pFreeroamCameraObject = GameObject::create("Camera");
     m_pFreeroamCamera = pFreeroamCameraObject->addComponent<FreeroamCamera>(false);
+    m_pFreeroamCamera->setSky("skyShader", "skyTexture", "sphereShape");
     pFreeroamCameraObject->getTransform()->setPosition(glm::vec3(0.0f, 5.0f, 20.0f));
 
     initScene();
@@ -31,7 +37,7 @@ void GameScene::initialize()
 
 void GameScene::update(float deltaTime)
 {
-    if (Game::getInstance().isKeyDown(GLFW_KEY_KP_0))
+    if (Game::getInstance().isKeyDown(GLFW_KEY_0))
     {
         m_pFreeroamCamera->disable();
         m_pPlayer1Camera->enable(0.0f);
@@ -39,7 +45,7 @@ void GameScene::update(float deltaTime)
 
         setDebugDrawEnabled(false);
     }
-    else if (Game::getInstance().isKeyDown(GLFW_KEY_KP_1))
+    else if (Game::getInstance().isKeyDown(GLFW_KEY_1))
     {
         m_pPlayer1Camera->disable();
         m_pPlayer2Camera->disable();
@@ -48,20 +54,24 @@ void GameScene::update(float deltaTime)
         setDebugDrawEnabled(true);
     }
 
-    Scene::update(deltaTime);
+    LightRiderScene::update(deltaTime);
 }
 
 void GameScene::physicsTick(float physicsTimeStep)
 {
-    Scene::physicsTick(physicsTimeStep);
+    LightRiderScene::physicsTick(physicsTimeStep);
 
     if (m_introTick <= GC::introEndFrame)
     {
+        float transitionAmount = m_introTick * GC::introBikeTransitionSpeed;
+        m_pPlayer1Bike->getComponent<BikeRenderer>()->setTransitionAmount(transitionAmount);
+        m_pPlayer2Bike->getComponent<BikeRenderer>()->setTransitionAmount(transitionAmount);
+
         switch (m_introTick)
         {
         case GC::introLightTrailFrame:
-            m_pPlayer1Bike->addComponent<LightTrail>(GC::player1Color);
-            m_pPlayer2Bike->addComponent<LightTrail>(GC::player2Color);
+            m_pPlayer1Bike->addComponent<LightTrail>(0);
+            m_pPlayer2Bike->addComponent<LightTrail>(1);
             break;
         case GC::introCameraFocusFrame:
             m_pPlayer1Camera->setCameraMode(PlayerCameraMode::FOLLOW);
@@ -83,6 +93,9 @@ void GameScene::physicsTick(float physicsTimeStep)
             if (pBikeController)
                 pBikeController->setControlMode(controlMode);
 
+            m_pPlayer1Bike->getComponent<BikeRenderer>()->setTransitionAmount(1.0f);
+            m_pPlayer2Bike->getComponent<BikeRenderer>()->setTransitionAmount(1.0f);
+
             break;
         }
 
@@ -102,7 +115,7 @@ void GameScene::physicsTick(float physicsTimeStep)
             m_pDeathCamera->enable(0.0f);
             m_pDeathCamera->setDeadObject(player1Dead ? m_pPlayer1Bike : m_pPlayer2Bike);
 
-            m_ticksUntilReset = 240;
+            m_ticksUntilReset = GC::deathSequenceTicks;
         }
     }
     else if (--m_ticksUntilReset == 0)
@@ -110,62 +123,23 @@ void GameScene::physicsTick(float physicsTimeStep)
         clearScene();
         initScene();
     }
-}
+    else
+    {
+        float transitionAmount = (m_ticksUntilReset - GC::deathSequenceTicks * 0.5f) / (GC::deathSequenceTicks * 0.5f);
 
-void GameScene::loadAssets()
-{
-    AssetManager* pAssets = getAssetManager();
+        bool player1Dead = m_pPlayer1Bike->getComponent<BikeController>() == nullptr;
+        bool player2Dead = m_pPlayer2Bike->getComponent<BikeController>() == nullptr;
 
-    // Bike assets.
-    Program* pBikeShader = pAssets->loadShaderProgram("bikeShader", "bike_vertex.glsl", "bike_fragment.glsl");
-    pBikeShader->addUniform("bikeColor");
-    pBikeShader->addUniform("campos");
+        if (player1Dead)
+        {
+            m_pPlayer1Bike->getComponent<BikeRenderer>()->setTransitionAmount(transitionAmount);
+        }
 
-    Program* pTrailShader = pAssets->loadShaderProgram("trailShader", "trail_vertex.glsl", "trail_fragment.glsl",
-        ShaderUniform::P_MATRIX
-      | ShaderUniform::V_MATRIX
-    );
-    pTrailShader->addUniform("baseColor");
-    pTrailShader->addUniform("noiseSeed");
-    pTrailShader->addUniform("currentTime");
-
-    pAssets->loadTexture("bikeTexture", "light_cycle_texture.png", TextureType::IMAGE);
-    pAssets->loadShape("bikeShape", "light_cycle.shape");
-
-    // Ground assets.
-    pAssets->loadShaderProgram("groundShader", "ground_vertex.glsl", "ground_fragment.glsl");
-    pAssets->loadTexture("groundTexture", "ground_texture.png", TextureType::IMAGE);
-
-    // Sky assets.
-    pAssets->loadShaderProgram("skyShader", "sky_vertex.glsl", "sky_fragment.glsl",
-        ShaderUniform::P_MATRIX
-      | ShaderUniform::V_MATRIX
-      | ShaderUniform::M_MATRIX
-      | ShaderUniform::TEXTURE_3
-    );
-    pAssets->loadTexture("skyTexture", "sky.jpg", TextureType::BACKGROUND);
-
-    // Miscellaneous assets.
-    Program* pPostShader = pAssets->loadShaderProgram("postShader", "post_vertex.glsl", "post_fragment.glsl", ShaderUniform::NONE);
-    pPostShader->addUniform("screenTexture");
-
-    Program* pFxaaShader = pAssets->loadShaderProgram("fxaaShader", "fxaa_vertex.glsl", "fxaa_fragment.glsl", ShaderUniform::NONE);
-    pFxaaShader->addUniform("screenTexture");
-    pFxaaShader->addUniform("screenWidth");
-    pFxaaShader->addUniform("screenHeight");
-
-    Program* pBlurShader = pAssets->loadShaderProgram("blurShader", "blur_vertex.glsl", "blur_fragment.glsl", ShaderUniform::NONE);
-    pBlurShader->addUniform("screenTexture");
-    pBlurShader->addUniform("horizontal");
-
-    Program* pBloomShader = pAssets->loadShaderProgram("bloomShader", "bloom_vertex.glsl", "bloom_fragment.glsl", ShaderUniform::NONE);
-    pBloomShader->addUniform("screenTexture");
-    pBloomShader->addUniform("blurTexture");
-    pBloomShader->addUniform("bloom");
-    pBloomShader->addUniform("exposure");
-
-    pAssets->loadShape("sphereShape", "sphere.shape");
-    pAssets->loadShape("planeShape", "plane.shape");
+        if (player2Dead)
+        {
+            m_pPlayer2Bike->getComponent<BikeRenderer>()->setTransitionAmount(transitionAmount);
+        }
+    }
 }
 
 void GameScene::initScene()
@@ -183,10 +157,10 @@ void GameScene::initScene()
     PlayerCameraControls player1CameraControls{ GLFW_JOYSTICK_1, GLFW_KEY_LEFT_SHIFT };
     PlayerCameraControls player2CameraControls{ GLFW_JOYSTICK_2, GLFW_KEY_RIGHT_SHIFT };
 
-    m_pPlayer1Bike = Presets::createLightRiderBike("Player1Bike", GC::player1Color,
+    m_pPlayer1Bike = Presets::createLightRiderBike("Player1Bike", 0,
         player1BikeControls, glm::vec3(-190.0f, 1.0f, 0.0f), -glm::pi<float>() * 0.5f);
 
-    m_pPlayer2Bike = Presets::createLightRiderBike("Player2Bike", GC::player2Color,
+    m_pPlayer2Bike = Presets::createLightRiderBike("Player2Bike", 1,
         player2BikeControls, glm::vec3(190.0f, 1.0f, 0.0f), glm::pi<float>() * 0.5f);
     
     GameObject* pPlayer1CameraObject = GameObject::create("Player1Camera");
@@ -194,7 +168,6 @@ void GameScene::initScene()
     pPlayer1CameraObject->getTransform()->setRotation(glm::eulerAngleY(glm::pi<float>() * 0.5f));
 
     m_pPlayer1Camera = pPlayer1CameraObject->addComponent<PlayerCamera>(m_pPlayer1Bike, m_pPlayer2Bike, player1CameraControls);
-    m_pPlayer1Camera->setFieldOfView(glm::pi<float>() / 3.5f);
     m_pPlayer1Camera->setSky("skyShader", "skyTexture", "sphereShape");
     m_pPlayer1Camera->setSizeRatio(glm::vec2(0.5f, 1.0f));
 
@@ -203,7 +176,6 @@ void GameScene::initScene()
     pPlayer2CameraObject->getTransform()->setRotation(glm::eulerAngleY(-glm::pi<float>() * 0.5f));
 
     m_pPlayer2Camera = pPlayer2CameraObject->addComponent<PlayerCamera>(m_pPlayer2Bike, m_pPlayer1Bike, player2CameraControls);
-    m_pPlayer2Camera->setFieldOfView(glm::pi<float>() / 3.5f);
     m_pPlayer2Camera->setSky("skyShader", "skyTexture", "sphereShape");
     m_pPlayer2Camera->setOffsetRatio(glm::vec2(0.5f, 0.0f));
     m_pPlayer2Camera->setSizeRatio(glm::vec2(0.5f, 1.0f));

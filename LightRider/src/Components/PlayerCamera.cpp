@@ -1,10 +1,35 @@
 #include "Components/PlayerCamera.h"
+#include "Components/RigidBodyComponent.h"
 
 #include <glm/gtx/matrix_interpolation.hpp>
 
 #include "GameConstants.h"
 
 namespace GC = GameConstants;
+
+void PlayerCamera::setCameraMode(PlayerCameraMode cameraMode)
+{
+    if (m_mode == cameraMode)
+    {
+        return;
+    }
+
+    switch (cameraMode)
+    {
+    case PlayerCameraMode::INTRO:
+        break;
+    case PlayerCameraMode::FOLLOW:
+        initFollowMode();
+        break;
+    }
+
+    m_mode = cameraMode;
+}
+
+void PlayerCamera::initFollowMode()
+{
+    m_lastPositionOffset = getTransform()->getPosition() - m_pPlayerObject->getTransform()->getPosition();
+}
 
 void PlayerCamera::postUpdate(float deltaTime)
 {
@@ -17,6 +42,8 @@ void PlayerCamera::postUpdate(float deltaTime)
         processFollowMode(deltaTime);
         break;
     }
+
+    setFieldOfView(glm::min(GC::cameraMaxFov, glm::mix(getFieldOfView(), m_targetFieldOfView, GC::cameraFovAdjustmentSpeed * deltaTime)));
 
     ProcessedCamera::postUpdate(deltaTime);
 }
@@ -51,17 +78,28 @@ void PlayerCamera::processFollowMode(float deltaTime)
 
     Transform* pCameraTransform = getTransform();
 
-    glm::vec3 cameraPosition = pCameraTransform->getPosition();
     glm::quat cameraRotation = pCameraTransform->getRotation();
 
     glm::vec3 targetPosition = glm::vec3(targetMatrix[3]);
     glm::quat targetRotation = glm::quat_cast(targetMatrix);
 
-    glm::vec3 lerpedPosition = glm::mix(cameraPosition, targetPosition, std::fmin(1.0f, GC::cameraTranslationStiffness * deltaTime));
+    glm::vec3 lerpedPosition = glm::mix(m_lastPositionOffset, targetPosition, std::fmin(1.0f, GC::cameraTranslationStiffness * deltaTime));
     glm::quat lerpedRotation = glm::slerp(cameraRotation, targetRotation, std::fmin(1.0f, GC::cameraRotationStiffness * deltaTime));
 
-    pCameraTransform->setPosition(lerpedPosition);
+    Transform* pPlayerTransform = m_pPlayerObject->getTransform();
+
+    pCameraTransform->setPosition(pPlayerTransform->getPosition() + lerpedPosition);
     pCameraTransform->setRotation(lerpedRotation);
+
+    m_lastPositionOffset = lerpedPosition;
+    m_targetFieldOfView = GC::cameraBaseFov;
+
+    RigidBodyComponent* pPlayerRigidBody = m_pPlayerObject->getComponent<RigidBodyComponent>();
+
+    if (pPlayerRigidBody != nullptr)
+    {
+        m_targetFieldOfView += pPlayerRigidBody->getRigidBody()->getLinearVelocity().length() * GC::cameraFovVelocityScale;
+    }
 }
 
 glm::mat4 PlayerCamera::getPlayerViewTransform()
@@ -72,7 +110,6 @@ glm::mat4 PlayerCamera::getPlayerViewTransform()
     float yaw = -glm::atan(playerMatrix[0][2], playerMatrix[0][0]);
 
     return
-        glm::translate(glm::mat4(1.0f), pPlayerTransform->getPosition()) *
         glm::rotate(glm::mat4(1.0f), yaw, glm::vec3(0.0f, 1.0f, 0.0f)) *
         glm::translate(glm::mat4(1.0f), glm::vec3(GC::cameraNudgeOffset, GC::cameraHeight, GC::cameraDistance));
 }
@@ -89,6 +126,6 @@ glm::mat4 PlayerCamera::getOpponentViewTransform()
     float yaw = glm::atan(cameraPosition.x - pOpponentTransform->getPosition().x, cameraPosition.z - pOpponentTransform->getPosition().z);
 
     return
-        glm::translate(glm::mat4(1.0f), cameraPosition) *
+        glm::translate(glm::mat4(1.0f), cameraPosition - pPlayerTransform->getPosition()) *
         glm::rotate(glm::mat4(1.0f), yaw, glm::vec3(0.0f, 1.0f, 0.0f));
 }

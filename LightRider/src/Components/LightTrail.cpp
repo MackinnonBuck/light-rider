@@ -6,9 +6,9 @@
 
 namespace GC = GameConstants;
 
-LightTrail::LightTrail(const glm::vec3& color) :
+LightTrail::LightTrail(int playerId) :
     Renderable("trailShader", "", true),
-    m_color(color),
+    m_playerId(playerId),
     m_pShaderProgram(Game::getInstance().getScene()->getAssetManager()->getShaderProgram(getShaderProgramId())),
     m_pRigidBody(nullptr),
     m_pCompoundShape(nullptr),
@@ -24,7 +24,7 @@ LightTrail::LightTrail(const glm::vec3& color) :
     m_trailHeights(),
     m_trailTimeStamps(),
     m_trailVertexCount(6),
-    m_trailBufferSize(2048)
+    m_trailBufferSize(1024 * 8)
 {
     glGenVertexArrays(1, &m_trailVertexArray);
     glBindVertexArray(m_trailVertexArray);
@@ -200,14 +200,16 @@ void LightTrail::render()
     if (!m_isInitialized)
         return;
     
-    glUniform3fv(m_pShaderProgram->getUniform("baseColor"), 1, &m_color[0]);
+    glUniform1i(m_pShaderProgram->getUniform("playerId"), m_playerId);
     glUniform1f(m_pShaderProgram->getUniform("noiseSeed"), m_continuousTime);
     glUniform1f(m_pShaderProgram->getUniform("currentTime"), m_physicsTime);
 
     glBindVertexArray(m_trailVertexArray);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glDepthMask(GL_FALSE);//glDisable(GL_DEPTH_TEST);
     glDrawArrays(GL_TRIANGLES, 0, m_trailVertexCount);
+    glDepthMask(GL_TRUE);
 
     glBindVertexArray(0);
 }

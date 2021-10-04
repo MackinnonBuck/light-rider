@@ -4,8 +4,8 @@
 
 void BikeRenderer::render()
 {
-    glUniform3fv(getShaderProgram()->getUniform("bikeColor"), 1, &m_bikeColor[0]);
-    glUniform3fv(getShaderProgram()->getUniform("campos"), 1, &Game::getInstance().getScene()->getActiveCamera()->getTransform()->getPosition()[0]);
+    glUniform1i(getShaderProgram()->getUniform("playerId"), m_playerId);
+    glUniform1f(getShaderProgram()->getUniform("transitionAmount"), m_transitionAmount);
 
     MeshRenderer::render();
 }

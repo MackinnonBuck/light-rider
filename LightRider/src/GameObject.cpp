@@ -23,7 +23,7 @@ GameObject* GameObject::find(std::string name, GameObject* pParent)
     auto matchesName = [&](GameObject* pGameObject) { return pGameObject->m_name == name; };
 
     if (pParent)
-        pGameObject = pParent->m_children.find<GameObject>(matchesName);
+        pGameObject = pParent->m_pChildren->find<GameObject>(matchesName);
     else
         pGameObject = Game::getInstance().getScene()->findGameObject(matchesName);
 
@@ -34,6 +34,12 @@ void GameObject::destroy(GameObject* pGameObject)
 {
     if (pGameObject)
         pGameObject->getContainer()->remove(pGameObject);
+}
+
+GameObject::~GameObject()
+{
+    delete m_pComponents;
+    delete m_pChildren;
 }
 
 void GameObject::registerTransform(Transform* pTransform)
@@ -62,29 +68,29 @@ void GameObject::registerChild(GameObject* pGameObject)
         return;
     }
 
-    m_children.add(pGameObject);
+    m_pChildren->add(pGameObject);
 }
 
 void GameObject::update(float deltaTime)
 {
-    m_components.update(deltaTime);
-    m_children.update(deltaTime);
+    m_pComponents->update(deltaTime);
+    m_pChildren->update(deltaTime);
 }
 
 void GameObject::postUpdate(float deltaTime)
 {
-    m_components.postUpdate(deltaTime);
-    m_children.postUpdate(deltaTime);
+    m_pComponents->postUpdate(deltaTime);
+    m_pChildren->postUpdate(deltaTime);
 }
 
 void GameObject::prePhysicsTick(float physicsTimeStep)
 {
-    m_components.prePhysicsTick(physicsTimeStep);
-    m_children.prePhysicsTick(physicsTimeStep);
+    m_pComponents->prePhysicsTick(physicsTimeStep);
+    m_pChildren->prePhysicsTick(physicsTimeStep);
 }
 
 void GameObject::physicsTick(float physicsTimeStep)
 {
-    m_components.physicsTick(physicsTimeStep);
-    m_children.physicsTick(physicsTimeStep);
+    m_pComponents->physicsTick(physicsTimeStep);
+    m_pChildren->physicsTick(physicsTimeStep);
 }

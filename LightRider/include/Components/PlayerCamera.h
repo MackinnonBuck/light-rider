@@ -5,6 +5,9 @@
 #include "Game.h"
 #include "Joystick.h"
 #include "Components/ProcessedCamera.h"
+#include "GameConstants.h"
+
+namespace GC = GameConstants;
 
 // Represents the possible player camera modes.
 enum class PlayerCameraMode
@@ -35,14 +38,19 @@ public:
         m_pPlayerObject(pPlayerObject),
         m_pOpponentObject(pOpponentObject),
         m_cameraControls(playerCameraControls),
+        m_lastPositionOffset(0.0f, 0.0f, 0.0f),
+        m_targetFieldOfView(GC::cameraBaseFov),
         m_pJoystick(Game::getInstance().getJoystick(playerCameraControls.joystickId)),
-        m_mode(PlayerCameraMode::INTRO) { }
+        m_mode(PlayerCameraMode::INTRO)
+    {
+        setFieldOfView(GC::cameraBaseFov);
+    }
 
     // Returns the camera mode of this player camera.
     PlayerCameraMode getCameraMode() const { return m_mode; }
 
     // Sets the camera mode of this player camera.
-    void setCameraMode(PlayerCameraMode cameraMode) { m_mode = cameraMode; }
+    void setCameraMode(PlayerCameraMode cameraMode);
 
     // Updates the camera's transform after all other objects in the scene have finished updating.
     virtual void postUpdate(float deltaTime);
@@ -63,6 +71,15 @@ private:
 
     // The current camera mode.
     PlayerCameraMode m_mode;
+
+    // The last position relative to the player.
+    glm::vec3 m_lastPositionOffset;
+
+    // The target field of view.
+    float m_targetFieldOfView;
+
+    // Initializes the player camera's follow mode.
+    void initFollowMode();
 
     // Processes the player camera in intro mode.
     void processIntroMode(float deltaTime);

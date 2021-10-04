@@ -44,6 +44,21 @@ public:
     // Gets the camera's far-plane rendering distance.
     float getFarPlane() const { return m_farPlane; }
 
+    // Gets the world-space position of the sun.
+    const glm::vec3& getSunPosition() const { return m_sunPosition; }
+
+    // Gets the direction of the sun.
+    const glm::vec3& getSunDirection() const { return m_sunDirection; }
+
+    // Gets the P matrix of the sun.
+    const glm::mat4& getSunPMatrix() const { return m_sunPMatrix; }
+
+    // Gets the V matrix of the sun.
+    const glm::mat4& getSunVMatrix() const { return m_sunVMatrix; }
+
+    // Gets the PV matrix of the sun.
+    const glm::mat4& getSunPvMatrix() const { return m_sunPvMatrix; }
+
     // Sets the camera's field of view.
     void setFieldOfView(float fieldOfView) { m_fieldOfView = fieldOfView; }
 
@@ -61,17 +76,26 @@ public:
 
     // Renders scene from this camera.
     void render();
-    
-protected:
 
     // Gets the viewport dimensions.
     virtual void getViewport(int& x, int& y, int& width, int& height);
+
+    // Gets the shadow map texture ID if it exists, otherwise 0.
+    virtual GLuint getShadowMapTextureId() const { return 0; }
+    
+protected:
 
     // Called just before the camera renders the scene.
     virtual void preRender() { }
 
     // Called just after the camera renders the scene.
     virtual void postRender() { }
+
+    // Renders Renderables with blending disabled.
+    void renderUnblendedRenderables();
+
+    // Renders Renderables with blending enabled.
+    void renderBlendedRenderables();
 
 private:
 
@@ -97,6 +121,24 @@ private:
     // The camera's perspective matrix.
     glm::mat4 m_perspectiveMatrix;
 
+    // The position of the sun in world space.
+    glm::vec3 m_sunPosition;
+    
+    // The direction of the sun.
+    glm::vec3 m_sunDirection;
+
+    // The perspective matrix of the sun.
+    glm::mat4 m_sunPMatrix;
+
+    // The view matrix of the sun.
+    glm::mat4 m_sunVMatrix;
+
+    // The PV matrix of the sun.
+    glm::mat4 m_sunPvMatrix;
+
+    // The distance from the sun to the camera.
+    float m_sunDistance;
+
     // The field of view of the camera.
     float m_fieldOfView;
 
@@ -109,11 +151,8 @@ private:
     // Renders the sky.
     void renderSky(const glm::mat4& transformMatrix);
 
-    // Renders Renderables with blending disabled.
-    void renderUnblendedRenderables();
-
-    // Renders Renderables with blending enabled.
-    void renderBlendedRenderables();
+    // Computes the sun's PV matrix.
+    void computeSunPvMatrix();
 
     // Sets up the given shader program for use.
     void setUpShaderProgram(Program* pShaderProgram);

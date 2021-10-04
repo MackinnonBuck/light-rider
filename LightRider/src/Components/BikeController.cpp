@@ -57,10 +57,13 @@ bool BikeController::initialize()
     if (!m_pRigidBodyComponent)
         return false;
 
+    btRigidBody* pRigidBody = m_pRigidBodyComponent->getRigidBody();
+
     m_pRigidBodyComponent->setContactHandler(this);
-    m_pRigidBodyComponent->getRigidBody()->setDamping(0.0f, 0.0f);
-    m_pRigidBodyComponent->getRigidBody()->setSleepingThresholds(0, 0);
-    m_pRigidBodyComponent->getRigidBody()->setFriction(0.0f);
+    pRigidBody->setDamping(0.0f, 0.0f);
+    pRigidBody->setSleepingThresholds(0, 0);
+    pRigidBody->setFriction(0.0f);
+    pRigidBody->setRestitution(0.0f);
 
     return true;
 }
@@ -141,6 +144,8 @@ void BikeController::updateDrivingPhysics()
 
     float targetFrontWheelAngle = 0.0f;
 
+    localForward.setY(0.0f);
+
     if (acceleration >= GC::accelerationDeadzone)
         pRigidBody->applyCentralImpulse((GC::bikeMaxSpeed - speed) * localForward * GC::bikeAccelerationForceFactor * acceleration);
     else
@@ -183,6 +188,9 @@ void BikeController::updateDrivingPhysics()
 
     btVector3 frontImpulse = -frontWheelLeft * frontFrictionFactor * GC::bikeWheelForceFactor;
     btVector3 rearImpulse = -rearWheelLeft * rearFrictionFactor * GC::bikeWheelForceFactor;
+
+    frontImpulse.setY(0.0f);
+    rearImpulse.setY(0.0f);
 
     pRigidBody->applyCentralImpulse(frontImpulse);
     pRigidBody->applyCentralImpulse(rearImpulse);

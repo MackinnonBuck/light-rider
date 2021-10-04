@@ -4,21 +4,30 @@
 #include "Components/MeshRenderer.h"
 
 // Renders the bike body.
-// usage: addComponent(const glm::vec3& bikeColor)
+// usage: addComponent(int playerId)
 class BikeRenderer : public MeshRenderer
 {
 public:
 
     // Creates a new bike renderer, rendering using the specified bike color.
-    BikeRenderer(const glm::vec3& bikeColor) : MeshRenderer("bikeShader", "bikeTexture", "bikeShape"),
-        m_bikeColor(bikeColor) { }
+    BikeRenderer(int playerId) : MeshRenderer("bikeShader", "bikeTexture", "bikeShape"),
+        m_playerId(playerId),
+        m_transitionAmount(0.0)
+    {
+    }
+
+    // Sets the amount that the bike has transitioned into its final form.
+    void setTransitionAmount(float transitionAmount) { m_transitionAmount = transitionAmount; }
 
     // Renders the bike body.
     virtual void render();
 
 private:
 
-    // The accent color of the bike.
-    glm::vec3 m_bikeColor;
+    // The ID of the player controlling the bike.
+    int m_playerId;
+
+    // The amount that the bike has transitioned into its final form.
+    float m_transitionAmount;
 };
 

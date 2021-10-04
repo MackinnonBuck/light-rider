@@ -32,6 +32,9 @@ public:
     // Runs the game, starting with the provided scene.
     void run(Scene* pScene);
 
+    // Changes the scene that the game is running.
+    void changeScene(Scene *pScene);
+
     // Exits the game.
     void exit();
 
@@ -61,6 +64,9 @@ public:
 
     // Returns the joystick with the given ID, or nullptr if the controller could not be found.
     Joystick* getJoystick(int id) const { return id >= m_joystickCount ? nullptr : m_pJoysticks[id]; }
+
+    // Returns true if a key or mouse button was pressed within the last frame.
+    bool wasAnyKeyPressed() const { return m_wasAnyKeyPressed; }
 
     // Returns the currently loaded scene.
     Scene* getScene() const { return m_pCurrentScene; }
@@ -118,6 +124,9 @@ private:
 
     // The Y position of the cursor.
     float m_cursorY;
+
+    // If true, a key was pressed within the last frame.
+    bool m_wasAnyKeyPressed;
 
     // Called when the close button is clicked.
     static void glfwWindowCloseCallback(GLFWwindow* pWindow);
