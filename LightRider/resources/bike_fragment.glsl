@@ -6,7 +6,8 @@ layout(location = 3) out int material;
 
 #define GRID_SPACING 0.05
 #define GRID_WIDTH 0.005
-#define GRID_INTENSITY 3
+#define GRID_INTENSITY_BASE 3
+#define GRID_INTENSITY_SCALE 5
 #define NOISE_FREQUENCY 6
 #define BORDER_SIZE 0.05
 #define BORDER_INTENSITY 10
@@ -185,7 +186,7 @@ void main()
     position = vertex_pos;
     normal = vertex_normal;
 
-    if (transitionAmount < 0)
+    if (transitionAmount < 0.99)
     {
         float noise = (cnoise(vec4(vertex_pos_raw * NOISE_FREQUENCY, 1)) + 1) * 0.5;
 
@@ -193,33 +194,11 @@ void main()
             ? player1GridColor
             : player2GridColor;
 
-        if (noise > abs(transitionAmount))
-        {
-            if (mod(vertex_pos_raw.x, GRID_SPACING) < GRID_WIDTH ||
-                mod(vertex_pos_raw.y, GRID_SPACING) < GRID_WIDTH ||
-                mod(vertex_pos_raw.z, GRID_SPACING) < GRID_WIDTH)
-            {
-                color.rgb = gridColor * GRID_INTENSITY + abs(transitionAmount) * 5;
-            }
-            else
-            {
-                discard;
-            }
-        }
-        else
+        if (noise > transitionAmount * 2)
         {
             discard;
+            return;
         }
-
-        return;
-    }
-    else if (transitionAmount < 0.99)
-    {
-        float noise = (cnoise(vec4(vertex_pos_raw * NOISE_FREQUENCY, 1)) + 1) * 0.5;
-
-        vec3 gridColor = playerId == 0
-            ? player1GridColor
-            : player2GridColor;
 
         if (noise > transitionAmount)
         {
@@ -229,7 +208,7 @@ void main()
                 mod(vertex_pos_raw.y, GRID_SPACING) < GRID_WIDTH ||
                 mod(vertex_pos_raw.z, GRID_SPACING) < GRID_WIDTH)
             {
-                color.rgb = gridColor * GRID_INTENSITY;
+                color.rgb = gridColor * GRID_INTENSITY_BASE + (noise - transitionAmount) * GRID_INTENSITY_SCALE;
             }
             else
             {

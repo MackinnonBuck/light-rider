@@ -129,9 +129,23 @@ void BikeController::updateDrivingPhysics()
     btVector3 frontWheelLeft = -localForward.cross(frontWheelGroundNormal);
     btVector3 rearWheelLeft = -localForward.cross(rearWheelGroundNormal);
 
-    float acceleration =
-        m_controlMode == BikeControlMode::LOCKED || m_controlMode == BikeControlMode::AUTO_ACCELERATE ? 1.0f :
-        getActionInput(BikeActions::ACCELERATE);
+    float acceleration;
+
+    switch (m_controlMode)
+    {
+    case BikeControlMode::LOCKED:
+        acceleration = GC::bikeLockedAccelerationInput;
+        break;
+    case BikeControlMode::AUTO_ACCELERATE:
+        acceleration = 1.0f;
+        break;
+    case BikeControlMode::MANUAL_ACCELERATE:
+        acceleration = getActionInput(BikeActions::ACCELERATE);
+        break;
+    default:
+        acceleration = 0.0f;
+        break;
+    }
 
     float jump =
         m_controlMode == BikeControlMode::LOCKED || m_jumpTimer > 0.0f ||

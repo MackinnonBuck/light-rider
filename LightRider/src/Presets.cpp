@@ -117,9 +117,6 @@ namespace Presets
         btSphereShape* pFrontWheelShape = new btSphereShape(btScalar(GC::bikeWheelRadius));
         btSphereShape* pBackWheelShape = new btSphereShape(btScalar(GC::bikeWheelRadius));
 
-        pFrontWheelShape->setMargin(0.5f);
-        pBackWheelShape->setMargin(0.5f);
-
         btVector3 localIntertia(0, 0, 0);
 
         float wheelbaseOffset = GC::bikeHalfLength - GC::bikeWheelRadius - GC::bikeWheelBodyPadding;

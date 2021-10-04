@@ -63,7 +63,8 @@ void GameScene::physicsTick(float physicsTimeStep)
 
     if (m_introTick <= GC::introEndFrame)
     {
-        float transitionAmount = m_introTick * GC::introBikeTransitionSpeed;
+        float transitionAmount = glm::min(1.0f, (float)m_introTick / GC::introCameraFocusFrame);
+
         m_pPlayer1Bike->getComponent<BikeRenderer>()->setTransitionAmount(transitionAmount);
         m_pPlayer2Bike->getComponent<BikeRenderer>()->setTransitionAmount(transitionAmount);
 
@@ -125,7 +126,7 @@ void GameScene::physicsTick(float physicsTimeStep)
     }
     else
     {
-        float transitionAmount = (m_ticksUntilReset - GC::deathSequenceTicks * 0.5f) / (GC::deathSequenceTicks * 0.5f);
+        float transitionAmount = (float)m_ticksUntilReset / GC::deathSequenceTicks;
 
         bool player1Dead = m_pPlayer1Bike->getComponent<BikeController>() == nullptr;
         bool player2Dead = m_pPlayer2Bike->getComponent<BikeController>() == nullptr;
