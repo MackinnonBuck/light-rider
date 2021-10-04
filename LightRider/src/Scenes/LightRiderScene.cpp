@@ -7,7 +7,7 @@ void LightRiderScene::loadAssets()
     // Bike assets.
     Program* pBikeShader = pAssets->loadShaderProgram("bikeShader", "bike_vertex.glsl", "bike_fragment.glsl");
     pBikeShader->addUniform("playerId");
-    pBikeShader->addUniform("campos");
+    pBikeShader->addUniform("transitionAmount");
 
     Program* pTrailShader = pAssets->loadShaderProgram("trailShader", "trail_vertex.glsl", "trail_fragment.glsl",
         ShaderUniform::P_MATRIX
@@ -36,6 +36,7 @@ void LightRiderScene::loadAssets()
         ShaderUniform::P_MATRIX
       | ShaderUniform::V_MATRIX
       | ShaderUniform::M_MATRIX);
+    pRampShader->addUniform("time");
 
     // Sky assets.
     pAssets->loadShaderProgram("skyShader", "sky_vertex.glsl", "sky_fragment.glsl",
@@ -83,4 +84,5 @@ void LightRiderScene::loadAssets()
     pAssets->loadShape("sphereShape", "sphere.shape");
     pAssets->loadShape("planeShape", "plane.shape");
     pAssets->loadShape("rampShape", "ramp.shape");
+    pAssets->loadShape("rampShapeCollision", "ramp_collision.shape");
 }

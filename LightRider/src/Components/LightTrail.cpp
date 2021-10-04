@@ -24,7 +24,7 @@ LightTrail::LightTrail(int playerId) :
     m_trailHeights(),
     m_trailTimeStamps(),
     m_trailVertexCount(6),
-    m_trailBufferSize(2048)
+    m_trailBufferSize(1024 * 8)
 {
     glGenVertexArrays(1, &m_trailVertexArray);
     glBindVertexArray(m_trailVertexArray);

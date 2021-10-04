@@ -257,6 +257,7 @@
     <ClCompile Include="src\Components\MenuCamera.cpp" />
     <ClCompile Include="src\States\MenuState.cpp" />
     <ClCompile Include="src\Components\GuiButton.cpp" />
+    <ClCompile Include="src\Components\RampRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.h" />
@@ -708,6 +709,7 @@
     <ClInclude Include="include\Components\MenuCamera.h" />
     <ClInclude Include="include\States\MenuState.h" />
     <ClInclude Include="include\Components\GuiButton.h" />
+    <ClInclude Include="include\Components\RampRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\line_fragment.glsl" />

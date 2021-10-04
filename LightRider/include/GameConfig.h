@@ -31,7 +31,7 @@ struct GameConfig
     float physicsTickInterval = 1.0f / 60.0f;
 
     // The maximum number of physics ticks per frame.
-    int maxPhysicsSubSteps = 1;
+    int maxPhysicsSubSteps = 10;
 
     // The root directory from where game resources (shaders, objects, etc.) are loaded.
     std::string resourceDirectory = std::string();

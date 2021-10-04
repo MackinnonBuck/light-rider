@@ -3,7 +3,25 @@
 #include <iostream>
 #include <assert.h>
 
+#include <BulletCollision/CollisionDispatch/btInternalEdgeUtility.h>
+
 #include "Game.h"
+
+extern ContactAddedCallback gContactAddedCallback;
+
+// This fixes broken triangle mesh collisions.
+static bool fixEdgeContacts(
+    btManifoldPoint& cp,
+    const btCollisionObjectWrapper* colObj0Wrap,
+    int partId0,
+    int index0,
+    const btCollisionObjectWrapper* colObj1Wrap,
+    int partId1,
+    int index1)
+{
+    btAdjustInternalEdgeContacts(cp, colObj1Wrap, colObj0Wrap, partId1, index1);
+    return true;
+}
 
 Scene::Scene() :
     m_pAssetManager(new AssetManager()),
@@ -20,6 +38,7 @@ Scene::Scene() :
     m_pDynamicsWorld(nullptr),
     m_pDebugDrawer(nullptr)
 {
+    gContactAddedCallback = fixEdgeContacts;
 }
 
 Scene::~Scene()
@@ -81,7 +100,6 @@ void Scene::prePhysicsTick(float physicsTimeStep)
 void Scene::physicsTick(float physicsTimeStep)
 {
     invokeCollisionCallbacks();
-
     m_pGameObjects->physicsTick(physicsTimeStep);
 }
 

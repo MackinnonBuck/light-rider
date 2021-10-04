@@ -27,6 +27,10 @@ namespace GameConstants
     constexpr float cameraDeathAngle = -0.35f;
     constexpr float cameraDeathHeight = 5.0f;
     constexpr float cameraDeathDistance = 10.0f;
+    constexpr float cameraBaseFov = glm::pi<float>() / 3.5f;
+    constexpr float cameraMaxFov = glm::pi<float>() / 2.5f;
+    constexpr float cameraFovVelocityScale = 0.005f;
+    constexpr float cameraFovAdjustmentSpeed = 10.0f;
 
     // Intro sequence constants.
     constexpr int introLightTrailFrame = 60;
@@ -35,6 +39,10 @@ namespace GameConstants
     constexpr glm::vec3 introCamera1Position = glm::vec3(-188.0f, 0.6f, -0.8f);
     constexpr glm::vec3 introCamera2Position = glm::vec3(188.0f, 0.6f, -0.8f);
     constexpr float introCameraSpeed = 25.0f;
+    constexpr float introBikeTransitionSpeed = 0.0125f;
+
+    // Death sequence constants.
+    constexpr int deathSequenceTicks = 240;
 
     // Player constants.
     constexpr glm::vec3 player1Color = glm::vec3(0.0f, 0.75f, 1.0f);

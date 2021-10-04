@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Components\RampRenderer.cpp" />
     <ClCompile Include="src\Components\GuiButton.cpp" />
     <ClCompile Include="src\States\MenuState.cpp" />
     <ClCompile Include="src\Components\MenuCamera.cpp" />
@@ -846,6 +847,7 @@
     <ClInclude Include="include\States\TitleScreenState.h" />
     <ClInclude Include="include\Components\MenuCamera.h" />
     <ClInclude Include="include\States\MenuState.h" />
+    <ClInclude Include="include\Components\RampRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\.gitignore" />

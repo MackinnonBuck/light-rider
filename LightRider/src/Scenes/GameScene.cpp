@@ -7,6 +7,7 @@
 #include "GameObject.h"
 #include "Presets.h"
 #include "Components/BikeController.h"
+#include "Components/BikeRenderer.h"
 #include "Components/LightTrail.h"
 #include "Components/FreeroamCamera.h"
 #include "Components/PlayerCamera.h"
@@ -62,6 +63,10 @@ void GameScene::physicsTick(float physicsTimeStep)
 
     if (m_introTick <= GC::introEndFrame)
     {
+        float transitionAmount = m_introTick * GC::introBikeTransitionSpeed;
+        m_pPlayer1Bike->getComponent<BikeRenderer>()->setTransitionAmount(transitionAmount);
+        m_pPlayer2Bike->getComponent<BikeRenderer>()->setTransitionAmount(transitionAmount);
+
         switch (m_introTick)
         {
         case GC::introLightTrailFrame:
@@ -88,6 +93,9 @@ void GameScene::physicsTick(float physicsTimeStep)
             if (pBikeController)
                 pBikeController->setControlMode(controlMode);
 
+            m_pPlayer1Bike->getComponent<BikeRenderer>()->setTransitionAmount(1.0f);
+            m_pPlayer2Bike->getComponent<BikeRenderer>()->setTransitionAmount(1.0f);
+
             break;
         }
 
@@ -107,13 +115,30 @@ void GameScene::physicsTick(float physicsTimeStep)
             m_pDeathCamera->enable(0.0f);
             m_pDeathCamera->setDeadObject(player1Dead ? m_pPlayer1Bike : m_pPlayer2Bike);
 
-            m_ticksUntilReset = 240;
+            m_ticksUntilReset = GC::deathSequenceTicks;
         }
     }
     else if (--m_ticksUntilReset == 0)
     {
         clearScene();
         initScene();
+    }
+    else
+    {
+        float transitionAmount = (m_ticksUntilReset - GC::deathSequenceTicks * 0.5f) / (GC::deathSequenceTicks * 0.5f);
+
+        bool player1Dead = m_pPlayer1Bike->getComponent<BikeController>() == nullptr;
+        bool player2Dead = m_pPlayer2Bike->getComponent<BikeController>() == nullptr;
+
+        if (player1Dead)
+        {
+            m_pPlayer1Bike->getComponent<BikeRenderer>()->setTransitionAmount(transitionAmount);
+        }
+
+        if (player2Dead)
+        {
+            m_pPlayer2Bike->getComponent<BikeRenderer>()->setTransitionAmount(transitionAmount);
+        }
     }
 }
 
@@ -143,7 +168,6 @@ void GameScene::initScene()
     pPlayer1CameraObject->getTransform()->setRotation(glm::eulerAngleY(glm::pi<float>() * 0.5f));
 
     m_pPlayer1Camera = pPlayer1CameraObject->addComponent<PlayerCamera>(m_pPlayer1Bike, m_pPlayer2Bike, player1CameraControls);
-    m_pPlayer1Camera->setFieldOfView(glm::pi<float>() / 3.5f);
     m_pPlayer1Camera->setSky("skyShader", "skyTexture", "sphereShape");
     m_pPlayer1Camera->setSizeRatio(glm::vec2(0.5f, 1.0f));
 
@@ -152,7 +176,6 @@ void GameScene::initScene()
     pPlayer2CameraObject->getTransform()->setRotation(glm::eulerAngleY(-glm::pi<float>() * 0.5f));
 
     m_pPlayer2Camera = pPlayer2CameraObject->addComponent<PlayerCamera>(m_pPlayer2Bike, m_pPlayer1Bike, player2CameraControls);
-    m_pPlayer2Camera->setFieldOfView(glm::pi<float>() / 3.5f);
     m_pPlayer2Camera->setSky("skyShader", "skyTexture", "sphereShape");
     m_pPlayer2Camera->setOffsetRatio(glm::vec2(0.5f, 0.0f));
     m_pPlayer2Camera->setSizeRatio(glm::vec2(0.5f, 1.0f));
