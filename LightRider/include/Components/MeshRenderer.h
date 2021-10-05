@@ -26,6 +26,9 @@ public:
     // Sets the depth of the mesh renderer to the provided depth function pointer.
     void setDepthFunction(float (*pDepthFunc)(Camera*)) { m_pDepthFunc = pDepthFunc; }
 
+    // Sets whether culling is enabled.
+    void setCullingEnabled(bool isCullingEnabled) { m_isCullingEnabled = isCullingEnabled; }
+
     // Sets whether forward shadow rendering is being used.
     // This is intended for objects that use blending or otherwise don't participate in deferred shading.
     void setUsingForwardShadowRendering(bool isUsingForwardShadowRendering) { m_isUsingForwardShadowRendering = isUsingForwardShadowRendering; }
@@ -57,8 +60,11 @@ private:
 
     // The local transform of the mesh relative to the parent GameObject.
     glm::mat4 m_localTransform;
+
+    // Whether culling is enabled.
+    bool m_isCullingEnabled;
     
-	// Whether forward shadow rendering is being used
+	// Whether forward shadow rendering is being used.
     bool m_isUsingForwardShadowRendering;
 
     // A custom depth function that can be used to override the default depth function.

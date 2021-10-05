@@ -3,6 +3,7 @@
 #include "Scenes/LightRiderScene.h"
 #include "Components/PlayerCamera.h"
 #include "Components/DeathCamera.h"
+#include "Components/ChunkManager.h"
 
 // The game's main scene.
 class GameScene : public LightRiderScene
@@ -39,6 +40,9 @@ private:
 
     // The death camera GameObject.
     DeathCamera* m_pDeathCamera;
+
+    // The chunk manager for the scene.
+    ChunkManager* m_pChunkManager;
 
     // The player 1 bike GameObject.
     GameObject* m_pPlayer1Bike;

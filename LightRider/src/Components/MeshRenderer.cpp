@@ -7,6 +7,7 @@ MeshRenderer::MeshRenderer(const std::string& shaderProgramId, const std::string
     : Renderable(shaderProgramId, primaryTextureId, useBlending),
     m_shapeId(shapeId),
     m_localTransform(1.0f),
+    m_isCullingEnabled(true),
     m_isUsingForwardShadowRendering(false),
     m_pDepthFunc(nullptr)
 {
@@ -31,8 +32,11 @@ MeshRenderer::MeshRenderer(const std::string& shaderProgramId, const std::string
 
 void MeshRenderer::render()
 {
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    if (m_isCullingEnabled)
+    {
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+    }
 
     glm::mat4 globalTransform = getGameObject()->getTransform()->getTransformMatrix() * m_localTransform;
     glUniformMatrix4fv(m_pShaderProgram->getUniform("M"), 1, GL_FALSE, &globalTransform[0][0]);

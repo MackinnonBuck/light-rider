@@ -20,6 +20,16 @@ void LightRiderScene::loadAssets()
     pAssets->loadTexture("bikeTexture", "light_cycle_texture.png", TextureType::IMAGE);
     pAssets->loadShape("bikeShape", "light_cycle.shape");
 
+    Program* pChunkShader = pAssets->loadShaderProgram("chunkShader", "chunk_vertex.glsl", "chunk_fragment.glsl",
+        ShaderUniform::P_MATRIX
+      | ShaderUniform::V_MATRIX
+      | ShaderUniform::M_MATRIX
+      | ShaderUniform::TEXTURE_0);
+    pChunkShader->addUniform("playerId");
+
+    pAssets->loadTexture("chunkTexture", "chunk_texture.png", TextureType::IMAGE);
+    pAssets->loadShape("chunkShape", "chunk_particle.shape");
+
     // Ground assets.
     Program* pGroundShader = pAssets->loadShaderProgram("groundShader", "ground_vertex.glsl", "ground_fragment.glsl");
     pGroundShader->addUniform("lightPV");
@@ -27,7 +37,7 @@ void LightRiderScene::loadAssets()
     //pGroundShader->addUniform("lightPosition");
     //pGroundShader->addUniform("lightDirection");
     pGroundShader->bind();
-	glUniform1i(pGroundShader->getUniform("shadowMap"), 4);
+    glUniform1i(pGroundShader->getUniform("shadowMap"), 4);
     pGroundShader->unbind();
     
     pAssets->loadTexture("groundTexture", "ground_texture.png", TextureType::IMAGE);
@@ -52,7 +62,7 @@ void LightRiderScene::loadAssets()
         ShaderUniform::P_MATRIX
       | ShaderUniform::V_MATRIX
       | ShaderUniform::M_MATRIX);
-	pShadowShader->addAttribute("vertexPosition");
+    pShadowShader->addAttribute("vertexPosition");
 
     Program* pDeferredShader = pAssets->loadShaderProgram("deferredShader", "deferred_vertex.glsl", "deferred_fragment.glsl", ShaderUniform::NONE);
     pDeferredShader->addUniform("gColor");

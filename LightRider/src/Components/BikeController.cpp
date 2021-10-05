@@ -4,9 +4,11 @@
 #include <GLFW/glfw3.h>
 
 #include "Game.h"
+#include "Presets.h"
 #include "GameConstants.h"
 #include "ConversionUtils.h"
 #include "Components/LightTrail.h"
+#include "Components/BikeRenderer.h"
 
 namespace GC = GameConstants;
 
@@ -79,13 +81,45 @@ void BikeController::prePhysicsTick(float physicsTimeStep)
 
     if (m_jumpTimer < 0.0f)
         m_jumpTimer = 0.0f;
+
+    m_lastVelocity = m_pRigidBodyComponent->getRigidBody()->getLinearVelocity();
 }
 
 void BikeController::handleContact(const ContactInfo& contactInfo, btCollisionObject* pBodySelf, btCollisionObject* pBodyOther)
 {
     if (pBodyOther->getCollisionShape()->getShapeType() == COMPOUND_SHAPE_PROXYTYPE)
     {
-        kill();
+        btTransform& transform = pBodySelf->getWorldTransform();
+        float damage = glm::abs(contactInfo.manifoldPoint.m_normalWorldOnB.dot(m_lastVelocity)) * GC::bikeDamageFactor;
+        float chunkScale = damage * GC::damageChunkScaleFactor;
+
+        m_health -= damage;
+
+        glm::vec3 velocityAfterContact = toGlm(pBodySelf->getInterpolationLinearVelocity());
+        glm::vec3 contactPoint = toGlm(contactInfo.positionWorldOnSelf);
+
+        BikeRenderer* pBikeRenderer = getGameObject()->getComponent<BikeRenderer>();
+
+        if (pBikeRenderer != nullptr)
+        {
+            pBikeRenderer->setTransitionAmount(GC::bikeDeadTransitionAmount + m_health * GC::bikeDeadTransitionAmount);
+        }
+
+        for (float f = 0; f < damage; f += GC::damagePerChunk)
+        {
+            m_pChunkManager->spawnChunk(pBikeRenderer->getPlayerId(), chunkScale, contactPoint, velocityAfterContact);
+        }
+
+        if (m_health <= 0)
+        {
+            for (int i = 0; i < GC::deathChunkSpawnCount; i++)
+            {
+                m_pChunkManager->spawnChunk(pBikeRenderer->getPlayerId(), GC::maxChunkScale, contactPoint, velocityAfterContact);
+            }
+
+            kill();
+        }
+
         return;
     }
 

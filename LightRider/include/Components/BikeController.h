@@ -4,6 +4,7 @@
 #include "DebugDrawer.h"
 #include "ContactHandler.h"
 #include "Components/RigidBodyComponent.h"
+#include "Components/ChunkManager.h"
 #include "Game.h"
 #include "Joystick.h"
 
@@ -48,10 +49,10 @@ struct BikeControls
 class BikeController : public Component, public ContactHandler
 {
 public:
-
     // Creates a new BikeController instance.
-    BikeController(const BikeControls& bikeControls) :
+    BikeController(const BikeControls& bikeControls, ChunkManager* pChunkManager) :
         m_bikeControls(bikeControls),
+        m_pChunkManager(pChunkManager),
         m_controlMode(BikeControlMode::LOCKED),
         m_pJoystick(Game::getInstance().getJoystick(bikeControls.joystickId)),
         m_pRigidBodyComponent(nullptr),
@@ -60,7 +61,11 @@ public:
         m_frontWheelGroundNormal(0.0f, 0.0f, 0.0f),
         m_rearWheelGroundNormal(0.0f, 0.0f, 0.0f),
         m_frontWheelAngle(0.0f),
-        m_jumpTimer(0.0f) { }
+        m_jumpTimer(0.0f),
+        m_lastVelocity(0.0f, 0.0f, 0.0f),
+        m_health(1.0f)
+    {
+    }
 
     // Returns the control mode for this bike controller.
     BikeControlMode getControlMode() const { return m_controlMode; }
@@ -92,6 +97,9 @@ private:
     // The control mode of this bike controller.
     BikeControlMode m_controlMode;
 
+    // The chunk manager for spawning bike chunks.
+    ChunkManager* m_pChunkManager;
+
     // The joystick controlling this bike controller.
     Joystick* m_pJoystick; 
 
@@ -115,6 +123,12 @@ private:
 
     // The time remaining until a jump is available.
     float m_jumpTimer;
+
+    // The last known velocity of the bike.
+    btVector3 m_lastVelocity;
+
+    // The current health of the bike.
+    float m_health;
 
     // Updates driving physics for the bike.
     void updateDrivingPhysics();

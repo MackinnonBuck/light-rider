@@ -100,7 +100,7 @@ namespace Presets
     }
 
     GameObject* createLightRiderBike(const std::string& name, int playerId, const BikeControls& bikeControls,
-        const glm::vec3& position, float yaw)
+        ChunkManager* pChunkManager, const glm::vec3& position, float yaw)
     {
         GameObject* pBikeObject = GameObject::create(name);
 
@@ -132,7 +132,7 @@ namespace Presets
         btRigidBody::btRigidBodyConstructionInfo rbInfo(btScalar(GC::bikeMass), pMotionState, pCompoundShape, localIntertia);
 
         pBikeObject->addComponent<RigidBodyComponent>(rbInfo);
-        pBikeObject->addComponent<BikeController>(bikeControls);
+        pBikeObject->addComponent<BikeController>(bikeControls, pChunkManager);
 
         BikeRenderer* pBikeRenderer = pBikeObject->addComponent<BikeRenderer>(playerId);
         pBikeRenderer->setLocalTransform(

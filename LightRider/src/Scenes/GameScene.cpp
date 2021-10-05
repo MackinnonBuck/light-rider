@@ -32,6 +32,9 @@ void GameScene::initialize()
     m_pFreeroamCamera->setSky("skyShader", "skyTexture", "sphereShape");
     pFreeroamCameraObject->getTransform()->setPosition(glm::vec3(0.0f, 5.0f, 20.0f));
 
+    GameObject* pChunkManagerObject = GameObject::create("ChunkManager");
+    m_pChunkManager = pChunkManagerObject->addComponent<ChunkManager>();
+
     initScene();
 }
 
@@ -126,7 +129,7 @@ void GameScene::physicsTick(float physicsTimeStep)
     }
     else
     {
-        float transitionAmount = (float)m_ticksUntilReset / GC::deathSequenceTicks;
+        float transitionAmount = GC::bikeDeadTransitionAmount * ((float)m_ticksUntilReset / GC::deathSequenceTicks);
 
         bool player1Dead = m_pPlayer1Bike->getComponent<BikeController>() == nullptr;
         bool player2Dead = m_pPlayer2Bike->getComponent<BikeController>() == nullptr;
@@ -159,10 +162,10 @@ void GameScene::initScene()
     PlayerCameraControls player2CameraControls{ GLFW_JOYSTICK_2, GLFW_KEY_RIGHT_SHIFT };
 
     m_pPlayer1Bike = Presets::createLightRiderBike("Player1Bike", 0,
-        player1BikeControls, glm::vec3(-190.0f, 1.0f, 0.0f), -glm::pi<float>() * 0.5f);
+        player1BikeControls, m_pChunkManager, glm::vec3(-190.0f, 1.0f, 0.0f), -glm::pi<float>() * 0.5f);
 
     m_pPlayer2Bike = Presets::createLightRiderBike("Player2Bike", 1,
-        player2BikeControls, glm::vec3(190.0f, 1.0f, 0.0f), glm::pi<float>() * 0.5f);
+        player2BikeControls, m_pChunkManager, glm::vec3(190.0f, 1.0f, 0.0f), glm::pi<float>() * 0.5f);
     
     GameObject* pPlayer1CameraObject = GameObject::create("Player1Camera");
     pPlayer1CameraObject->getTransform()->setPosition(GC::introCamera1Position);
@@ -193,4 +196,6 @@ void GameScene::clearScene()
     GameObject::destroy(m_pPlayer2Camera->getGameObject());
     GameObject::destroy(m_pPlayer1Bike);
     GameObject::destroy(m_pPlayer2Bike);
+
+    m_pChunkManager->clearChunks();
 }

@@ -19,6 +19,9 @@ public:
     // Sets the amount that the bike has transitioned into its final form.
     void setTransitionAmount(float transitionAmount) { m_transitionAmount = transitionAmount; }
 
+    // The ID of the player being rendered.
+    int getPlayerId() const { return m_playerId; }
+
     // Renders the bike body.
     virtual void render();
 

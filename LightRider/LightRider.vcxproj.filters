@@ -258,6 +258,8 @@
     <ClCompile Include="src\States\MenuState.cpp" />
     <ClCompile Include="src\Components\GuiButton.cpp" />
     <ClCompile Include="src\Components\RampRenderer.cpp" />
+    <ClCompile Include="src\Components\ChunkManager.cpp" />
+    <ClCompile Include="src\Components\ChunkRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.h" />
@@ -710,6 +712,8 @@
     <ClInclude Include="include\States\MenuState.h" />
     <ClInclude Include="include\Components\GuiButton.h" />
     <ClInclude Include="include\Components\RampRenderer.h" />
+    <ClInclude Include="include\Components\ChunkManager.h" />
+    <ClInclude Include="include\Components\ChunkRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\line_fragment.glsl" />
@@ -744,6 +748,8 @@
     <None Include="resources\ramp_vertex.glsl" />
     <None Include="resources\ramp.mtl" />
     <None Include="resources\ramp.shape" />
+    <None Include="resources\chunk_fragment.glsl" />
+    <None Include="resources\chunk_vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ground_texture.png" />

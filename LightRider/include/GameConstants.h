@@ -81,6 +81,8 @@ namespace GameConstants
     constexpr float bikeDampingTorqueFactor = 50.0f;
     constexpr float bikeJumpImpulse = 2000.0f;
     constexpr float bikeJumpCooldown = 0.5f;
+    constexpr float bikeDamageFactor = 0.01f;
+    constexpr float bikeDeadTransitionAmount = 0.5f;
     constexpr float bikeMinTrailSegmentLength = 2.0f;
     constexpr float bikeTrailTopEdgeOffset = 0.55f;
     constexpr float bikeTrailBottomEdgeOffset = -0.625f;
@@ -88,4 +90,13 @@ namespace GameConstants
     constexpr float bikeDeathAngularDamping = 0.5f;
     constexpr float bikeDeathRestitution = 0.5f;
     constexpr float bikeDeathFriction = 0.6f;
+
+    // FX constants.
+    constexpr int maxChunkCount = 100;
+    constexpr float chunkLifetime = 5.0f;
+    constexpr float damagePerChunk = 0.02f;
+    constexpr float damageChunkScaleFactor = 1.5f;
+    constexpr float minChunkscale = 0.01f;
+    constexpr float maxChunkScale = 0.1f;
+    constexpr float deathChunkSpawnCount = 50;
 }
