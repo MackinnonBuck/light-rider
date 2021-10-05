@@ -202,12 +202,11 @@ void main()
 
         if (noise > transitionAmount)
         {
-            material = 0;
-
             if (mod(vertex_pos_raw.x, GRID_SPACING) < GRID_WIDTH ||
                 mod(vertex_pos_raw.y, GRID_SPACING) < GRID_WIDTH ||
                 mod(vertex_pos_raw.z, GRID_SPACING) < GRID_WIDTH)
             {
+                material = 0;
                 color.rgb = gridColor * GRID_INTENSITY_BASE + (noise - transitionAmount) * GRID_INTENSITY_SCALE;
             }
             else
@@ -220,6 +219,7 @@ void main()
 
         if (noise > transitionAmount - BORDER_SIZE)
         {
+            material = 0;
             color.rgb = gridColor * BORDER_INTENSITY;
             return;
         }
