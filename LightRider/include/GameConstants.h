@@ -64,7 +64,7 @@ namespace GameConstants
     constexpr float bikeWheelRadius = 0.65f;
     constexpr float bikeWheelVerticalOffset = -0.15f;
     constexpr float bikeWheelBodyPadding = 0.1f;
-    constexpr float bikeLockedAccelerationInput = 0.5;
+    constexpr float bikeLockedAccelerationInput = 0.5f;
     constexpr float bikeMaxSpeed = 50.0f;
     constexpr float bikeAccelerationForceFactor = 8.0f;
     constexpr float bikeDecelerationForceFactor = 2.0f;
@@ -91,7 +91,7 @@ namespace GameConstants
     constexpr float bikeDeathAngularDamping = 0.5f;
     constexpr float bikeDeathRestitution = 0.5f;
     constexpr float bikeDeathFriction = 0.6f;
-    constexpr float bikeDismantleTransitionRate = 0.2f;
+    constexpr float bikeDismantleTransitionRate = 0.8f;
 
     // FX constants.
     constexpr int maxChunkCount = 100;
