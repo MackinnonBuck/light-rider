@@ -6,6 +6,7 @@
 #include <BulletCollision/CollisionDispatch/btInternalEdgeUtility.h>
 
 #include "Game.h"
+#include "CollisionObjectInfo.h"
 
 extern ContactAddedCallback gContactAddedCallback;
 
@@ -153,7 +154,8 @@ void Scene::_unregisterCamera(Camera* pCamera)
 
 void Scene::invokeCollisionCallbacks()
 {
-    int numManifolds = m_pDynamicsWorld->getDispatcher()->getNumManifolds();
+    btDispatcher* pDispatcher = m_pDynamicsWorld->getDispatcher();
+    int numManifolds = pDispatcher->getNumManifolds();
 
     for (int i = 0; i < numManifolds; i++)
     {
@@ -167,11 +169,13 @@ void Scene::invokeCollisionCallbacks()
 
         if (pBody1->getUserPointer())
             invokeCollisionHandlerCallback(pContactManifold, pBody1, pBody0, false);
+
+        numManifolds = pDispatcher->getNumManifolds();
     }
 }
 
 void Scene::invokeCollisionHandlerCallback(btPersistentManifold* pContactManifold,
-        btCollisionObject* pBodySelf, btCollisionObject* pBodyOther, bool isBodyA)
+    btCollisionObject* pBodySelf, btCollisionObject* pBodyOther, bool isBodyA)
 {
     int numContacts = pContactManifold->getNumContacts();
 
@@ -186,9 +190,16 @@ void Scene::invokeCollisionHandlerCallback(btPersistentManifold* pContactManifol
             if (!pUserPointer)
                 return;
 
-            ContactHandler* pContactHandler = static_cast<ContactHandler*>(pUserPointer);
-            pContactHandler->handleContact(ContactInfo(contactPoint, isBodyA), pBodySelf, pBodyOther);
+            CollisionObjectInfo* pInfo = static_cast<CollisionObjectInfo*>(pUserPointer);
+            ContactHandler* pContactHandler = pInfo->getContactHandler();
+
+            if (pContactHandler != nullptr)
+            {
+                pContactHandler->handleContact(ContactInfo(contactPoint, isBodyA), pBodySelf, pBodyOther);
+            }
         }
+
+        numContacts = pContactManifold->getNumContacts();
     }
 }
 

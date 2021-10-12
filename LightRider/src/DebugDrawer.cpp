@@ -83,8 +83,8 @@ void DebugDrawer::drawContactPoint(const btVector3& pointOnB, const btVector3& n
 {
     if (distance <= 0.0f)
     {
-		m_pointVertices.push_back(toGlm(pointOnB));
-		m_pointColors.push_back(toGlm(color));
+        m_pointVertices.push_back(toGlm(pointOnB));
+        m_pointColors.push_back(toGlm(color));
     }
 }
 

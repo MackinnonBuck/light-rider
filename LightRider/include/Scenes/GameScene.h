@@ -11,9 +11,19 @@ class GameScene : public LightRiderScene
 public:
 
     // Creates a new GameScene instance.
-    GameScene() : m_gameConfig(Game::getInstance().getConfig()), m_pFreeroamCamera(nullptr), m_pPlayer1Camera(nullptr), m_pPlayer2Camera(nullptr),
-        m_pDeathCamera(nullptr), m_pPlayer1Bike(nullptr), m_pPlayer2Bike(nullptr),
-        m_introTick(0), m_ticksUntilReset(-1) { }
+    GameScene() :
+        m_gameConfig(Game::getInstance().getConfig()),
+        m_pFreeroamCamera(nullptr),
+        m_pPlayer1Camera(nullptr),
+        m_pPlayer2Camera(nullptr),
+        m_pDeathCamera(nullptr),
+        m_pChunkManager(nullptr),
+        m_pPlayer1Bike(nullptr),
+        m_pPlayer2Bike(nullptr),
+        m_introTick(0),
+        m_ticksUntilReset(-1)
+    {
+    }
 
     // Initializes the GameScene.
     virtual void initialize();
@@ -62,4 +72,7 @@ private:
 
     // Clears the scene.
     void clearScene();
+
+    // Returns whether the player associated with the given GameObject is dead.
+    bool isPlayerDead(const GameObject* pPlayerGameObject) const;
 };

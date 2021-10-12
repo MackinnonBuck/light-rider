@@ -260,6 +260,7 @@
     <ClCompile Include="src\Components\RampRenderer.cpp" />
     <ClCompile Include="src\Components\ChunkManager.cpp" />
     <ClCompile Include="src\Components\ChunkRenderer.cpp" />
+    <ClCompile Include="src\StaticCollisionObjectInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.h" />
@@ -714,6 +715,8 @@
     <ClInclude Include="include\Components\RampRenderer.h" />
     <ClInclude Include="include\Components\ChunkManager.h" />
     <ClInclude Include="include\Components\ChunkRenderer.h" />
+    <ClInclude Include="include\CollisionObjectInfo.h" />
+    <ClInclude Include="include\StaticCollisionObjectInfo.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\line_fragment.glsl" />

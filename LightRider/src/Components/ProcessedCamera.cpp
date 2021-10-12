@@ -196,7 +196,25 @@ void ProcessedCamera::renderShadowMap()
         for (auto textureNode : *shaderProgramNode.second)
         {
             for (auto renderable : *textureNode.second)
-                renderable->renderDepth(m_pShadowShader);
+            {
+                if (renderable->usesDetailedShadows())
+                {
+                    auto pShader = shaderProgramNode.first;
+                    m_pShadowShader->unbind();
+
+                    pShader->bind();
+                    glUniformMatrix4fv(pShader->getUniform("P"), 1, GL_FALSE, &getSunPMatrix()[0][0]);
+                    glUniformMatrix4fv(pShader->getUniform("V"), 1, GL_FALSE, &getSunVMatrix()[0][0]);
+                    renderable->render();
+                    pShader->unbind();
+
+                    m_pShadowShader->bind();
+                }
+                else
+                {
+                    renderable->renderDepth(m_pShadowShader);
+                }
+            }
         }
     }
 
@@ -397,11 +415,11 @@ void ProcessedCamera::createFrameBuffers()
 
     glBindTexture(GL_TEXTURE_2D, m_shadowMapDepthBuffer);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec3(1.0)));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec3(1.0)));
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowMapDepthBuffer, 0);
 
     frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <glm/gtc/type_ptr.hpp>
 #include "Components/MeshRenderer.h"
 
 // Renders the bike body.
@@ -10,14 +9,17 @@ class BikeRenderer : public MeshRenderer
 public:
 
     // Creates a new bike renderer, rendering using the specified bike color.
-    BikeRenderer(int playerId) : MeshRenderer("bikeShader", "bikeTexture", "bikeShape"),
+    BikeRenderer(int playerId) : MeshRenderer("bikeShader", "bikeTexture", "bikeShape", false, true),
         m_playerId(playerId),
         m_transitionAmount(0.0)
     {
     }
 
+    // Gets the amount that the bike has transitioned into its final form.
+    float getTransitionAmount() const { return m_transitionAmount; }
+
     // Sets the amount that the bike has transitioned into its final form.
-    void setTransitionAmount(float transitionAmount) { m_transitionAmount = transitionAmount; }
+    void setTransitionAmount(float transitionAmount);
 
     // The ID of the player being rendered.
     int getPlayerId() const { return m_playerId; }

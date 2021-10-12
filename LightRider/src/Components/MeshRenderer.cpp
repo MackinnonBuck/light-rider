@@ -2,9 +2,13 @@
 
 #include "Game.h"
 
-MeshRenderer::MeshRenderer(const std::string& shaderProgramId, const std::string& primaryTextureId,
-    const std::string& shapeId, bool useBlending)
-    : Renderable(shaderProgramId, primaryTextureId, useBlending),
+MeshRenderer::MeshRenderer(
+    const std::string& shaderProgramId,
+    const std::string& primaryTextureId,
+    const std::string& shapeId,
+    bool useBlending,
+    bool useDetailedShadows)
+    : Renderable(shaderProgramId, primaryTextureId, useBlending, useDetailedShadows),
     m_shapeId(shapeId),
     m_localTransform(1.0f),
     m_isCullingEnabled(true),
@@ -34,8 +38,8 @@ void MeshRenderer::render()
 {
     if (m_isCullingEnabled)
     {
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
     }
 
     glm::mat4 globalTransform = getGameObject()->getTransform()->getTransformMatrix() * m_localTransform;
@@ -48,7 +52,7 @@ void MeshRenderer::render()
 
         if (shadowMapTextureId != 0)
         {
-			glActiveTexture(GL_TEXTURE4);
+            glActiveTexture(GL_TEXTURE4);
             glBindTexture(GL_TEXTURE_2D, shadowMapTextureId);
 
             //glUniform3fv(m_pShaderProgram->getUniform("lightPosition"), 1, &pCamera->getSunPosition()[0]);

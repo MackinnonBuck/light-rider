@@ -28,12 +28,12 @@ Camera::Camera(bool enabled, float layerDepth) :
         enable(layerDepth);
 
     const float fov = 40.0f;
-	const float left = -fov;
-	const float right = fov;
-	const float bottom = -fov;
-	const float top = fov;
-	const float zNear = 0.1f;
-	const float zFar = 500.0f;
+    const float left = -fov;
+    const float right = fov;
+    const float bottom = -fov;
+    const float top = fov;
+    const float zNear = 0.1f;
+    const float zFar = 500.0f;
 
     m_sunPMatrix = glm::ortho(left, right, bottom, top, zNear, zFar);
 }

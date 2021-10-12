@@ -4,7 +4,7 @@
 
 #include "Component.h"
 #include "Transform.h"
-#include "ContactHandler.h"
+#include "CollisionObjectInfo.h"
 
 // Encapsulates a btRigidBody, adding Component and Transform capabilities.
 // Usage: addComponent(btRigidBody::btRigidBodyConstructionInfo& constructionInfo)
@@ -23,7 +23,7 @@ public:
     btRigidBody* getRigidBody() const { return m_pRigidBody; }
 
     // Sets the contact handler for this RigidBodyComponent.
-    void setContactHandler(ContactHandler* pContactHandler);
+    void setInfo(CollisionObjectInfo* pInfo);
 
     // Initializes the RigidBodyComponent.
     virtual bool initialize();

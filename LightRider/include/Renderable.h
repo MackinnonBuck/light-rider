@@ -10,7 +10,11 @@ class Renderable : public Component
 public:
 
     // Instantiates a new Renderable instance, adding it to the scene's asset manager render tree.
-    Renderable(const std::string& shaderProgramId, const std::string& imageTextureId, bool useBlending = false);
+    Renderable(
+        const std::string& shaderProgramId,
+        const std::string& imageTextureId,
+        bool useBlending = false,
+        bool useDetailedShadows = false);
 
     // Destroys a Renderable instance, removing it from the scene's asset manager render tree.
     virtual ~Renderable();
@@ -23,6 +27,9 @@ public:
 
     // If true, the renderable uses alpha blending and will be added to the dynamic render tree.
     bool usesBlending() { return m_useBlending; }
+
+    // If true, the renderable uses detailed shadows using its specified shader rather than the depth pass shader.
+    bool usesDetailedShadows() { return m_useDetailedShadows; }
 
     // Renders the Renderable.
     virtual void render() = 0;
@@ -43,4 +50,6 @@ private:
 
     // If true, this renderable uses alpha blending and will be added to the dynamic render tree.
     bool m_useBlending;
+
+    bool m_useDetailedShadows;
 };

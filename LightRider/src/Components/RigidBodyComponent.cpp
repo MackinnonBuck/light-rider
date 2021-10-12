@@ -43,9 +43,9 @@ RigidBodyComponent::~RigidBodyComponent()
     }
 }
 
-void RigidBodyComponent::setContactHandler(ContactHandler* pContactHandler)
+void RigidBodyComponent::setInfo(CollisionObjectInfo* pInfo)
 {
-    m_pRigidBody->setUserPointer(pContactHandler);
+    m_pRigidBody->setUserPointer(pInfo);
 }
 
 bool RigidBodyComponent::initialize()

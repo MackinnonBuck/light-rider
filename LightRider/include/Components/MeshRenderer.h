@@ -11,8 +11,12 @@ class MeshRenderer : public Renderable
 public:
 
     // Creates a new MeshRenderer instance.
-    MeshRenderer(const std::string& shaderProgramId, const std::string& primaryTextureId,
-        const std::string& shapeId, bool useBlending = false);
+    MeshRenderer(
+        const std::string& shaderProgramId,
+        const std::string& primaryTextureId,
+        const std::string& shapeId,
+        bool useBlending = false,
+        bool useDetailedShadows = false);
 
     // Gets the transform of the mesh relative to the parent GameObject.
     glm::mat4& getLocalTransform() { return m_localTransform; }
@@ -64,7 +68,7 @@ private:
     // Whether culling is enabled.
     bool m_isCullingEnabled;
     
-	// Whether forward shadow rendering is being used.
+    // Whether forward shadow rendering is being used.
     bool m_isUsingForwardShadowRendering;
 
     // A custom depth function that can be used to override the default depth function.

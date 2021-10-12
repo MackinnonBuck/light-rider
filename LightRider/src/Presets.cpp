@@ -9,6 +9,7 @@
 #include "Game.h"
 #include "GameConstants.h"
 #include "ConversionUtils.h"
+#include "StaticCollisionObjectInfo.h"
 #include "Components/RigidBodyComponent.h"
 #include "Components/MeshRenderer.h"
 #include "Components/BikeController.h"
@@ -36,6 +37,7 @@ namespace Presets
         btRigidBody::btRigidBodyConstructionInfo groundRbInfo(0, groundMotionState, groundShape, groundLocalInertia);
 
         RigidBodyComponent* pGroundComponent = pGroundObject->addComponent<RigidBodyComponent>(groundRbInfo);
+        pGroundComponent->setInfo(&StaticCollisionObjectInfo::getGroundInfo());
         btRigidBody* pGroundRigidBody = pGroundComponent->getRigidBody();
         pGroundRigidBody->setFriction(1.0f);
         pGroundRigidBody->setRestitution(1.0f);
@@ -80,9 +82,9 @@ namespace Presets
         btTriangleInfoMap* infoMap = new btTriangleInfoMap();
         btGenerateInternalEdgeInfo(rampShape, infoMap);
 
-		btTransform rampTransform;
-		rampTransform.setIdentity();
-		rampTransform.setOrigin(toBullet(position + glm::vec3(0.0f, 2.4f, 0.0f)));
+        btTransform rampTransform;
+        rampTransform.setIdentity();
+        rampTransform.setOrigin(toBullet(position + glm::vec3(0.0f, 2.4f, 0.0f)));
         rampTransform.setRotation(toBullet(glm::eulerAngleY(rotation)));
 
         btVector3 rampLocalInertia(0.0f, 0.0f, 0.0f);
@@ -91,6 +93,7 @@ namespace Presets
         btRigidBody::btRigidBodyConstructionInfo rampRbInfo(0, rampMotionState, rampShape, rampLocalInertia);
 
         RigidBodyComponent* pRampRigidBodyComponent = pRampObject->addComponent<RigidBodyComponent>(rampRbInfo);
+        pRampRigidBodyComponent->setInfo(&StaticCollisionObjectInfo::getRampInfo());
         btRigidBody* pRampRigidBody = pRampRigidBodyComponent->getRigidBody();
         pRampRigidBody->setFriction(0.0f);
         pRampRigidBody->setRestitution(0.0f);
@@ -131,9 +134,6 @@ namespace Presets
         btDefaultMotionState* pMotionState = new btDefaultMotionState(bikeTransform);
         btRigidBody::btRigidBodyConstructionInfo rbInfo(btScalar(GC::bikeMass), pMotionState, pCompoundShape, localIntertia);
 
-        pBikeObject->addComponent<RigidBodyComponent>(rbInfo);
-        pBikeObject->addComponent<BikeController>(bikeControls, pChunkManager);
-
         BikeRenderer* pBikeRenderer = pBikeObject->addComponent<BikeRenderer>(playerId);
         pBikeRenderer->setLocalTransform(
             glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, GC::bikeShapeVerticalOffset, 0.0f)) *
@@ -141,6 +141,9 @@ namespace Presets
             glm::rotate(glm::mat4(1.0f), glm::pi<float>() * 0.5f, glm::vec3(0.0f, 0.0f, 1.0f)) *
             glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f))
         );
+
+        pBikeObject->addComponent<RigidBodyComponent>(rbInfo);
+        pBikeObject->addComponent<BikeController>(bikeControls, pChunkManager);
 
         return pBikeObject;
     }

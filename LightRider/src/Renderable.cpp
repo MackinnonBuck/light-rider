@@ -2,8 +2,11 @@
 
 #include "Game.h"
 
-Renderable::Renderable(const std::string& shaderProgramId, const std::string& primaryTextureId, bool useBlending) :
-    m_shaderProgramId(shaderProgramId), m_imageTextureId(primaryTextureId), m_useBlending(useBlending)
+Renderable::Renderable(const std::string& shaderProgramId, const std::string& primaryTextureId, bool useBlending, bool useDetailedShadows) :
+    m_shaderProgramId(shaderProgramId),
+    m_imageTextureId(primaryTextureId),
+    m_useBlending(useBlending),
+    m_useDetailedShadows(useDetailedShadows)
 {
     Game::getInstance().getScene()->getAssetManager()->_registerRenderable(this);
 }

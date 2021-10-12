@@ -107,8 +107,8 @@ void GameScene::physicsTick(float physicsTimeStep)
     }
     else if (m_ticksUntilReset == -1)
     {
-        bool player1Dead = m_pPlayer1Bike->getComponent<BikeController>() == nullptr;
-        bool player2Dead = m_pPlayer2Bike->getComponent<BikeController>() == nullptr;
+        bool player1Dead = isPlayerDead(m_pPlayer1Bike);
+        bool player2Dead = isPlayerDead(m_pPlayer2Bike);
 
         if (player1Dead || player2Dead)
         {
@@ -127,23 +127,13 @@ void GameScene::physicsTick(float physicsTimeStep)
         clearScene();
         initScene();
     }
-    else
-    {
-        float transitionAmount = GC::bikeDeadTransitionAmount * ((float)m_ticksUntilReset / GC::deathSequenceTicks);
+}
 
-        bool player1Dead = m_pPlayer1Bike->getComponent<BikeController>() == nullptr;
-        bool player2Dead = m_pPlayer2Bike->getComponent<BikeController>() == nullptr;
-
-        if (player1Dead)
-        {
-            m_pPlayer1Bike->getComponent<BikeRenderer>()->setTransitionAmount(transitionAmount);
-        }
-
-        if (player2Dead)
-        {
-            m_pPlayer2Bike->getComponent<BikeRenderer>()->setTransitionAmount(transitionAmount);
-        }
-    }
+bool GameScene::isPlayerDead(const GameObject* pPlayerGameObject) const
+{
+    BikeController* pBikeController = pPlayerGameObject->getComponent<BikeController>();
+    assert(pBikeController != nullptr);
+    return pBikeController->isDead();
 }
 
 void GameScene::initScene()

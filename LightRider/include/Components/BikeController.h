@@ -3,6 +3,7 @@
 #include "Component.h"
 #include "DebugDrawer.h"
 #include "ContactHandler.h"
+#include "Components/BikeRenderer.h"
 #include "Components/RigidBodyComponent.h"
 #include "Components/ChunkManager.h"
 #include "Game.h"
@@ -55,7 +56,9 @@ public:
         m_pChunkManager(pChunkManager),
         m_controlMode(BikeControlMode::LOCKED),
         m_pJoystick(Game::getInstance().getJoystick(bikeControls.joystickId)),
+        m_pBikeRenderer(nullptr),
         m_pRigidBodyComponent(nullptr),
+        m_pInfo(nullptr),
         m_localFrontWheelContactPoint(0.0f, 0.0f, 0.0f),
         m_localRearWheelContactPoint(0.0f, 0.0f, 0.0f),
         m_frontWheelGroundNormal(0.0f, 0.0f, 0.0f),
@@ -63,7 +66,8 @@ public:
         m_frontWheelAngle(0.0f),
         m_jumpTimer(0.0f),
         m_lastVelocity(0.0f, 0.0f, 0.0f),
-        m_health(1.0f)
+        m_health(1.0f),
+        m_isDead(false)
     {
     }
 
@@ -72,6 +76,9 @@ public:
 
     // Sets the control mode for this bike controller.
     void setControlMode(BikeControlMode controlMode) { m_controlMode = controlMode; }
+
+    // Returns whether the player is dead.
+    bool isDead() const { return m_isDead; }
 
     // Destroys the BikeController instance.
     virtual ~BikeController();
@@ -85,6 +92,9 @@ public:
 
     // Called just before the physics simulation is advanced.
     virtual void prePhysicsTick(float physicsTimeStep);
+
+    // Updates the bike controller.
+    virtual void update(float deltaTime);
 
     // Handles bike collisions.
     virtual void handleContact(const ContactInfo& contactInfo, btCollisionObject* pBodySelf, btCollisionObject* pBodyOther);
@@ -103,8 +113,14 @@ private:
     // The joystick controlling this bike controller.
     Joystick* m_pJoystick; 
 
+    // The sibling BikeRenderer;
+    BikeRenderer* m_pBikeRenderer;
+
     // The sibling RigidBodyComponent.
     RigidBodyComponent* m_pRigidBodyComponent;
+
+    // The collision object info associated with the rigid body.
+    CollisionObjectInfo* m_pInfo;
 
     // The best-determined front wheel contact point.
     glm::vec3 m_localFrontWheelContactPoint;
@@ -129,6 +145,15 @@ private:
 
     // The current health of the bike.
     float m_health;
+
+    // Whether the player is "dead".
+    bool m_isDead;
+
+    // Handles a contact when the player is alive.
+    void handleAliveContact(const ContactInfo& contactInfo, btCollisionObject* pBodySelf, btCollisionObject* pBodyOther);
+
+    // Handles a contact when the player is dead.
+    void handleDeadContact(const ContactInfo& contactInfo, btCollisionObject* pBodySelf, btCollisionObject* pBodyOther);
 
     // Updates driving physics for the bike.
     void updateDrivingPhysics();
