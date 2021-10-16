@@ -11,9 +11,16 @@ class FreeroamCamera : public ProcessedCamera
 public:
 
     // Creates a new FreeroamCamera instance.
-    FreeroamCamera(bool enabled = true, float layerDepth = 0.0f) : ProcessedCamera(enabled, layerDepth),
-        m_eulerAngles(0.0f, 0.0f, 0.0f), m_isMoving(false),
-        m_initialCursorX(0.0f), m_initialCursorY(0.0f) { }
+    FreeroamCamera(bool enabled = true, float layerDepth = 0.0f) :
+        ProcessedCamera(enabled, layerDepth),
+        m_eulerAngles(0.0f, 0.0f, 0.0f),
+        m_isMoving(false),
+        m_initialCursorX(0.0f),
+        m_initialCursorY(0.0f),
+        m_lastCursorX(0.0f),
+        m_lastCursorY(0.0f)
+    {
+    }
 
     // Destroys the FreeroamCamera, removing it from the scene.
     virtual ~FreeroamCamera() { }
@@ -35,5 +42,11 @@ private:
 
     // The cursor Y position when the user starts moving the camera.
     float m_initialCursorY;
+
+    // The last known X position of the cursor.
+    float m_lastCursorX;
+
+    // The last known y position of the cursor.
+    float m_lastCursorY;
 };
 

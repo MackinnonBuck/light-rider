@@ -32,6 +32,35 @@ namespace GameConstants
     constexpr float cameraFovVelocityScale = 0.005f;
     constexpr float cameraFovAdjustmentSpeed = 10.0f;
 
+    // Tone mapping constants.
+
+    /*
+     * Offsets the luminance just before it's used to calculate the exposure.
+     * When adjusting this value, it's good to keep in mind LUMINANCE_BASE_OFFSET
+     * in the luminance calculation compute shader. Increasing the shader constant
+     * decreases the overall impact of darker objects on the final exposure. This
+     * constant here can be thought of as a way to offset the shader-reported luminance
+     * back to a normal value.
+     */
+    constexpr float luminanceBaseOffset = -0.2f;
+
+    /*
+     * The absolute minimum value for luminance.
+     * This is useful to avoid situations where the luminance is so low that the scene becomes
+     * noisy or "deep fried".
+     */
+    constexpr float minLuminance = 0.1f;
+
+    /*
+     * Controls the overall exposure level in the scene.
+     */
+    constexpr float exposureMultiplier = 0.25f;
+
+    /*
+     * The rate at which the camera's current exposure adjusts to the target exposure.
+     */
+    constexpr float exposureAdjustmentRate = 1.5f;
+
     // Intro sequence constants.
     constexpr int introLightTrailFrame = 80;
     constexpr int introCameraFocusFrame = 120;

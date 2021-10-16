@@ -18,14 +18,14 @@ void FreeroamCamera::postUpdate(float deltaTime)
     bool leftButtonDown = game.isMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT);
     bool rightButtonDown = game.isMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT);
 
-    float centerX = (float)(game.getWindowWidth() / 2);
-    float centerY = (float)(game.getWindowHeight() / 2);
-
     float cursorX = game.getCursorX();
     float cursorY = game.getCursorY();
 
-    float dX = cursorX - centerX;
-    float dY = cursorY - centerY;
+    float dX = cursorX - m_lastCursorX;
+    float dY = cursorY - m_lastCursorY;
+
+    m_lastCursorX = cursorX;
+    m_lastCursorY = cursorY;
 
     if (leftButtonDown || rightButtonDown)
     {
@@ -35,7 +35,7 @@ void FreeroamCamera::postUpdate(float deltaTime)
             m_initialCursorX = cursorX;
             m_initialCursorY = cursorY;
 
-            glfwSetInputMode(game.getWindowHandle(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+            glfwSetInputMode(game.getWindowHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
         else
         {
@@ -62,15 +62,13 @@ void FreeroamCamera::postUpdate(float deltaTime)
                 getTransform()->setRotation(glm::quat(m_eulerAngles));
             }
         }
-
-        glfwSetCursorPos(game.getWindowHandle(), centerX, centerY);
     }
     else if (m_isMoving)
     {
         m_isMoving = false;
 
-        glfwSetCursorPos(game.getWindowHandle(), m_initialCursorX, m_initialCursorY);
         glfwSetInputMode(game.getWindowHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetCursorPos(game.getWindowHandle(), m_initialCursorX, m_initialCursorY);
     }
 
     Camera::postUpdate(deltaTime);

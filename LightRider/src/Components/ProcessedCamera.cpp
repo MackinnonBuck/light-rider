@@ -4,6 +4,9 @@
 
 #include "Game.h"
 #include "GLSL.h"
+#include "GameConstants.h"
+
+namespace GC = GameConstants;
 
 constexpr int SHADOW_MAP_WIDTH = 8192;
 constexpr int SHADOW_MAP_HEIGHT = 8192;
@@ -145,7 +148,7 @@ void ProcessedCamera::getViewport(int& x, int& y, int& width, int& height)
 
 void ProcessedCamera::update(float deltaTime)
 {
-    m_currentExposure += (m_targetExposure - m_currentExposure) * deltaTime * 2.0f;
+    m_currentExposure += (m_targetExposure - m_currentExposure) * deltaTime * GC::exposureAdjustmentRate;
 }
 
 void ProcessedCamera::preRender()
@@ -300,11 +303,11 @@ void ProcessedCamera::postRender()
 
     m_pLuminanceComputeShader->unbind();
 
-    // TODO: Be a little bit smarter about this.
     float luminance = result.x / (m_bufferWidth * m_bufferHeight);
+    luminance += GC::luminanceBaseOffset;
+    luminance = glm::max(GC::minLuminance, luminance);
     m_targetExposure = 1.0f / luminance;
-    m_targetExposure *= 0.1f;
-    m_targetExposure = glm::clamp(m_targetExposure, 0.5f, 2.0f);
+    m_targetExposure *= GC::exposureMultiplier;
 
     glBindVertexArray(m_quadVertexArrayObject);
 
