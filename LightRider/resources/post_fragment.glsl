@@ -3,21 +3,27 @@ out vec4 color;
 in vec2 vertex_tex;
 
 uniform sampler2D screenTexture;
+uniform float exposure;
+
+float getLuminance(vec3 color)
+{
+    return 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;
+}
 
 void main()
 {             
     color.rgb = texture(screenTexture, vertex_tex).rgb;
     color.a = 1.0;
 
-    float brightness = (color.r + color.g + color.b) * 0.33333;
-
-    if (brightness < 1.0)
+    vec3 toneMapped = vec3(1.0) - exp(-color.rgb * exposure);
+    float luminance = getLuminance(toneMapped);
+    float threshold = 1 - exposure;
+    if (luminance < threshold)
     {
-        color = vec4(0.0, 0.0, 0.0, 1.0);
+        color.rgb = vec3(0.0, 0.0, 0.0);
     }
     else
     {
-        color.rgb = normalize(color.rgb);
-        color.rgb += color.rgb * (brightness - 1);
+        color.rgb = color.rgb * ((luminance - threshold) / (1 - threshold));
     }
 }

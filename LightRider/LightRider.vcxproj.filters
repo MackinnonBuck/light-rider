@@ -261,6 +261,7 @@
     <ClCompile Include="src\Components\ChunkManager.cpp" />
     <ClCompile Include="src\Components\ChunkRenderer.cpp" />
     <ClCompile Include="src\StaticCollisionObjectInfo.cpp" />
+    <ClCompile Include="src\ComputeProgram.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.h" />
@@ -717,6 +718,7 @@
     <ClInclude Include="include\Components\ChunkRenderer.h" />
     <ClInclude Include="include\CollisionObjectInfo.h" />
     <ClInclude Include="include\StaticCollisionObjectInfo.h" />
+    <ClInclude Include="include\ComputeProgram.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\line_fragment.glsl" />
@@ -753,6 +755,7 @@
     <None Include="resources\ramp.shape" />
     <None Include="resources\chunk_fragment.glsl" />
     <None Include="resources\chunk_vertex.glsl" />
+    <None Include="resources\luminance_compute.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ground_texture.png" />

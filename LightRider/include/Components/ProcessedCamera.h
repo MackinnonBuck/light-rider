@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Program.h"
+#include "ComputeProgram.h"
 #include "Camera.h"
 
 // Extends the Camera component, integrating post processing.
@@ -28,6 +29,8 @@ public:
     
     // Gets the shadow map texture ID.
     virtual GLuint getShadowMapTextureId() const { return m_shadowMapDepthBuffer; }
+
+    virtual void update(float deltaTime);
 
 protected:
 
@@ -60,6 +63,9 @@ private:
     // The shader that combines the blur with the scene's first pass to create a 
     // "bloom" effect.
     Program* m_pBloomShader;
+
+    // The compute shader used to determine the overall luminance of the scene.
+    ComputeProgram* m_pLuminanceComputeShader;
 
     // The frame buffer that the scene gets rendered to.
     GLuint m_primaryFrameBuffer;
@@ -142,6 +148,12 @@ private:
 
     // The size ratio of the camera to screen size.
     glm::vec2 m_sizeRatio;
+
+    // The current exposure level.
+    float m_currentExposure;
+
+    // The target exposure level.
+    float m_targetExposure;
 
     // Creates a new frame buffer, freeing the old one if it exists.
     void createFrameBuffers();

@@ -1,6 +1,9 @@
 #include "Components/ProcessedCamera.h"
 
+#include <string>
+
 #include "Game.h"
+#include "GLSL.h"
 
 constexpr int SHADOW_MAP_WIDTH = 8192;
 constexpr int SHADOW_MAP_HEIGHT = 8192;
@@ -30,7 +33,9 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     m_hdrFrameBuffer(0),
     m_hdrColorBuffer(0),
     m_pingPongFrameBuffers{0, 0},
-    m_pingPongColorBuffers{0, 0}
+    m_pingPongColorBuffers{0, 0},
+    m_currentExposure(1.0f),
+    m_targetExposure(1.0f)
 {
     AssetManager* pAssets = Game::getInstance().getScene()->getAssetManager();
 
@@ -40,6 +45,7 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     m_pFxaaShader = pAssets->getShaderProgram("fxaaShader");
     m_pBlurShader = pAssets->getShaderProgram("blurShader");
     m_pBloomShader = pAssets->getShaderProgram("bloomShader");
+    m_pLuminanceComputeShader = pAssets->getComputeShaderProgram("luminanceCompute");
 
     m_pDeferredShader->bind();
     glUniform1i(m_pDeferredShader->getUniform("gColor"), 0);
@@ -135,6 +141,11 @@ void ProcessedCamera::getViewport(int& x, int& y, int& width, int& height)
     x = y = 0;
     width = m_bufferWidth;
     height = m_bufferHeight;
+}
+
+void ProcessedCamera::update(float deltaTime)
+{
+    m_currentExposure += (m_targetExposure - m_currentExposure) * deltaTime * 2.0f;
 }
 
 void ProcessedCamera::preRender()
@@ -259,31 +270,41 @@ void ProcessedCamera::postRender()
 
     m_pDeferredShader->unbind();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fxaaFrameBuffer);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    m_pFxaaShader->bind();
-
-    glUniform1f(m_pFxaaShader->getUniform("screenWidth"), (float)m_bufferWidth);
-    glUniform1f(m_pFxaaShader->getUniform("screenHeight"), (float)m_bufferHeight);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_deferredColorBuffer);
-
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    m_pFxaaShader->unbind();
-
     glBindFramebuffer(GL_READ_FRAMEBUFFER, m_primaryFrameBuffer);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fxaaFrameBuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_deferredFrameBuffer);
     glBlitFramebuffer(0, 0, m_bufferWidth, m_bufferHeight, 0, 0, m_bufferWidth, m_bufferHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fxaaFrameBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFrameBuffer);
 
     glBindVertexArray(0);
 
     glEnable(GL_BLEND);
+    // TODO: We'll want to populate the position buffer, etc. with blended object information.
+    // This will be necessary for effects like SSR.
     renderBlendedRenderables();
     glDisable(GL_BLEND);
+
+    m_pLuminanceComputeShader->bind();
+    GLuint resultBuffer = m_pLuminanceComputeShader->getBuffer("result");
+    GLuint colorImage = m_pLuminanceComputeShader->getUniform("colorImage");
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, resultBuffer);
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(glm::vec4), glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)));
+    glBindImageTexture(0, m_deferredColorBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA16F);
+    glDispatchCompute(m_bufferWidth, m_bufferHeight, 1);
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+    glm::vec4 result;
+    glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(glm::vec4), &result);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+    glUseProgram(0);
+
+    m_pLuminanceComputeShader->unbind();
+
+    // TODO: Be a little bit smarter about this.
+    float luminance = result.x / (m_bufferWidth * m_bufferHeight);
+    m_targetExposure = 1.0f / luminance;
+    m_targetExposure *= 0.1f;
+    m_targetExposure = glm::clamp(m_targetExposure, 0.5f, 2.0f);
 
     glBindVertexArray(m_quadVertexArrayObject);
 
@@ -291,9 +312,10 @@ void ProcessedCamera::postRender()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_pPostShader->bind();
+    glUniform1f(m_pPostShader->getUniform("exposure"), m_currentExposure);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_fxaaColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, m_deferredColorBuffer);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     m_pPostShader->unbind();
@@ -321,6 +343,20 @@ void ProcessedCamera::postRender()
 
     m_pBlurShader->unbind();
 
+    glBindFramebuffer(GL_FRAMEBUFFER, m_fxaaFrameBuffer);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    m_pBloomShader->bind();
+    glUniform1f(m_pBloomShader->getUniform("exposure"), m_currentExposure);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_deferredColorBuffer);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_pingPongColorBuffers[!horizontal]);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    m_pBloomShader->unbind();
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     int x = (int)(m_defaultBufferWidth * m_offsetRatio.x);
@@ -328,18 +364,19 @@ void ProcessedCamera::postRender()
 
     glViewport(x, y, m_bufferWidth, m_bufferHeight);
 
-    m_pBloomShader->bind();
+    m_pFxaaShader->bind();
+
+    glUniform1f(m_pFxaaShader->getUniform("screenWidth"), (float)m_bufferWidth);
+    glUniform1f(m_pFxaaShader->getUniform("screenHeight"), (float)m_bufferHeight);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_fxaaColorBuffer);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, m_pingPongColorBuffers[!horizontal]);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    glBindVertexArray(0);
+    m_pFxaaShader->unbind();
 
-    m_pBloomShader->unbind();
+    glBindVertexArray(0);
 }
 
 void ProcessedCamera::createFrameBuffers()
@@ -436,12 +473,18 @@ void ProcessedCamera::createFrameBuffers()
     glGenTextures(1, &m_deferredColorBuffer);
 
     glBindTexture(GL_TEXTURE_2D, m_deferredColorBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_bufferWidth, m_bufferHeight, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_bufferWidth, m_bufferHeight, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_deferredColorBuffer, 0);
+
+    glGenRenderbuffers(1, &m_blendedDepthRenderBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_blendedDepthRenderBuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_bufferWidth, m_bufferHeight);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_blendedDepthRenderBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
@@ -463,12 +506,6 @@ void ProcessedCamera::createFrameBuffers()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fxaaColorBuffer, 0);
-
-    glGenRenderbuffers(1, &m_blendedDepthRenderBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, m_blendedDepthRenderBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_bufferWidth, m_bufferHeight);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_blendedDepthRenderBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 

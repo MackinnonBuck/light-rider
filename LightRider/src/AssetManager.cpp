@@ -29,8 +29,29 @@ AssetManager::AssetManager() :
 AssetManager::~AssetManager()
 {
     m_renderTree.clear();
+
+    for (auto& pair : m_shaderPrograms)
+    {
+        delete pair.second;
+    }
     m_shaderPrograms.clear();
+
+    for (auto& pair : m_computeShaderPrograms)
+    {
+        delete pair.second;
+    }
+    m_computeShaderPrograms.clear();
+
+    for (auto& pair : m_textures)
+    {
+        delete pair.second;
+    }
     m_textures.clear();
+
+    for (auto& pair : m_shapes)
+    {
+        delete pair.second;
+    }
     m_shapes.clear();
 }
 
@@ -89,6 +110,21 @@ Program* AssetManager::loadShaderProgram(const std::string& id, const std::strin
     }
 
     m_shaderPrograms[id] = pProgram;
+
+    return pProgram;
+}
+
+ComputeProgram* AssetManager::loadComputeShaderProgram(const std::string& id, const std::string& fileName)
+{
+    if (id.empty())
+    {
+        std::cout << "Cannot create a shader with an empty ID!" << std::endl;
+        return nullptr;
+    }
+
+    ComputeProgram* pProgram = ComputeProgram::create(m_gameConfig.resourceDirectory + fileName);
+
+    m_computeShaderPrograms[id] = pProgram;
 
     return pProgram;
 }

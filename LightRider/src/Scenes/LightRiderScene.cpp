@@ -1,4 +1,5 @@
 #include "Scenes/LightRiderScene.h"
+#include "ComputeProgram.h"
 
 void LightRiderScene::loadAssets()
 {
@@ -75,6 +76,7 @@ void LightRiderScene::loadAssets()
 
     Program* pPostShader = pAssets->loadShaderProgram("postShader", "post_vertex.glsl", "post_fragment.glsl", ShaderUniform::NONE);
     pPostShader->addUniform("screenTexture");
+    pPostShader->addUniform("exposure");
 
     Program* pFxaaShader = pAssets->loadShaderProgram("fxaaShader", "fxaa_vertex.glsl", "fxaa_fragment.glsl", ShaderUniform::NONE);
     pFxaaShader->addUniform("screenTexture");
@@ -90,6 +92,10 @@ void LightRiderScene::loadAssets()
     pBloomShader->addUniform("blurTexture");
     pBloomShader->addUniform("bloom");
     pBloomShader->addUniform("exposure");
+
+    ComputeProgram* pLuminanceProgram = pAssets->loadComputeShaderProgram("luminanceCompute", "luminance_compute.glsl");
+    pLuminanceProgram->addBuffer("result", sizeof(glm::vec4));
+    pLuminanceProgram->addUniform("colorImage");
 
     pAssets->loadShape("sphereShape", "sphere.shape");
     pAssets->loadShape("planeShape", "plane.shape");

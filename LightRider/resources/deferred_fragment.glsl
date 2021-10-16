@@ -114,7 +114,7 @@ void main()
     if (materialId == 3)
     {
         // Bike headlights
-        fragColor.rgb = vec3(20);
+        fragColor.rgb = vec3(10);
         return;
     }
 

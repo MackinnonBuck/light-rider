@@ -15,7 +15,10 @@ void main()
     vec3 bloomColor = texture(blurTexture, vertex_tex).rgb;
 
     if (bloom)
-        hdrColor += bloomColor;
+    {
+        hdrColor += bloomColor * exposure;
+        //hdrColor = bloomColor; // Uncomment to show only bloom.
+    }
 
     vec3 result = vec3(1.0) - exp(-hdrColor * exposure);
     result = pow(result, vec3(1.0 / gamma));

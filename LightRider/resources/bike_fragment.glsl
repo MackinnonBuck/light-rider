@@ -225,17 +225,17 @@ void main()
         }
     }
 
-    if (color.r < 0.1) // Bike body
+    if (color.r < 0.9) // Bike body
     {
         material = 4;
         color.rgb = vec3(0, 0, 0);
     }
-    else if (color.g < 0.1) // Bike rider
+    else if (color.g < 0.9) // Bike rider
     {
         material = 5;
         color.rgb = vec3(0, 0, 0);
     }
-    else if (color.b < 0.1) // Bike headlights
+    else if (color.b < 0.9) // Bike headlights
     {
         material = 3;
         color.rgb = vec3(0, 0, 0);

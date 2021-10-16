@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "Renderable.h"
 #include "Program.h"
+#include "ComputeProgram.h"
 #include "Shape.h"
 #include "Texture.h"
 
@@ -61,6 +62,9 @@ public:
     Program* loadShaderProgram(const std::string& id, const std::string& vertexShaderFileName,
         const std::string& fragmentShaderFileName, ShaderUniform defaultUniforms = ShaderUniform::DEFAULT);
 
+    // Loads a compute shader program from the given file name.
+    ComputeProgram* loadComputeShaderProgram(const std::string& id, const std::string& fileName);
+
     // Loads a texture from the given texture file name. The TextureType is meant to indicate how the
     // texture will be used.
     Texture* loadTexture(const std::string& id, const std::string& fileName, TextureType textureType);
@@ -70,6 +74,9 @@ public:
 
     // Returns a loaded shader program by ID.
     Program* getShaderProgram(const std::string& id) const { return m_shaderPrograms.at(id); }
+
+    // Returns a loaded compute shader program by ID.
+    ComputeProgram* getComputeShaderProgram(const std::string& id) const { return m_computeShaderPrograms.at(id); }
 
     // Returns a loaded texture by ID.
     Texture* getTexture(const std::string& id) const { return m_textures.at(id); }
@@ -96,6 +103,9 @@ private:
 
     // Maps shader program IDs to loaded shader programs.
     std::map<std::string, Program*> m_shaderPrograms;
+
+    // Maps compute shader program IDs to loaded compute shader programs.
+    std::map<std::string, ComputeProgram*> m_computeShaderPrograms;
 
     // Maps texture IDs to loaded textures.
     std::map<std::string, Texture*> m_textures;
