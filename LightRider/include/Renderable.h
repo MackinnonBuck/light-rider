@@ -20,10 +20,13 @@ public:
     virtual ~Renderable();
 
     // Gets the ID of the shader program used.
-    std::string& getShaderProgramId() { return m_shaderProgramId; }
+    const std::string& getShaderProgramId() const { return m_shaderProgramId; }
 
-    // Gets the ID of the texture used.
-    std::string& getImageTextureId() { return m_imageTextureId; }
+    // Gets the ID of the image texture used.
+    const std::string& getImageTextureId() const { return m_imageTextureId; }
+
+    // Gets the ID of the normal texture used.
+    virtual const std::string& getNormalTextureId() const { return ""; }
 
     // If true, the renderable uses alpha blending and will be added to the dynamic render tree.
     bool usesBlending() { return m_useBlending; }

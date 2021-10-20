@@ -8,6 +8,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+class AssetManager;
+
 // Used for rendering the scene.
 // Usage: addComponent(bool enabled = true, float layerDepth = 0.0f)
 class Camera : public Component
@@ -157,6 +159,9 @@ private:
     // Sets up the given shader program for use.
     void setUpShaderProgram(Program* pShaderProgram);
 
-    // Sets up the given image texture for use.
-    void setUpImageTexture(Texture* pTexture);
+    // Finds and sets up a texture for use.
+    void findAndSetUpTexture(AssetManager* pAssets, TextureType type, const std::string& textureId);
+
+    // Sets up the given texture for use.
+    void setUpTexture(TextureType type, Texture* pTexture);
 };

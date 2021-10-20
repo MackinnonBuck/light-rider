@@ -61,7 +61,7 @@ vec3 sunDirection = normalize(vec3(1.0f, -0.5f, -1.0f));
 vec3 getDiffuseFromLight(vec3 fragPosition, vec3 normal, vec3 lightDir)
 {
     vec3 lightColor = vec3(1.0);
-    float light = dot(lightDir, normal);	
+    float light = dot(lightDir, normal);
     return clamp(light, 0.0f, 1.0f) * lightColor;
 }
 
@@ -152,6 +152,19 @@ void main()
         for (int i = 0; i < 4; i++)
             fragColor.rgb += vec3(getSpecFromLight(fragPosition, n, lightPositions[i], 80) * 0.5) * lightFactor;
 
+        return;
+    }
+
+    if (materialId == 7)
+    {
+        // Container
+        vec3 specColor = vec3(0);
+
+        for (int i = 0; i < 4; i++)
+            specColor += vec3(getSpecFromLight(fragPosition, n, lightPositions[i], 20) * 2) * lightFactor;
+
+        vec3 diffuseColor = getDiffuseFromLight(fragPosition, n, sunDirection);
+        fragColor.rgb = (fragColor.rgb + specColor) * diffuseColor + fragColor.rgb * 0.1;
         return;
     }
     

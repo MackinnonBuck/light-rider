@@ -262,6 +262,7 @@
     <ClCompile Include="src\Components\ChunkRenderer.cpp" />
     <ClCompile Include="src\StaticCollisionObjectInfo.cpp" />
     <ClCompile Include="src\ComputeProgram.cpp" />
+    <ClCompile Include="src\ContainerGroupBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.h" />
@@ -719,6 +720,7 @@
     <ClInclude Include="include\CollisionObjectInfo.h" />
     <ClInclude Include="include\StaticCollisionObjectInfo.h" />
     <ClInclude Include="include\ComputeProgram.h" />
+    <ClInclude Include="include\ContainerGroupBuilder.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\line_fragment.glsl" />
@@ -756,6 +758,9 @@
     <None Include="resources\chunk_fragment.glsl" />
     <None Include="resources\chunk_vertex.glsl" />
     <None Include="resources\luminance_compute.glsl" />
+    <None Include="resources\container.shape" />
+    <None Include="resources\container_fragment.glsl" />
+    <None Include="resources\container_vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ground_texture.png" />
@@ -766,5 +771,7 @@
     <Image Include="resources\play.png" />
     <Image Include="resources\exit.png" />
     <Image Include="resources\settings.png" />
+    <Image Include="resources\container_color_texture.png" />
+    <Image Include="resources\container_normal_texture.png" />
   </ItemGroup>
 </Project>

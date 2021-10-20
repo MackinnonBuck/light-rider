@@ -93,7 +93,7 @@ namespace Presets
         btRigidBody::btRigidBodyConstructionInfo rampRbInfo(0, rampMotionState, rampShape, rampLocalInertia);
 
         RigidBodyComponent* pRampRigidBodyComponent = pRampObject->addComponent<RigidBodyComponent>(rampRbInfo);
-        pRampRigidBodyComponent->setInfo(&StaticCollisionObjectInfo::getRampInfo());
+        pRampRigidBodyComponent->setInfo(&StaticCollisionObjectInfo::getGroundInfo());
         btRigidBody* pRampRigidBody = pRampRigidBodyComponent->getRigidBody();
         pRampRigidBody->setFriction(0.0f);
         pRampRigidBody->setRestitution(0.0f);

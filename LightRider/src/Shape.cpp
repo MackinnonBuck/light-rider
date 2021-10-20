@@ -255,8 +255,16 @@ void Shape::draw(const Program* prog) const
         //	glActiveTexture(GL_TEXTURE0);
         //	glBindTexture(GL_TEXTURE_2D, textureIDs[textureindex]);
         //}
+
         // Draw
-        glDrawElements(GL_TRIANGLES, (int)eleBuf[i].size(), GL_UNSIGNED_INT, (const void *)0);
+        if (usesInstancing())
+        {
+            drawInstanced(i, prog);
+        }
+        else
+        {
+            glDrawElements(GL_TRIANGLES, (int)eleBuf[i].size(), GL_UNSIGNED_INT, (const void *)0);
+        }
 
         // Disable and unbind
         if (h_tex != -1)
@@ -271,6 +279,40 @@ void Shape::draw(const Program* prog) const
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
+}
+
+void Shape::drawInstanced(int shapeId, const Program* prog) const
+{
+    if (instancedPrograms.find(prog->getPid()) == instancedPrograms.end())
+    {
+        GLuint pid = prog->getPid();
+        GLint instanceDataLocation = glGetAttribLocation(pid, "instanceData");
+
+        if (instanceDataLocation < 0)
+        {
+            std::cerr << "Missing 'instanceData' attribute." << std::endl;
+            return;
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, instanceBufID[shapeId]);
+        glVertexAttribPointer(
+            instanceDataLocation,
+            instanceElementComponentCount,
+            instanceElementType,
+            GL_FALSE,
+            instanceElementSize,
+            nullptr);
+
+        glEnableVertexAttribArray(instanceDataLocation);
+        glVertexAttribDivisor(instanceDataLocation, 1);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        glGetError();
+
+        instancedPrograms.insert(pid);
+    }
+
+    glDrawElementsInstanced(GL_TRIANGLES, (int)eleBuf[shapeId].size(), GL_UNSIGNED_INT, nullptr, instanceCount);
 }
 
 void Shape::drawDepth(const Program* prog) const

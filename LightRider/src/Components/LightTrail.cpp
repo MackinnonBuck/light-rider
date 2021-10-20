@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "GameConstants.h"
 #include "ConversionUtils.h"
+#include "StaticCollisionObjectInfo.h"
 
 namespace GC = GameConstants;
 
@@ -94,6 +95,7 @@ bool LightTrail::initialize()
     m_pRigidBody = new btRigidBody(rbInfo);
     m_pRigidBody->setRestitution(1.0f);
     m_pRigidBody->setCollisionFlags(m_pRigidBody->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+    m_pRigidBody->setUserPointer(&StaticCollisionObjectInfo::getTrailInfo());
 
     Game::getInstance().getScene()->getDynamicsWorld()->addRigidBody(m_pRigidBody);
 

@@ -4,8 +4,8 @@
 
 #include <glm/gtx/euler_angles.hpp>
 
-#include "Game.h"
 #include "AssetManager.h"
+#include "Game.h"
 
 Camera::Camera(bool enabled, float layerDepth) :
     m_pSkyTexture(nullptr),
@@ -180,6 +180,8 @@ void Camera::renderSky(const glm::mat4& transformMatrix)
 
 void Camera::renderUnblendedRenderables()
 {
+    AssetManager* pAssets = Game::getInstance().getScene()->getAssetManager();
+
     for (auto shaderProgramNode : Game::getInstance().getScene()->getAssetManager()->getRenderTree())
     {
         Program* pShaderProgram = shaderProgramNode.first;
@@ -192,10 +194,15 @@ void Camera::renderUnblendedRenderables()
             Texture* pTexture = textureNode.first;
 
             if (pTexture)
-                setUpImageTexture(pTexture);
+            {
+                setUpTexture(TextureType::IMAGE, pTexture);
+            }
 
-            for (auto renderable : *textureNode.second)
-                renderable->render();
+            for (auto pRenderable : *textureNode.second)
+            {
+                findAndSetUpTexture(pAssets, TextureType::NORMAL, pRenderable->getNormalTextureId());
+                pRenderable->render();
+            }
         }
 
         if (pShaderProgram)
@@ -210,30 +217,40 @@ void Camera::renderBlendedRenderables()
     pAssets->sortBlendedRenderables(this);
 
     Program* pShaderProgram = nullptr;
-    Texture* pTexture = nullptr;
+    Texture* pColorTexture = nullptr;
 
     for (BlendedNode* pBlendedNode : pAssets->getSortedBlendedRenderables())
     {
         if (pShaderProgram != pBlendedNode->pShaderProgram)
         {
             if (pShaderProgram)
+            {
                 pShaderProgram->unbind();
+            }
 
             pShaderProgram = pBlendedNode->pShaderProgram;
 
             if (pShaderProgram)
+            {
                 setUpShaderProgram(pShaderProgram);
+            }
         }
 
-        if (pTexture != pBlendedNode->pTexture)
+        if (pColorTexture != pBlendedNode->pTexture)
         {
-            pTexture = pBlendedNode->pTexture;
+            pColorTexture = pBlendedNode->pTexture;
 
-            if (pTexture)
-                setUpImageTexture(pTexture);
+            if (pColorTexture)
+            {
+                setUpTexture(TextureType::IMAGE, pColorTexture);
+            }
         }
 
-        pBlendedNode->pRenderable->render();
+        Renderable* pRenderable = pBlendedNode->pRenderable;
+
+        findAndSetUpTexture(pAssets, TextureType::NORMAL, pRenderable->getNormalTextureId());
+
+        pRenderable->render();
     }
 
     if (pShaderProgram)
@@ -257,8 +274,23 @@ void Camera::setUpShaderProgram(Program* pShaderProgram)
     pShaderProgram->setVerbose(true);
 }
 
-void Camera::setUpImageTexture(Texture* pTexture)
+void Camera::findAndSetUpTexture(AssetManager* pAssets, TextureType type, const std::string& textureId)
 {
-    glActiveTexture((GLenum)TextureType::IMAGE);
+    if (textureId.empty())
+    {
+        return;
+    }
+
+    Texture* pTexture = pAssets->getTexture(textureId);
+
+    if (pTexture != nullptr)
+    {
+        setUpTexture(TextureType::NORMAL, pTexture);
+    }
+}
+
+void Camera::setUpTexture(TextureType type, Texture* pTexture)
+{
+    glActiveTexture((GLenum)type);
     glBindTexture(GL_TEXTURE_2D, pTexture->getTextureId());
 }

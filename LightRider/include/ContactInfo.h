@@ -20,8 +20,12 @@ struct ContactInfo
     // The local contact point in world coordinates relative to the other body.
     btVector3& localPointOther;
 
+    // True if this contact info is from the perspective of "body A".
+    bool isBodyA;
+
     // Creates a new ContactInfo instance.
     ContactInfo(btManifoldPoint& manifoldPoint, bool isBodyA) :
+        isBodyA(isBodyA),
         manifoldPoint(manifoldPoint),
         positionWorldOnSelf(isBodyA ? manifoldPoint.m_positionWorldOnA : manifoldPoint.m_positionWorldOnB),
         positionWorldOnOther(isBodyA ? manifoldPoint.m_positionWorldOnB : manifoldPoint.m_positionWorldOnA),

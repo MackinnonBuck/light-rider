@@ -22,7 +22,13 @@ public:
     glm::mat4& getLocalTransform() { return m_localTransform; }
 
     // Gets the shape representing the mesh.
-    const Shape* getShape() const { return m_pShape; }
+    Shape* getShape() const { return m_pShape; }
+
+    // Gets the ID of the normal texture for this mesh.
+    virtual const std::string& getNormalTextureId() const { return m_normalTextureId; }
+
+    // Sets the ID of the normal texture for this mesh.
+    void setNormalTextureId(const std::string& textureId) { m_normalTextureId = textureId; };
 
     // Sets the local transform of the mesh relative to the parent GameObject.
     void setLocalTransform(glm::mat4 localTransform) { m_localTransform = localTransform; }
@@ -61,6 +67,9 @@ private:
 
     // The shape being rendered.
     Shape* m_pShape;
+
+    // The ID of the normal texture.
+    std::string m_normalTextureId;
 
     // The local transform of the mesh relative to the parent GameObject.
     glm::mat4 m_localTransform;

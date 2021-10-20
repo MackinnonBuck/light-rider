@@ -49,6 +49,17 @@ void LightRiderScene::loadAssets()
       | ShaderUniform::M_MATRIX);
     pRampShader->addUniform("time");
 
+    // Container assets.
+    pAssets->loadShaderProgram("containerShader", "container_vertex.glsl", "container_fragment.glsl",
+        ShaderUniform::P_MATRIX
+      | ShaderUniform::V_MATRIX
+      | ShaderUniform::M_MATRIX
+      | ShaderUniform::TEXTURE_0);
+      //| ShaderUniform::TEXTURE_2);
+    pAssets->loadTexture("containerTexture", "container_color_texture.png", TextureType::IMAGE);
+    pAssets->loadTexture("containerNormalTexture", "container_normal_texture.png", TextureType::NORMAL);
+    pAssets->loadShape("containerShape", "container.shape");
+
     // Sky assets.
     pAssets->loadShaderProgram("skyShader", "sky_vertex.glsl", "sky_fragment.glsl",
         ShaderUniform::P_MATRIX

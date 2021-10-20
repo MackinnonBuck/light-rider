@@ -4,9 +4,10 @@
 
 enum class StaticCollisionObjectType
 {
+    UNKNOWN,
     GROUND,
-    RAMP,
     PARTICLE,
+    TRAIL,
 };
 
 class StaticCollisionObjectInfo
@@ -19,14 +20,15 @@ public:
 
     StaticCollisionObjectType getType() const { return m_type; }
 
+    static StaticCollisionObjectType getType(void* pUserPointer);
     static CollisionObjectInfo& getGroundInfo() { return s_groundInfo; }
-    static CollisionObjectInfo& getRampInfo() { return s_rampInfo; }
     static CollisionObjectInfo& getParticleInfo() { return s_particleInfo; }
+    static CollisionObjectInfo& getTrailInfo() { return s_trailInfo; }
 
 private:
     static CollisionObjectInfo s_groundInfo;
-    static CollisionObjectInfo s_rampInfo;
     static CollisionObjectInfo s_particleInfo;
+    static CollisionObjectInfo s_trailInfo;
 
     StaticCollisionObjectType m_type;
 };

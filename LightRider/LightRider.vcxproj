@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ContainerGroupBuilder.cpp" />
     <ClCompile Include="src\ComputeProgram.cpp" />
     <ClCompile Include="src\Components\ChunkRenderer.cpp" />
     <ClCompile Include="src\Components\ChunkManager.cpp" />
@@ -402,6 +403,7 @@
     <ClCompile Include="src\StaticCollisionObjectInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\ContainerGroupBuilder.h" />
     <ClInclude Include="include\ComputeProgram.h" />
     <ClInclude Include="include\CollisionObjectInfo.h" />
     <ClInclude Include="include\Components\ChunkRenderer.h" />
@@ -880,6 +882,9 @@
     </None>
     <None Include="resources\chunk_fragment.glsl" />
     <None Include="resources\chunk_vertex.glsl" />
+    <None Include="resources\container.shape" />
+    <None Include="resources\container_fragment.glsl" />
+    <None Include="resources\container_vertex.glsl" />
     <None Include="resources\deferred_fragment.glsl" />
     <None Include="resources\deferred_vertex.glsl" />
     <None Include="resources\luminance_compute.glsl" />
@@ -943,6 +948,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="resources\container_color_texture.png" />
+    <Image Include="resources\container_normal_texture.png" />
     <Image Include="resources\exit.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>

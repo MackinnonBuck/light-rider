@@ -3,6 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
+#include "ContainerGroupBuilder.h"
 #include "GameConstants.h"
 #include "GameObject.h"
 #include "Presets.h"
@@ -34,6 +35,10 @@ void GameScene::initialize()
 
     GameObject* pChunkManagerObject = GameObject::create("ChunkManager");
     m_pChunkManager = pChunkManagerObject->addComponent<ChunkManager>();
+
+    ContainerGroupBuilder containerGroupBuilder(0.75f, 0.1f);
+    containerGroupBuilder.addGroup(glm::vec2(0.0f, 0.0f), glm::ivec3(40, 4, 40));
+    containerGroupBuilder.build("containerShader", "containerTexture", "containerShape");
 
     initScene();
 }

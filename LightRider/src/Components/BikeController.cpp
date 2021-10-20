@@ -137,7 +137,9 @@ void BikeController::handleContact(const ContactInfo& contactInfo, btCollisionOb
 
 void BikeController::handleAliveContact(const ContactInfo& contactInfo, btCollisionObject* pBodySelf, btCollisionObject* pBodyOther)
 {
-    if (pBodyOther->getCollisionShape()->getShapeType() == COMPOUND_SHAPE_PROXYTYPE)
+    StaticCollisionObjectType type = StaticCollisionObjectInfo::getType(pBodyOther->getUserPointer());
+
+    if (type != StaticCollisionObjectType::GROUND && type != StaticCollisionObjectType::PARTICLE)
     {
         float damage = glm::abs(contactInfo.manifoldPoint.m_normalWorldOnB.dot(m_lastVelocity)) * GC::bikeDamageFactor;
         m_health -= damage;
@@ -167,13 +169,20 @@ void BikeController::handleAliveContact(const ContactInfo& contactInfo, btCollis
     }
 
     btVector3& localPoint = contactInfo.localPointSelf;
+    btVector3 normal = contactInfo.manifoldPoint.m_normalWorldOnB;
+
+    if (!contactInfo.isBodyA)
+    {
+        // HACK: Flip the normal if body B.
+        normal *= -1.0f;
+    }
 
     if (localPoint.z() < 0)
     {
         if (localPoint.y() < m_localFrontWheelContactPoint.y)
         {
             m_localFrontWheelContactPoint = toGlm(localPoint);
-            m_frontWheelGroundNormal = toGlm(contactInfo.manifoldPoint.m_normalWorldOnB);
+            m_frontWheelGroundNormal = toGlm(normal);
         }
     }
     else
@@ -181,7 +190,7 @@ void BikeController::handleAliveContact(const ContactInfo& contactInfo, btCollis
         if (localPoint.y() < m_localRearWheelContactPoint.y)
         {
             m_localRearWheelContactPoint = toGlm(localPoint);
-            m_rearWheelGroundNormal = toGlm(contactInfo.manifoldPoint.m_normalWorldOnB);
+            m_rearWheelGroundNormal = toGlm(normal);
         }
     }
 }
@@ -193,33 +202,15 @@ void BikeController::handleDeadContact(const ContactInfo& contactInfo, btCollisi
         return;
     }
 
-    void* pUserPointer = pBodyOther->getUserPointer();
-
-    if (pUserPointer == nullptr)
+    if (StaticCollisionObjectInfo::getType(pBodyOther->getUserPointer()) == StaticCollisionObjectType::PARTICLE)
     {
-        return;
-    }
-
-    CollisionObjectInfo* pInfo = static_cast<CollisionObjectInfo*>(pUserPointer);
-    void* pUserData = pInfo->getUserData();
-
-    if (pUserData == nullptr)
-    {
-        return;
-    }
-
-    StaticCollisionObjectInfo* pStaticInfo = static_cast<StaticCollisionObjectInfo*>(pUserData);
-    StaticCollisionObjectType type = pStaticInfo->getType();
-
-    if (type != StaticCollisionObjectType::GROUND && type != StaticCollisionObjectType::RAMP)
-    {
+        // Don't want micro-collisions with particles to cause damage.
         return;
     }
 
     float damage = contactInfo.manifoldPoint.getAppliedImpulse() * GC::bikeDeadDamageFactor;
     m_health -= damage;
 
-    // TODO: Make dead collisions work with trail.
     glm::vec3 velocityAfterContact = toGlm(pBodySelf->getInterpolationLinearVelocity());
     glm::vec3 contactPoint = toGlm(contactInfo.positionWorldOnSelf);
 

@@ -181,8 +181,8 @@ void AssetManager::sortBlendedRenderables(Camera* pCamera)
 
 void AssetManager::_registerRenderable(Renderable* pRenderable)
 {
-    std::string& shaderProgramId = pRenderable->getShaderProgramId();
-    std::string& imageTextureId = pRenderable->getImageTextureId();
+    const std::string& shaderProgramId = pRenderable->getShaderProgramId();
+    const std::string& imageTextureId = pRenderable->getImageTextureId();
 
     Program* pShaderProgram = m_shaderPrograms[shaderProgramId];
 
@@ -226,8 +226,8 @@ void AssetManager::_unregisterRenderable(Renderable* pRenderable)
         return;
     }
 
-    std::string& shaderProgramId = pRenderable->getShaderProgramId();
-    std::string& imageTextureId = pRenderable->getImageTextureId();
+    const std::string& shaderProgramId = pRenderable->getShaderProgramId();
+    const std::string& imageTextureId = pRenderable->getImageTextureId();
 
     Program* pShaderProgram = m_shaderPrograms[shaderProgramId];
     Texture* pTexture = m_textures[imageTextureId];
