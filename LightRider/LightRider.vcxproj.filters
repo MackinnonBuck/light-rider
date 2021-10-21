@@ -761,6 +761,8 @@
     <None Include="resources\container.shape" />
     <None Include="resources\container_fragment.glsl" />
     <None Include="resources\container_vertex.glsl" />
+    <None Include="resources\blended_deferred_fragment.glsl" />
+    <None Include="resources\blended_deferred_vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ground_texture.png" />

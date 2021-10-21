@@ -868,6 +868,8 @@
     <None Include="resources\bike_vertex.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="resources\blended_deferred_fragment.glsl" />
+    <None Include="resources\blended_deferred_vertex.glsl" />
     <None Include="resources\bloom_fragment.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>

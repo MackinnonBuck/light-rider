@@ -3,7 +3,12 @@
 #define SHADOW_STRENGTH 0.7
 #define OPACITY 0.4
 
-out vec4 color;
+layout(location = 0) out vec4 color;
+layout(location = 1) out vec3 position;
+layout(location = 2) out vec3 normal;
+layout(location = 3) out int material;
+
+//out vec4 color;
 
 in vec3 vertex_normal;
 in vec3 vertex_pos;
@@ -49,6 +54,10 @@ float calcShadowFactor(vec4 lightSpacePosition)
 
 void main()
 {
+    position = vertex_pos;
+    normal = vertex_normal;
+    material = 0;
+
     color = texture(texture0, vec2(vertex_pos.x, vertex_pos.z) * 0.05);
     float shadowFactor = calcShadowFactor(vertex_light_space_pos);
 

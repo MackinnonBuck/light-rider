@@ -29,10 +29,10 @@ public:
     bool isEnabled() const { return m_isEnabled; }
 
     // Gets the camera's view matrix (updated just before each render cycle).
-    glm::mat4& getViewMatrix() { return m_viewMatrix; }
+    const glm::mat4& getViewMatrix() const { return m_viewMatrix; }
 
     // Gets the camera's perspective matrix (updated just before each render cycle).
-    glm::mat4& getPerspectiveMatrix() { return m_perspectiveMatrix; }
+    const glm::mat4& getPerspectiveMatrix() const { return m_perspectiveMatrix; }
 
     // Gets the camera's layer depth set when it was enabled.
     float getLayerDepth() const { return m_layerDepth; }

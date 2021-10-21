@@ -51,6 +51,9 @@ private:
     // The shader program used for deferred rendering.
     Program* m_pDeferredShader;
 
+    // The shader program used for deferred rendering, including blended objects.
+    Program* m_pBlendedDeferredShader;
+
     // The shader program used to render the scene's first pass.
     Program* m_pPostShader;
 
@@ -91,6 +94,9 @@ private:
     // The color buffer for the deferred frame buffer.
     GLuint m_deferredColorBuffer;
 
+    // The texture containing the SSAO noise.
+    GLuint m_ssaoNoiseTexture;
+
     // The frame buffer to store the antialiased scene.
     GLuint m_fxaaFrameBuffer;
 
@@ -111,9 +117,6 @@ private:
 
     // The depth render buffer.
     GLuint m_depthRenderBuffer;
-
-    // The depth render buffer for blended objects.
-    GLuint m_blendedDepthRenderBuffer;
 
     // The depth render buffer for the shadow map.
     GLuint m_shadowMapDepthBuffer;
@@ -163,4 +166,8 @@ private:
     
     // Renders the current scene to the shadow map.
     void renderShadowMap();
+
+    void generateSsaoKernel(glm::vec3* kernel, unsigned int size);
+
+    void generateSsaoNoise(glm::vec3* noise, unsigned int size);
 };

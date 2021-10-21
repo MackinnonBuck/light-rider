@@ -1,6 +1,7 @@
 #include "Components/ProcessedCamera.h"
 
 #include <string>
+#include <random>
 
 #include "Game.h"
 #include "GLSL.h"
@@ -10,6 +11,9 @@ namespace GC = GameConstants;
 
 constexpr int SHADOW_MAP_WIDTH = 8192;
 constexpr int SHADOW_MAP_HEIGHT = 8192;
+constexpr int SSAO_KERNEL_SIZE = 64;
+constexpr int SSAO_NOISE_DIMENSION = 4;
+constexpr int SSAO_NOISE_SIZE = SSAO_NOISE_DIMENSION * SSAO_NOISE_DIMENSION;
 
 ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     Camera(enabled, layerDepth),
@@ -21,7 +25,6 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     m_bufferWidth(-1),
     m_bufferHeight(-1),
     m_depthRenderBuffer(0),
-    m_blendedDepthRenderBuffer(0),
     m_deferredFrameBuffer(0),
     m_deferredColorBuffer(0),
     m_primaryFrameBuffer(0),
@@ -44,6 +47,7 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
 
     m_pShadowShader = pAssets->getShaderProgram("shadowShader");
     m_pDeferredShader = pAssets->getShaderProgram("deferredShader");
+    m_pBlendedDeferredShader = pAssets->getShaderProgram("blendedDeferredShader");
     m_pPostShader = pAssets->getShaderProgram("postShader");
     m_pFxaaShader = pAssets->getShaderProgram("fxaaShader");
     m_pBlurShader = pAssets->getShaderProgram("blurShader");
@@ -57,6 +61,18 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     glUniform1i(m_pDeferredShader->getUniform("gMaterial"), 3);
     glUniform1i(m_pDeferredShader->getUniform("shadowMap"), 4);
     m_pDeferredShader->unbind();
+
+    glm::vec3 ssaoKernel[SSAO_KERNEL_SIZE];
+    generateSsaoKernel(ssaoKernel, SSAO_KERNEL_SIZE);
+
+    m_pBlendedDeferredShader->bind();
+    glUniform1i(m_pBlendedDeferredShader->getUniform("gColor"), 0);
+    glUniform1i(m_pBlendedDeferredShader->getUniform("gPosition"), 1);
+    glUniform1i(m_pBlendedDeferredShader->getUniform("gNormal"), 2);
+    glUniform1i(m_pBlendedDeferredShader->getUniform("gMaterial"), 3);
+    glUniform1i(m_pBlendedDeferredShader->getUniform("noise"), 4);
+    glUniform3fv(m_pBlendedDeferredShader->getUniform("samples"), SSAO_KERNEL_SIZE, &ssaoKernel[0].x);
+    m_pBlendedDeferredShader->unbind();
 
     m_pPostShader->bind();
     glUniform1i(m_pPostShader->getUniform("screenTexture"), 0);
@@ -176,15 +192,7 @@ void ProcessedCamera::preRender()
 
     // First render pass
     glBindFramebuffer(GL_FRAMEBUFFER, m_primaryFrameBuffer);
-    
-    unsigned int attachments[4] =
-    {
-        GL_COLOR_ATTACHMENT0,
-        GL_COLOR_ATTACHMENT1,
-        GL_COLOR_ATTACHMENT2,
-        GL_COLOR_ATTACHMENT3,
-    };
-    glDrawBuffers(4, attachments);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_primaryColorBuffer, 0);
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -239,18 +247,13 @@ void ProcessedCamera::renderShadowMap()
 
 void ProcessedCamera::postRender()
 {
-    unsigned int attachments[1] =
-    {
-        GL_COLOR_ATTACHMENT0,
-    };
-    glDrawBuffers(1, attachments);
-
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 
     glBindVertexArray(m_quadVertexArrayObject);
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFrameBuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_deferredColorBuffer, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_pDeferredShader->bind();
@@ -273,25 +276,46 @@ void ProcessedCamera::postRender()
 
     m_pDeferredShader->unbind();
 
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_primaryFrameBuffer);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_deferredFrameBuffer);
-    glBlitFramebuffer(0, 0, m_bufferWidth, m_bufferHeight, 0, 0, m_bufferWidth, m_bufferHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFrameBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_primaryFrameBuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_deferredColorBuffer, 0);
 
     glBindVertexArray(0);
 
     glEnable(GL_BLEND);
-    // TODO: We'll want to populate the position buffer, etc. with blended object information.
-    // This will be necessary for effects like SSR.
     renderBlendedRenderables();
     glDisable(GL_BLEND);
+
+    glBindVertexArray(m_quadVertexArrayObject);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFrameBuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_primaryColorBuffer, 0);
+
+    m_pBlendedDeferredShader->bind();
+
+    glUniformMatrix4fv(m_pBlendedDeferredShader->getUniform("projection"), 1, GL_FALSE, &getPerspectiveMatrix()[0][0]);
+    glUniformMatrix4fv(m_pBlendedDeferredShader->getUniform("view"), 1, GL_FALSE, &getViewMatrix()[0][0]);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_deferredColorBuffer);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_primaryPositionBuffer);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, m_primaryNormalBuffer);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, m_primaryMaterialBuffer);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, m_ssaoNoiseTexture);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    m_pBlendedDeferredShader->unbind();
 
     m_pLuminanceComputeShader->bind();
     GLuint resultBuffer = m_pLuminanceComputeShader->getBuffer("result");
     GLuint colorImage = m_pLuminanceComputeShader->getUniform("colorImage");
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, resultBuffer);
     glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(glm::vec4), glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)));
-    glBindImageTexture(0, m_deferredColorBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA16F);
+    glBindImageTexture(0, m_primaryColorBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA16F);
     glDispatchCompute(m_bufferWidth, m_bufferHeight, 1);
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -309,8 +333,6 @@ void ProcessedCamera::postRender()
     m_targetExposure = 1.0f / luminance;
     m_targetExposure *= GC::exposureMultiplier;
 
-    glBindVertexArray(m_quadVertexArrayObject);
-
     glBindFramebuffer(GL_FRAMEBUFFER, m_hdrFrameBuffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -318,7 +340,7 @@ void ProcessedCamera::postRender()
     glUniform1f(m_pPostShader->getUniform("exposure"), m_currentExposure);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_deferredColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, m_primaryColorBuffer);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     m_pPostShader->unbind();
@@ -353,7 +375,7 @@ void ProcessedCamera::postRender()
     glUniform1f(m_pBloomShader->getUniform("exposure"), m_currentExposure);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_deferredColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, m_primaryColorBuffer);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, m_pingPongColorBuffers[!horizontal]);
 
@@ -387,6 +409,14 @@ void ProcessedCamera::createFrameBuffers()
     if (m_bufferWidth != -1 || m_bufferHeight != -1)
         deleteBuffers();
 
+    unsigned int attachments[4] =
+    {
+        GL_COLOR_ATTACHMENT0,
+        GL_COLOR_ATTACHMENT1,
+        GL_COLOR_ATTACHMENT2,
+        GL_COLOR_ATTACHMENT3,
+    };
+
     m_bufferWidth = (int)(m_defaultBufferWidth * m_sizeRatio.x);
     m_bufferHeight = (int)(m_defaultBufferHeight * m_sizeRatio.y);
 
@@ -397,7 +427,7 @@ void ProcessedCamera::createFrameBuffers()
     // Primary color texture
     glGenTextures(1, &m_primaryColorBuffer);
     glBindTexture(GL_TEXTURE_2D, m_primaryColorBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_bufferWidth, m_bufferHeight, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_bufferWidth, m_bufferHeight, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -440,6 +470,8 @@ void ProcessedCamera::createFrameBuffers()
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthRenderBuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
+    glDrawBuffers(4, attachments);
+
     GLenum frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
     if (frameBufferStatus != GL_FRAMEBUFFER_COMPLETE)
@@ -462,6 +494,8 @@ void ProcessedCamera::createFrameBuffers()
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec3(1.0)));
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowMapDepthBuffer, 0);
 
+    glDrawBuffers(1, attachments);
+
     frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
     if (frameBufferStatus != GL_FRAMEBUFFER_COMPLETE)
@@ -483,16 +517,24 @@ void ProcessedCamera::createFrameBuffers()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_deferredColorBuffer, 0);
 
-    glGenRenderbuffers(1, &m_blendedDepthRenderBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, m_blendedDepthRenderBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_bufferWidth, m_bufferHeight);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_blendedDepthRenderBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glDrawBuffers(1, attachments);
 
     frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
     if (frameBufferStatus != GL_FRAMEBUFFER_COMPLETE)
         std::cerr << "Unable to create deferred frame buffer: " << frameBufferStatus << std::endl;
+
+    // SSAO noise texture
+    glm::vec3 ssaoNoise[SSAO_NOISE_SIZE];
+    generateSsaoNoise(ssaoNoise, SSAO_NOISE_SIZE);
+
+    glGenTextures(1, &m_ssaoNoiseTexture);
+    glBindTexture(GL_TEXTURE_2D, m_ssaoNoiseTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SSAO_NOISE_DIMENSION, SSAO_NOISE_DIMENSION, 0, GL_RGB, GL_FLOAT, ssaoNoise);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
@@ -509,6 +551,8 @@ void ProcessedCamera::createFrameBuffers()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fxaaColorBuffer, 0);
+
+    glDrawBuffers(1, attachments);
 
     frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
@@ -530,6 +574,8 @@ void ProcessedCamera::createFrameBuffers()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_hdrColorBuffer, 0);
+
+    glDrawBuffers(1, attachments);
 
     frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
@@ -553,6 +599,8 @@ void ProcessedCamera::createFrameBuffers()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_pingPongColorBuffers[i], 0);
 
+        glDrawBuffers(1, attachments);
+
         GLenum frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
         if (frameBufferStatus != GL_FRAMEBUFFER_COMPLETE)
@@ -571,14 +619,48 @@ void ProcessedCamera::deleteBuffers()
     glDeleteFramebuffers(1, &m_hdrFrameBuffer);
     glDeleteFramebuffers(2, m_pingPongFrameBuffers);
     glDeleteRenderbuffers(1, &m_depthRenderBuffer);
-    glDeleteRenderbuffers(1, &m_blendedDepthRenderBuffer);
     glDeleteTextures(1, &m_shadowMapDepthBuffer);
     glDeleteTextures(1, &m_deferredColorBuffer);
     glDeleteTextures(1, &m_primaryColorBuffer);
     glDeleteTextures(1, &m_primaryPositionBuffer);
     glDeleteTextures(1, &m_primaryNormalBuffer);
     glDeleteTextures(1, &m_primaryMaterialBuffer);
+    glDeleteTextures(1, &m_ssaoNoiseTexture);
     glDeleteTextures(1, &m_fxaaColorBuffer);
     glDeleteTextures(1, &m_hdrColorBuffer);
     glDeleteTextures(2, m_pingPongColorBuffers);
+}
+
+void ProcessedCamera::generateSsaoKernel(glm::vec3* kernel, unsigned int size)
+{
+    std::uniform_real_distribution<float> randomFloats(0.0f, 1.0f);
+    std::default_random_engine generator;
+
+    for (unsigned int i = 0; i < size; i++)
+    {
+        glm::vec3 sample(
+            randomFloats(generator) * 2.0f - 1.0f,
+            randomFloats(generator) * 2.0f - 1.0f,
+            randomFloats(generator));
+        sample = glm::normalize(sample);
+        float scale = (float)i / (float)size;
+        scale = glm::mix(0.1f, 1.0f, scale * scale);
+        sample *= scale;
+        kernel[i] = sample;
+    }
+}
+
+void ProcessedCamera::generateSsaoNoise(glm::vec3* noise, unsigned int size)
+{
+    std::uniform_real_distribution<float> randomFloats(0.0f, 1.0f);
+    std::default_random_engine generator;
+
+    for (unsigned int i = 0; i < size; i++)
+    {
+        glm::vec3 sample(
+            randomFloats(generator) * 2.0f - 1.0f,
+            randomFloats(generator) * 2.0f - 1.0f,
+            0.0f);
+        noise[i] = sample;
+    }
 }

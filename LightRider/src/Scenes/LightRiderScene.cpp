@@ -85,6 +85,17 @@ void LightRiderScene::loadAssets()
     pDeferredShader->addUniform("campos");
     pDeferredShader->addUniform("lightPV");
 
+    Program* pBlendedDeferredShader = pAssets->loadShaderProgram("blendedDeferredShader", "blended_deferred_vertex.glsl", "blended_deferred_fragment.glsl", ShaderUniform::NONE);
+    pBlendedDeferredShader->addUniform("gColor");
+    pBlendedDeferredShader->addUniform("gPosition");
+    pBlendedDeferredShader->addUniform("gNormal");
+    pBlendedDeferredShader->addUniform("gMaterial");
+    pBlendedDeferredShader->addUniform("noise");
+    pBlendedDeferredShader->addUniform("campos");
+    pBlendedDeferredShader->addUniform("samples");
+    pBlendedDeferredShader->addUniform("projection");
+    pBlendedDeferredShader->addUniform("view");
+
     Program* pPostShader = pAssets->loadShaderProgram("postShader", "post_vertex.glsl", "post_fragment.glsl", ShaderUniform::NONE);
     pPostShader->addUniform("screenTexture");
     pPostShader->addUniform("exposure");

@@ -1,5 +1,5 @@
 #version 430 core
-layout(location = 0) out vec3 color;
+layout(location = 0) out vec4 color;
 layout(location = 1) out vec3 position;
 layout(location = 2) out vec3 normal;
 layout(location = 3) out int material;
@@ -182,6 +182,7 @@ float cnoise(vec4 P)
 
 void main()
 {
+    color.a = 1;
     color.rgb = texture(texture0, vertex_tex).rgb;
     position = vertex_pos;
     normal = vertex_normal;

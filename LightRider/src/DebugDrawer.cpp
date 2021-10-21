@@ -92,8 +92,8 @@ void DebugDrawer::flushLines()
 {
     Camera* pCamera = Game::getInstance().getScene()->getActiveCamera();
 
-    glm::mat4& P = pCamera->getPerspectiveMatrix();
-    glm::mat4& V = pCamera->getViewMatrix();
+    const glm::mat4& P = pCamera->getPerspectiveMatrix();
+    const glm::mat4& V = pCamera->getViewMatrix();
 
     int lineVertexCount = (int)m_lineVertices.size();
     int lineColorCount = (int)m_lineColors.size();

@@ -108,7 +108,7 @@ void GuiElement::render()
     glUniform1f(m_pShaderProgram->getUniform("bloomFactor"), m_bloomFactor);
     glUniformMatrix4fv(m_pShaderProgram->getUniform("M"), 1, GL_FALSE, &transformMatrix[0][0]);
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     m_pShape->draw(m_pShaderProgram);
 }

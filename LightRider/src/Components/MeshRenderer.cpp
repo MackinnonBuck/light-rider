@@ -62,7 +62,7 @@ void MeshRenderer::render()
     }
 
     if (usesBlending())
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     m_pShape->draw(m_pShaderProgram);
 

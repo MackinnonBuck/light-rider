@@ -209,7 +209,7 @@ void LightTrail::render()
 
     glBindVertexArray(m_trailVertexArray);
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBlendFunci(0, GL_SRC_ALPHA, GL_ONE);
     glDepthMask(GL_FALSE);//glDisable(GL_DEPTH_TEST);
     glDrawArrays(GL_TRIANGLES, 0, m_trailVertexCount);
     glDepthMask(GL_TRUE);
