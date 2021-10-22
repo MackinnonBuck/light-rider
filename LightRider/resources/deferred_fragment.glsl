@@ -12,9 +12,12 @@ layout(location = 1) uniform sampler2D gPosition;
 layout(location = 2) uniform sampler2D gNormal;
 layout(location = 3) uniform isampler2D gMaterial;
 layout(location = 4) uniform sampler2D shadowMap;
+layout(location = 5) uniform sampler2D skyTexture;
 
 uniform vec3 campos;
 uniform mat4 lightPV;
+
+const float M_PI = 3.1415926535;
 
 // Evaluates how shadowed a point is using PCF with 5 samples
 // Credit: Sam Freed - https://github.com/sfreed141/vct/blob/master/shaders/phong.frag
@@ -121,7 +124,7 @@ void main()
     if (materialId == 6)
     {
         // Ramp arrows
-        fragColor.rgb = vec3(0.5, 1, 0.8) * 6;
+        fragColor.rgb = vec3(1.0f, 1.0f, 1.0f) * 3;
         return;
     }
 
@@ -140,6 +143,18 @@ void main()
             fragColor.rgb += vec3(getSpecFromLight(fragPosition, n, lightPositions[i], 500) * 8) * lightFactor;
 
         fragColor.rgb *= getDiffuseFromLight(fragPosition, n, sunDirection);
+        vec3 e = fragPosition - campos;
+        vec3 r = reflect(e, n);
+
+        if (r.y >= 0)
+        {
+            vec3 v = normalize(r);
+            float x = (atan(v.z, v.x) + M_PI) / (M_PI * 2);
+            float y = (v.y + 1) * 0.5;
+            y = 1 - y;
+            x = mod(x + 0.25, 1);
+            fragColor.rgb += texture(skyTexture, vec2(x, y)).rgb * 0.8 * lightFactor;
+        }
 
         return;
     }

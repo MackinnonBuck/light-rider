@@ -3,7 +3,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
-#include "ContainerGroupBuilder.h"
 #include "GameConstants.h"
 #include "GameObject.h"
 #include "Presets.h"
@@ -37,7 +36,44 @@ void GameScene::initialize()
     m_pChunkManager = pChunkManagerObject->addComponent<ChunkManager>();
 
     ContainerGroupBuilder containerGroupBuilder(0.75f, 0.1f);
-    containerGroupBuilder.addGroup(glm::vec2(0.0f, 0.0f), glm::ivec3(40, 4, 40));
+
+    // Center field group
+    containerGroupBuilder.addGroup(glm::vec2(10.0f, 10.0f), glm::ivec3(2, 2, 2));
+    containerGroupBuilder.addGroup(glm::vec2(10.0f, -10.0f), glm::ivec3(2, 2, 2));
+    containerGroupBuilder.addGroup(glm::vec2(-10.0f, 10.0f), glm::ivec3(2, 2, 2));
+    containerGroupBuilder.addGroup(glm::vec2(-10.0f, -10.0f), glm::ivec3(2, 2, 2));
+
+    // Side grids
+    containerGroupBuilder.addGroup(glm::vec2(0.0f, 150.0f), glm::ivec3(10, 1, 5));
+    containerGroupBuilder.addGroup(glm::vec2(0.0f, -150.0f), glm::ivec3(10, 1, 5));
+
+    // Corner patterns
+    buildCornerContainers(containerGroupBuilder, glm::vec2(160.0f, 160.0f));
+    buildCornerContainers(containerGroupBuilder, glm::vec2(160.0f, -160.0f));
+    buildCornerContainers(containerGroupBuilder, glm::vec2(-160.0f, 160.0f));
+    buildCornerContainers(containerGroupBuilder, glm::vec2(-160.0f, -160.0f));
+
+    // Side strips
+    containerGroupBuilder.addGroup(glm::vec2(0.0f, 75.0f), glm::ivec3(1, 1, 30));
+    containerGroupBuilder.addGroup(glm::vec2(0.0f, -75.0f), glm::ivec3(1, 1, 30));
+
+    // Back strips
+    containerGroupBuilder.addGroup(glm::vec2(160.0f, 60.0f), glm::ivec3(1, 1, 8));
+    containerGroupBuilder.addGroup(glm::vec2(160.0f, -60.0f), glm::ivec3(1, 1, 8));
+    containerGroupBuilder.addGroup(glm::vec2(-160.0f, 60.0f), glm::ivec3(1, 1, 8));
+    containerGroupBuilder.addGroup(glm::vec2(-160.0f, -60.0f), glm::ivec3(1, 1, 8));
+
+    // Diagonal boxes
+    containerGroupBuilder.addGroup(glm::vec2(100.0f, 50.0f), glm::ivec3(1, 1, 1));
+    containerGroupBuilder.addGroup(glm::vec2(50.0f, 100.0f), glm::ivec3(1, 1, 1));
+    containerGroupBuilder.addGroup(glm::vec2(100.0f, -50.0f), glm::ivec3(1, 1, 1));
+    containerGroupBuilder.addGroup(glm::vec2(50.0f, -100.0f), glm::ivec3(1, 1, 1));
+    containerGroupBuilder.addGroup(glm::vec2(-100.0f, 50.0f), glm::ivec3(1, 1, 1));
+    containerGroupBuilder.addGroup(glm::vec2(-50.0f, 100.0f), glm::ivec3(1, 1, 1));
+    containerGroupBuilder.addGroup(glm::vec2(-100.0f, -50.0f), glm::ivec3(1, 1, 1));
+    containerGroupBuilder.addGroup(glm::vec2(-50.0f, -100.0f), glm::ivec3(1, 1, 1));
+
+    // Build all containers
     containerGroupBuilder.build("containerShader", "containerTexture", "containerShape");
 
     initScene();
@@ -193,4 +229,13 @@ void GameScene::clearScene()
     GameObject::destroy(m_pPlayer2Bike);
 
     m_pChunkManager->clearChunks();
+}
+
+void GameScene::buildCornerContainers(ContainerGroupBuilder& builder, const glm::vec2& position)
+{
+    builder.addGroup(position, glm::ivec3(1, 30, 1));
+    builder.addGroup(position + glm::vec2(15.0f, 15.0f), glm::ivec3(2, 3, 2));
+    builder.addGroup(position + glm::vec2(15.0f, -15.0f), glm::ivec3(2, 3, 2));
+    builder.addGroup(position + glm::vec2(-15.0f, 15.0f), glm::ivec3(2, 3, 2));
+    builder.addGroup(position + glm::vec2(-15.0f, -15.0f), glm::ivec3(2, 3, 2));
 }

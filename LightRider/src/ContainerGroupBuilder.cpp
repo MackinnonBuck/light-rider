@@ -29,7 +29,11 @@ void ContainerGroupBuilder::addGroup(const glm::vec2& position, const glm::ivec3
         {
             for (int z = 0; z < dimensions.z; z++)
             {
-                m_positions.push_back(glm::vec4(-halfExtents + glm::vec3(x * scaleWithSpacing, y * m_scale, z * scaleWithSpacing) * 2.0f + positionOffset, m_scale));
+                m_positions.push_back(glm::vec4(
+                    -halfExtents +
+                    glm::vec3(x * scaleWithSpacing, y * m_scale, z * scaleWithSpacing) * 2.0f +
+                    positionOffset +
+                    glm::vec3(position.x, 0.0f, position.y), m_scale));
             }
         }
     }
@@ -39,7 +43,7 @@ void ContainerGroupBuilder::addGroup(const glm::vec2& position, const glm::ivec3
     btBoxShape* pBoxShape = new btBoxShape(dimensionsWithSpacing - spacingOffset);
     btTransform localTransform;
     localTransform.setIdentity();
-    localTransform.setOrigin(btVector3(position.x, dimensions.y * m_scale, -position.y * 2) - spacingOffset);
+    localTransform.setOrigin(btVector3(position.x, dimensions.y * m_scale, position.y) - spacingOffset);
     m_pCompoundShape->addChildShape(localTransform, pBoxShape);
 }
 

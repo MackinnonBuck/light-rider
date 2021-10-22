@@ -263,6 +263,7 @@
     <ClCompile Include="src\StaticCollisionObjectInfo.cpp" />
     <ClCompile Include="src\ComputeProgram.cpp" />
     <ClCompile Include="src\ContainerGroupBuilder.cpp" />
+    <ClCompile Include="src\Components\GroundRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.h" />
@@ -721,6 +722,7 @@
     <ClInclude Include="include\StaticCollisionObjectInfo.h" />
     <ClInclude Include="include\ComputeProgram.h" />
     <ClInclude Include="include\ContainerGroupBuilder.h" />
+    <ClInclude Include="include\Components\GroundRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\line_fragment.glsl" />
@@ -763,6 +765,8 @@
     <None Include="resources\container_vertex.glsl" />
     <None Include="resources\blended_deferred_fragment.glsl" />
     <None Include="resources\blended_deferred_vertex.glsl" />
+    <None Include="resources\ssao_fragment.glsl" />
+    <None Include="resources\ssao_vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ground_texture.png" />

@@ -10,6 +10,7 @@
 #include "GameConstants.h"
 #include "ConversionUtils.h"
 #include "StaticCollisionObjectInfo.h"
+#include "Components/GroundRenderer.h"
 #include "Components/RigidBodyComponent.h"
 #include "Components/MeshRenderer.h"
 #include "Components/BikeController.h"
@@ -42,10 +43,10 @@ namespace Presets
         pGroundRigidBody->setFriction(1.0f);
         pGroundRigidBody->setRestitution(1.0f);
 
-        MeshRenderer* pGroundMeshRenderer = pGroundObject->addComponent<MeshRenderer>("groundShader", "groundTexture", "planeShape", true);
-        pGroundMeshRenderer->setUsingForwardShadowRendering(true);
-        pGroundMeshRenderer->setDepthFunction([](Camera* pCamera) { return 1000.0f; });
-        pGroundMeshRenderer->setLocalTransform(
+        GroundRenderer* pGroundRenderer = pGroundObject->addComponent<GroundRenderer>();
+        pGroundRenderer->setUsingForwardShadowRendering(true);
+        pGroundRenderer->setDepthFunction([](Camera* pCamera) { return 1000.0f; });
+        pGroundRenderer->setLocalTransform(
             glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, GC::mapHalfHeight, 0.0f)) *
             glm::scale(glm::mat4(1.0f), glm::vec3(GC::mapHalfWidth, 1.0f, GC::mapHalfWidth)) *
             glm::rotate(glm::mat4(1.0f), glm::pi<float>() * 0.5f, glm::vec3(1.0f, 0.0f, 0.0f))

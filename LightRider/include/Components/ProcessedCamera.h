@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Program.h"
 #include "ComputeProgram.h"
 #include "Camera.h"
+#include "Program.h"
+#include "Texture.h"
 
 // Extends the Camera component, integrating post processing.
 class ProcessedCamera : public Camera
@@ -51,6 +52,9 @@ private:
     // The shader program used for deferred rendering.
     Program* m_pDeferredShader;
 
+    // The shader used to compute SSAO.
+    Program* m_pSsaoShader;
+
     // The shader program used for deferred rendering, including blended objects.
     Program* m_pBlendedDeferredShader;
 
@@ -66,6 +70,9 @@ private:
     // The shader that combines the blur with the scene's first pass to create a 
     // "bloom" effect.
     Program* m_pBloomShader;
+
+    // The sky texture used for environment sampling.
+    Texture* m_pSkyTexture;
 
     // The compute shader used to determine the overall luminance of the scene.
     ComputeProgram* m_pLuminanceComputeShader;
@@ -96,6 +103,12 @@ private:
 
     // The texture containing the SSAO noise.
     GLuint m_ssaoNoiseTexture;
+
+    // The frame buffer used to render SSAO.
+    GLuint m_ssaoFrameBuffer;
+
+    // The color buffer for storing the SSAO output.
+    GLuint m_ssaoColorBuffer;
 
     // The frame buffer to store the antialiased scene.
     GLuint m_fxaaFrameBuffer;

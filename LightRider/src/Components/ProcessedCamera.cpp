@@ -47,12 +47,14 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
 
     m_pShadowShader = pAssets->getShaderProgram("shadowShader");
     m_pDeferredShader = pAssets->getShaderProgram("deferredShader");
+    m_pSsaoShader = pAssets->getShaderProgram("ssaoShader");
     m_pBlendedDeferredShader = pAssets->getShaderProgram("blendedDeferredShader");
     m_pPostShader = pAssets->getShaderProgram("postShader");
     m_pFxaaShader = pAssets->getShaderProgram("fxaaShader");
     m_pBlurShader = pAssets->getShaderProgram("blurShader");
     m_pBloomShader = pAssets->getShaderProgram("bloomShader");
     m_pLuminanceComputeShader = pAssets->getComputeShaderProgram("luminanceCompute");
+    m_pSkyTexture = pAssets->getTexture("skyTexture");
 
     m_pDeferredShader->bind();
     glUniform1i(m_pDeferredShader->getUniform("gColor"), 0);
@@ -60,18 +62,26 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     glUniform1i(m_pDeferredShader->getUniform("gNormal"), 2);
     glUniform1i(m_pDeferredShader->getUniform("gMaterial"), 3);
     glUniform1i(m_pDeferredShader->getUniform("shadowMap"), 4);
+    glUniform1i(m_pDeferredShader->getUniform("skyTexture"), 5);
     m_pDeferredShader->unbind();
 
     glm::vec3 ssaoKernel[SSAO_KERNEL_SIZE];
     generateSsaoKernel(ssaoKernel, SSAO_KERNEL_SIZE);
+
+    m_pSsaoShader->bind();
+    glUniform1i(m_pSsaoShader->getUniform("gPosition"), 0);
+    glUniform1i(m_pSsaoShader->getUniform("gNormal"), 1);
+    glUniform1i(m_pSsaoShader->getUniform("gMaterial"), 2);
+    glUniform1i(m_pSsaoShader->getUniform("noise"), 3);
+    glUniform3fv(m_pSsaoShader->getUniform("samples"), SSAO_KERNEL_SIZE, &ssaoKernel[0].x);
+    m_pSsaoShader->unbind();
 
     m_pBlendedDeferredShader->bind();
     glUniform1i(m_pBlendedDeferredShader->getUniform("gColor"), 0);
     glUniform1i(m_pBlendedDeferredShader->getUniform("gPosition"), 1);
     glUniform1i(m_pBlendedDeferredShader->getUniform("gNormal"), 2);
     glUniform1i(m_pBlendedDeferredShader->getUniform("gMaterial"), 3);
-    glUniform1i(m_pBlendedDeferredShader->getUniform("noise"), 4);
-    glUniform3fv(m_pBlendedDeferredShader->getUniform("samples"), SSAO_KERNEL_SIZE, &ssaoKernel[0].x);
+    glUniform1i(m_pBlendedDeferredShader->getUniform("ssaoTexture"), 4);
     m_pBlendedDeferredShader->unbind();
 
     m_pPostShader->bind();
@@ -271,6 +281,8 @@ void ProcessedCamera::postRender()
     glBindTexture(GL_TEXTURE_2D, m_primaryMaterialBuffer);
     glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, m_shadowMapDepthBuffer);
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, m_pSkyTexture->getTextureId());
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -287,13 +299,33 @@ void ProcessedCamera::postRender()
 
     glBindVertexArray(m_quadVertexArrayObject);
 
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ssaoFrameBuffer);
+    
+    m_pSsaoShader->bind();
+
+    glUniformMatrix4fv(m_pSsaoShader->getUniform("projection"), 1, GL_FALSE, &getPerspectiveMatrix()[0][0]);
+    glUniformMatrix4fv(m_pSsaoShader->getUniform("view"), 1, GL_FALSE, &getViewMatrix()[0][0]);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_primaryPositionBuffer);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_primaryNormalBuffer);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, m_primaryMaterialBuffer);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, m_ssaoNoiseTexture);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    m_pSsaoShader->unbind();
+
     glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFrameBuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_primaryColorBuffer, 0);
 
     m_pBlendedDeferredShader->bind();
 
-    glUniformMatrix4fv(m_pBlendedDeferredShader->getUniform("projection"), 1, GL_FALSE, &getPerspectiveMatrix()[0][0]);
-    glUniformMatrix4fv(m_pBlendedDeferredShader->getUniform("view"), 1, GL_FALSE, &getViewMatrix()[0][0]);
+    // TODO: For testing. Remove.
+    glUniform1f(m_pBlendedDeferredShader->getUniform("occlusionFactor"), Game::getInstance().getCursorY() / Game::getInstance().getWindowHeight());
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_deferredColorBuffer);
@@ -304,7 +336,7 @@ void ProcessedCamera::postRender()
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, m_primaryMaterialBuffer);
     glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D, m_ssaoNoiseTexture);
+    glBindTexture(GL_TEXTURE_2D, m_ssaoColorBuffer);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -537,6 +569,25 @@ void ProcessedCamera::createFrameBuffers()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // SSAO frame buffer
+    glGenFramebuffers(1, &m_ssaoFrameBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ssaoFrameBuffer);
+
+    glGenTextures(1, &m_ssaoColorBuffer);
+
+    glBindTexture(GL_TEXTURE_2D, m_ssaoColorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_bufferWidth, m_bufferHeight, 0, GL_RED, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ssaoColorBuffer, 0);
+
+    glDrawBuffers(1, attachments);
+
+    frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+    if (frameBufferStatus != GL_FRAMEBUFFER_COMPLETE)
+        std::cerr << "Unable to create SSAO frame buffer: " << frameBufferStatus << std::endl;
     
     // FXAA frame buffer
     glGenFramebuffers(1, &m_fxaaFrameBuffer);
@@ -615,6 +666,7 @@ void ProcessedCamera::deleteBuffers()
     glDeleteFramebuffers(1, &m_primaryFrameBuffer);
     glDeleteFramebuffers(1, &m_shadowMapFrameBuffer);
     glDeleteFramebuffers(1, &m_deferredFrameBuffer);
+    glDeleteFramebuffers(1, &m_ssaoFrameBuffer);
     glDeleteFramebuffers(1, &m_fxaaFrameBuffer);
     glDeleteFramebuffers(1, &m_hdrFrameBuffer);
     glDeleteFramebuffers(2, m_pingPongFrameBuffers);
@@ -626,6 +678,7 @@ void ProcessedCamera::deleteBuffers()
     glDeleteTextures(1, &m_primaryNormalBuffer);
     glDeleteTextures(1, &m_primaryMaterialBuffer);
     glDeleteTextures(1, &m_ssaoNoiseTexture);
+    glDeleteTextures(1, &m_ssaoColorBuffer);
     glDeleteTextures(1, &m_fxaaColorBuffer);
     glDeleteTextures(1, &m_hdrColorBuffer);
     glDeleteTextures(2, m_pingPongColorBuffers);

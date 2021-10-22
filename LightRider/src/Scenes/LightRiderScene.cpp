@@ -32,12 +32,19 @@ void LightRiderScene::loadAssets()
     pAssets->loadShape("chunkShape", "chunk_particle.shape");
 
     // Ground assets.
-    Program* pGroundShader = pAssets->loadShaderProgram("groundShader", "ground_vertex.glsl", "ground_fragment.glsl");
+    Program* pGroundShader = pAssets->loadShaderProgram("groundShader", "ground_vertex.glsl", "ground_fragment.glsl",
+        ShaderUniform::P_MATRIX
+      | ShaderUniform::V_MATRIX
+      | ShaderUniform::M_MATRIX
+      | ShaderUniform::TEXTURE_0
+      | ShaderUniform::TEXTURE_3);
     pGroundShader->addUniform("lightPV");
     pGroundShader->addUniform("shadowMap");
+    pGroundShader->addUniform("campos");
     //pGroundShader->addUniform("lightPosition");
     //pGroundShader->addUniform("lightDirection");
     pGroundShader->bind();
+    glUniform1i(pGroundShader->getUniform("texture3"), 3);
     glUniform1i(pGroundShader->getUniform("shadowMap"), 4);
     pGroundShader->unbind();
     
@@ -82,19 +89,26 @@ void LightRiderScene::loadAssets()
     pDeferredShader->addUniform("gNormal");
     pDeferredShader->addUniform("gMaterial");
     pDeferredShader->addUniform("shadowMap");
+    pDeferredShader->addUniform("skyTexture");
     pDeferredShader->addUniform("campos");
     pDeferredShader->addUniform("lightPV");
+
+    Program* pSsaoShader = pAssets->loadShaderProgram("ssaoShader", "ssao_vertex.glsl", "ssao_fragment.glsl", ShaderUniform::NONE);
+    pSsaoShader->addUniform("gPosition");
+    pSsaoShader->addUniform("gNormal");
+    pSsaoShader->addUniform("gMaterial");
+    pSsaoShader->addUniform("noise");
+    pSsaoShader->addUniform("samples");
+    pSsaoShader->addUniform("projection");
+    pSsaoShader->addUniform("view");
 
     Program* pBlendedDeferredShader = pAssets->loadShaderProgram("blendedDeferredShader", "blended_deferred_vertex.glsl", "blended_deferred_fragment.glsl", ShaderUniform::NONE);
     pBlendedDeferredShader->addUniform("gColor");
     pBlendedDeferredShader->addUniform("gPosition");
     pBlendedDeferredShader->addUniform("gNormal");
     pBlendedDeferredShader->addUniform("gMaterial");
-    pBlendedDeferredShader->addUniform("noise");
-    pBlendedDeferredShader->addUniform("campos");
-    pBlendedDeferredShader->addUniform("samples");
-    pBlendedDeferredShader->addUniform("projection");
-    pBlendedDeferredShader->addUniform("view");
+    pBlendedDeferredShader->addUniform("ssaoTexture");
+    pBlendedDeferredShader->addUniform("occlusionFactor");
 
     Program* pPostShader = pAssets->loadShaderProgram("postShader", "post_vertex.glsl", "post_fragment.glsl", ShaderUniform::NONE);
     pPostShader->addUniform("screenTexture");

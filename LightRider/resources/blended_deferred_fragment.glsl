@@ -1,11 +1,8 @@
 #version 430 core
 
-#define KERNEL_SIZE 64
-#define RADIUS 0.5
-#define BIAS 0.025
-
-const vec3 player1Color = vec3(0.0, 0.75, 1.0);
-const vec3 player2Color = vec3(1.0f, 0.25f, 0.0f);
+#define KERNEL_DIM 4
+#define KERNEL_HALF_DIM (KERNEL_DIM / 2)
+#define KERNEL_SIZE (KERNEL_DIM * KERNEL_DIM)
 
 in vec2 texCoords;
 
@@ -15,42 +12,28 @@ layout(location = 0) uniform sampler2D gColor;
 layout(location = 1) uniform sampler2D gPosition;
 layout(location = 2) uniform sampler2D gNormal;
 layout(location = 3) uniform isampler2D gMaterial;
-layout(location = 4) uniform sampler2D noise;
+layout(location = 4) uniform sampler2D ssaoTexture;
 
-uniform vec3 campos;
-uniform vec3 samples[KERNEL_SIZE];
-uniform mat4 projection;
-uniform mat4 view;
+uniform float occlusionFactor;
 
 void main()
 {
-    vec2 noiseScale = vec2(textureSize(gPosition, 0).xy) * 0.25;
-    fragColor = texture(gColor, texCoords).xyz;
-
-    vec3 fragPos = (view * texture(gPosition, texCoords)).xyz;
-    vec3 normal = normalize(mat3(view) * texture(gNormal, texCoords).xyz);
-    vec3 randomVec = texture(noise, texCoords * noiseScale).xyz;
-
-    vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
-    vec3 bitangent = cross(normal, tangent);
-    mat3 TBN = mat3(tangent, bitangent, normal);
-
-    float occlusion = 0.0;
-    for (int i = 0; i < KERNEL_SIZE; i++)
+    vec2 texelSize = 1.0 / vec2(textureSize(ssaoTexture, 0));
+    float occlusion = 0;
+    for (int x = -KERNEL_HALF_DIM; x < KERNEL_HALF_DIM; x++)
     {
-        vec3 samplePos = TBN * samples[i];
-        samplePos = fragPos + samplePos * RADIUS;
-
-        vec4 offset = vec4(samplePos, 1.0);
-        offset = projection * offset;
-        offset.xyz /= offset.w;
-        offset.xyz = offset.xyz * 0.5 + vec3(0.5, 0.5, 0.5);
-
-        float sampleDepth = vec3(view * texture(gPosition, offset.xy)).z;
-
-        occlusion += (sampleDepth >= samplePos.z + BIAS ? 1.0 : 0.0);
+        for (int y = -KERNEL_HALF_DIM; y < KERNEL_HALF_DIM; y++)
+        {
+            vec2 offset = vec2(float(x), float(y)) * texelSize;
+            occlusion += texture(ssaoTexture, texCoords + offset).r;
+        }
     }
+    occlusion /= KERNEL_SIZE;
 
-    occlusion = 1.0 - (occlusion / KERNEL_SIZE);
-    fragColor.rgb *= vec3(occlusion, occlusion, occlusion);
+    fragColor = texture(gColor, texCoords).rgb;
+    vec3 occlusionColor = fragColor * occlusion;
+    occlusionColor += vec3(0.1, 0.75, 1) * (1 - occlusion) * 3;
+    fragColor = fragColor * (1 - occlusionFactor) + occlusionColor * occlusionFactor;
+
+    // TODO: Additional post processing effects here.
 }

@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Components\GroundRenderer.cpp" />
     <ClCompile Include="src\ContainerGroupBuilder.cpp" />
     <ClCompile Include="src\ComputeProgram.cpp" />
     <ClCompile Include="src\Components\ChunkRenderer.cpp" />
@@ -403,6 +404,7 @@
     <ClCompile Include="src\StaticCollisionObjectInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Components\GroundRenderer.h" />
     <ClInclude Include="include\ContainerGroupBuilder.h" />
     <ClInclude Include="include\ComputeProgram.h" />
     <ClInclude Include="include\CollisionObjectInfo.h" />
@@ -942,6 +944,8 @@
     <None Include="resources\sphere.shape">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="resources\ssao_fragment.glsl" />
+    <None Include="resources\ssao_vertex.glsl" />
     <None Include="resources\trail_fragment.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>

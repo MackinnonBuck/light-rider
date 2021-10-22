@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ContainerGroupBuilder.h"
 #include "Scenes/LightRiderScene.h"
 #include "Components/PlayerCamera.h"
 #include "Components/DeathCamera.h"
@@ -75,4 +76,7 @@ private:
 
     // Returns whether the player associated with the given GameObject is dead.
     bool isPlayerDead(const GameObject* pPlayerGameObject) const;
+
+    // Constructs the container patterns in the corners of the map.
+    void buildCornerContainers(ContainerGroupBuilder& builder, const glm::vec2& position);
 };
