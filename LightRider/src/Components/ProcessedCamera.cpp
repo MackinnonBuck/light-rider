@@ -15,6 +15,8 @@ constexpr int SSAO_KERNEL_SIZE = 64;
 constexpr int SSAO_NOISE_DIMENSION = 4;
 constexpr int SSAO_NOISE_SIZE = SSAO_NOISE_DIMENSION * SSAO_NOISE_DIMENSION;
 
+bool ProcessedCamera::s_isUsingHbao = false;
+
 ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     Camera(enabled, layerDepth),
     m_offsetRatio(glm::zero<glm::vec2>()),
@@ -48,6 +50,7 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     m_pShadowShader = pAssets->getShaderProgram("shadowShader");
     m_pDeferredShader = pAssets->getShaderProgram("deferredShader");
     m_pSsaoShader = pAssets->getShaderProgram("ssaoShader");
+    m_pHbaoShader = pAssets->getShaderProgram("hbaoShader");
     m_pBlendedDeferredShader = pAssets->getShaderProgram("blendedDeferredShader");
     m_pPostShader = pAssets->getShaderProgram("postShader");
     m_pFxaaShader = pAssets->getShaderProgram("fxaaShader");
@@ -75,6 +78,13 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     glUniform1i(m_pSsaoShader->getUniform("noise"), 3);
     glUniform3fv(m_pSsaoShader->getUniform("samples"), SSAO_KERNEL_SIZE, &ssaoKernel[0].x);
     m_pSsaoShader->unbind();
+
+    m_pHbaoShader->bind();
+    glUniform1i(m_pHbaoShader->getUniform("gPosition"), 0);
+    glUniform1i(m_pHbaoShader->getUniform("gNormal"), 1);
+    glUniform1i(m_pHbaoShader->getUniform("gMaterial"), 2);
+    glUniform1i(m_pHbaoShader->getUniform("noise"), 3);
+    m_pHbaoShader->unbind();
 
     m_pBlendedDeferredShader->bind();
     glUniform1i(m_pBlendedDeferredShader->getUniform("gColor"), 0);
@@ -175,6 +185,23 @@ void ProcessedCamera::getViewport(int& x, int& y, int& width, int& height)
 void ProcessedCamera::update(float deltaTime)
 {
     m_currentExposure += (m_targetExposure - m_currentExposure) * deltaTime * GC::exposureAdjustmentRate;
+
+    if (Game::getInstance().isKeyDown(GLFW_KEY_J))
+    {
+        if (s_isUsingHbao)
+        {
+            std::cout << "Using SSAO\n";
+            s_isUsingHbao = false;
+        }
+    }
+    else if (Game::getInstance().isKeyDown(GLFW_KEY_K))
+    {
+        if (!s_isUsingHbao)
+        {
+            std::cout << "Using HBAO\n";
+            s_isUsingHbao = true;
+        }
+    }
 }
 
 void ProcessedCamera::preRender()
@@ -300,11 +327,20 @@ void ProcessedCamera::postRender()
     glBindVertexArray(m_quadVertexArrayObject);
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_ssaoFrameBuffer);
-    
-    m_pSsaoShader->bind();
 
-    glUniformMatrix4fv(m_pSsaoShader->getUniform("projection"), 1, GL_FALSE, &getPerspectiveMatrix()[0][0]);
-    glUniformMatrix4fv(m_pSsaoShader->getUniform("view"), 1, GL_FALSE, &getViewMatrix()[0][0]);
+    Program* pAoShader = s_isUsingHbao ? m_pHbaoShader : m_pSsaoShader;
+    pAoShader->bind();
+
+    if (s_isUsingHbao)
+    {
+        glUniform2fv(pAoShader->getUniform("focalLength"), 1, &getFocalLength()[0]);
+    }
+    else
+    {
+        glUniformMatrix4fv(pAoShader->getUniform("projection"), 1, GL_FALSE, &getPerspectiveMatrix()[0][0]);
+    }
+
+    glUniformMatrix4fv(pAoShader->getUniform("view"), 1, GL_FALSE, &getViewMatrix()[0][0]);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_primaryPositionBuffer);
@@ -317,7 +353,7 @@ void ProcessedCamera::postRender()
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    m_pSsaoShader->unbind();
+    pAoShader->unbind();
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFrameBuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_primaryColorBuffer, 0);

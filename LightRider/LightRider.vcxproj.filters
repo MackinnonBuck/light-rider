@@ -767,6 +767,8 @@
     <None Include="resources\blended_deferred_vertex.glsl" />
     <None Include="resources\ssao_fragment.glsl" />
     <None Include="resources\ssao_vertex.glsl" />
+    <None Include="resources\hbao_fragment.glsl" />
+    <None Include="resources\hbao_vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ground_texture.png" />

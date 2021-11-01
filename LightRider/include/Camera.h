@@ -34,6 +34,9 @@ public:
     // Gets the camera's perspective matrix (updated just before each render cycle).
     const glm::mat4& getPerspectiveMatrix() const { return m_perspectiveMatrix; }
 
+    // Gets the camera's focal length (updated just before each render cycle).
+    const glm::vec2& getFocalLength() const { return m_focalLength; }
+
     // Gets the camera's layer depth set when it was enabled.
     float getLayerDepth() const { return m_layerDepth; }
 
@@ -137,6 +140,9 @@ private:
 
     // The PV matrix of the sun.
     glm::mat4 m_sunPvMatrix;
+
+    // The focal length of the camera.
+    glm::vec2 m_focalLength;
 
     // The distance from the sun to the camera.
     float m_sunDistance;

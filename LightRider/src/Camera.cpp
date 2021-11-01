@@ -20,6 +20,7 @@ Camera::Camera(bool enabled, float layerDepth) :
     m_sunDistance(300.0f),
     m_sunVMatrix(1.0f),
     m_sunPvMatrix(1.0f),
+    m_focalLength(0.0f, 0.0f),
     m_fieldOfView(glm::pi<float>() / 4.0f),
     m_nearPlane(0.1f),
     m_farPlane(1000.0f)
@@ -108,6 +109,8 @@ void Camera::render()
 
     float aspectRatio = (float)width / (float)height;
     m_perspectiveMatrix = glm::perspective(m_fieldOfView, aspectRatio, m_nearPlane, m_farPlane);
+    m_focalLength.x = (1.0f / glm::tan(m_fieldOfView * 0.5f)) * (1.0f / aspectRatio);
+    m_focalLength.y = 1.0f / glm::tan(m_fieldOfView * 0.5f);
 
     glDepthMask(GL_FALSE);
 

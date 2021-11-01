@@ -19,6 +19,8 @@ uniform float occlusionFactor;
 void main()
 {
     vec2 texelSize = 1.0 / vec2(textureSize(ssaoTexture, 0));
+    
+    // Blurred version
     float occlusion = 0;
     for (int x = -KERNEL_HALF_DIM; x < KERNEL_HALF_DIM; x++)
     {
@@ -29,6 +31,9 @@ void main()
         }
     }
     occlusion /= KERNEL_SIZE;
+
+    // Non-blurred version
+    //float occlusion = texture(ssaoTexture, texCoords).r;
 
     fragColor = texture(gColor, texCoords).rgb;
     vec3 occlusionColor = fragColor * occlusion;

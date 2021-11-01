@@ -55,6 +55,9 @@ private:
     // The shader used to compute SSAO.
     Program* m_pSsaoShader;
 
+    // The shader used to compute HBAO.
+    Program* m_pHbaoShader;
+
     // The shader program used for deferred rendering, including blended objects.
     Program* m_pBlendedDeferredShader;
 
@@ -170,6 +173,9 @@ private:
 
     // The target exposure level.
     float m_targetExposure;
+
+    // Whether HBAO is used. If false, SSAO is used instead.
+    static bool s_isUsingHbao;
 
     // Creates a new frame buffer, freeing the old one if it exists.
     void createFrameBuffers();

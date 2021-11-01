@@ -891,6 +891,8 @@
     <None Include="resources\container_vertex.glsl" />
     <None Include="resources\deferred_fragment.glsl" />
     <None Include="resources\deferred_vertex.glsl" />
+    <None Include="resources\hbao_fragment.glsl" />
+    <None Include="resources\hbao_vertex.glsl" />
     <None Include="resources\luminance_compute.glsl" />
     <None Include="resources\fxaa_fragment.glsl">
       <DeploymentContent>true</DeploymentContent>

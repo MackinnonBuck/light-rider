@@ -102,6 +102,14 @@ void LightRiderScene::loadAssets()
     pSsaoShader->addUniform("projection");
     pSsaoShader->addUniform("view");
 
+    Program* pHbaoShader = pAssets->loadShaderProgram("hbaoShader", "hbao_vertex.glsl", "hbao_fragment.glsl", ShaderUniform::NONE);
+    pHbaoShader->addUniform("gPosition");
+    pHbaoShader->addUniform("gNormal");
+    pHbaoShader->addUniform("gMaterial");
+    pHbaoShader->addUniform("noise");
+    pHbaoShader->addUniform("view");
+    pHbaoShader->addUniform("focalLength");
+
     Program* pBlendedDeferredShader = pAssets->loadShaderProgram("blendedDeferredShader", "blended_deferred_vertex.glsl", "blended_deferred_fragment.glsl", ShaderUniform::NONE);
     pBlendedDeferredShader->addUniform("gColor");
     pBlendedDeferredShader->addUniform("gPosition");
