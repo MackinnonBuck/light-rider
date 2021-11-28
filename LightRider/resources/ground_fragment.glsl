@@ -1,23 +1,11 @@
-#version 430 core
-
 #define SHADOW_STRENGTH 0.7
 #define OPACITY 0.4
-
-layout(location = 0) out vec4 color;
-layout(location = 1) out vec3 position;
-layout(location = 2) out vec3 normal;
-layout(location = 3) out int material;
-
-//out vec4 color;
 
 in vec3 vertex_normal;
 in vec3 vertex_pos;
 in vec4 vertex_light_space_pos;
 
 const float M_PI = 3.1415926535;
-
-//uniform vec3 lightPosition;
-//uniform vec3 lightDirection;
 
 layout(location = 0) uniform sampler2D texture0;
 layout(location = 3) uniform sampler2D texture3;
@@ -59,11 +47,8 @@ float calcShadowFactor(vec4 lightSpacePosition)
 
 void main()
 {
-    position = vertex_pos;
-    normal = vec3(0, 1, 0);
-    material = 0;
-
-    color = texture(texture0, vec2(vertex_pos.x, vertex_pos.z) * 0.05);
+    vec3 normal = vec3(0, 1, 0);
+    vec4 color = texture(texture0, vec2(vertex_pos.x, vertex_pos.z) * 0.05);
     float shadowFactor = calcShadowFactor(vertex_light_space_pos);
 
     float lightness = (color.r + color.g + color.b) / 3;
@@ -87,4 +72,6 @@ void main()
 
     color.rgb *= 1 - shadowFactor * SHADOW_STRENGTH;
     color.a = OPACITY + (shadowFactor * SHADOW_STRENGTH) * (1 - OPACITY);
+
+    writeOutput(color, vertex_pos, normal, 0);
 }

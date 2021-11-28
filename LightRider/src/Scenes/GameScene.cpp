@@ -87,7 +87,7 @@ void GameScene::update(float deltaTime)
         m_pPlayer1Camera->enable(0.0f);
         m_pPlayer2Camera->enable(0.0f);
 
-        setDebugDrawEnabled(false);
+        //setDebugDrawEnabled(false);
     }
     else if (Game::getInstance().isKeyDown(GLFW_KEY_1))
     {
@@ -95,7 +95,7 @@ void GameScene::update(float deltaTime)
         m_pPlayer2Camera->disable();
         m_pFreeroamCamera->enable(0.0f);
 
-        setDebugDrawEnabled(true);
+        //setDebugDrawEnabled(true);
     }
 
     LightRiderScene::update(deltaTime);

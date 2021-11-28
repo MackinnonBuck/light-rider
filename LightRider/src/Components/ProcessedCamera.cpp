@@ -6,6 +6,8 @@
 #include "Game.h"
 #include "GLSL.h"
 #include "GameConstants.h"
+#include "ProgramMetadata.h"
+#include "ProgramOutputMode.h"
 
 namespace GC = GameConstants;
 
@@ -14,6 +16,10 @@ constexpr int SHADOW_MAP_HEIGHT = 8192;
 constexpr int SSAO_KERNEL_SIZE = 64;
 constexpr int SSAO_NOISE_DIMENSION = 4;
 constexpr int SSAO_NOISE_SIZE = SSAO_NOISE_DIMENSION * SSAO_NOISE_DIMENSION;
+constexpr GLsizei VOXEL_MAP_DIMENSION = 128;
+constexpr GLsizei VOXEL_CAMERA_RESOLUTION = 1024;
+constexpr int VOXEL_ORTHO_WIDTH = 10;
+constexpr int VOXEL_ORTHO_HEIGHT = 10;
 
 bool ProcessedCamera::s_isUsingHbao = false;
 
@@ -36,6 +42,9 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     m_primaryMaterialBuffer(0),
     m_shadowMapFrameBuffer(0),
     m_shadowMapDepthBuffer(0),
+    //m_voxelFrameBuffer(0),
+    //m_voxelColorBuffer(0),
+    m_voxelMapTexture(0),
     m_fxaaFrameBuffer(0),
     m_fxaaColorBuffer(0),
     m_hdrFrameBuffer(0),
@@ -43,7 +52,9 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     m_pingPongFrameBuffers{0, 0},
     m_pingPongColorBuffers{0, 0},
     m_currentExposure(1.0f),
-    m_targetExposure(1.0f)
+    m_targetExposure(1.0f),
+    m_voxelPerspectiveMatrix(1.0f),
+    m_voxelViewMatrix(1.0f)
 {
     AssetManager* pAssets = Game::getInstance().getScene()->getAssetManager();
 
@@ -151,6 +162,49 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
     glBindVertexArray(0);
+
+    m_voxelPerspectiveMatrix = glm::ortho(0, VOXEL_ORTHO_WIDTH, VOXEL_ORTHO_HEIGHT, 0, 0, 1000);
+
+    m_voxelMapRenderConfiguration =
+    {
+        // canUseShader
+        [this](Program* pShaderProgram) -> bool
+        {
+            return doesProgramHaveDynamicOutput(pShaderProgram);
+        },
+
+        // configureShader
+        [this](Program* pShaderProgram)
+        {
+            pShaderProgram->setVerbose(false);
+
+            GLint pId = pShaderProgram->getUniform("P");
+            GLint vId = pShaderProgram->getUniform("V");
+
+            if (pId != -1)
+                glUniformMatrix4fv(pId, 1, GL_FALSE, &m_voxelPerspectiveMatrix[0][0]);
+
+            if (vId != -1)
+                glUniformMatrix4fv(vId, 1, GL_FALSE, &m_voxelViewMatrix[0][0]);
+
+            pShaderProgram->setVerbose(true);
+
+            // TODO:
+            // 1. Output to a larger framebuffer whose resolution matches VOXEL_CAMERA_RESOLUTION.
+            //    Note that this is only a dummy framebuffer. We might be able to get away with only having
+            //    a color attachment since we're not writing to any other attachments and we only need 1
+            //    to define the output resolution.
+            // 2. Need to find an orthographic view that works. Use RenderDoc to determine if it's working.
+            // 3. Continue with the rest of the implementation.
+
+            // NOTES:
+            // 1. This toggle below will help you debug the output.
+
+            //glUniform1i(pShaderProgram->getUniform("_outputMode"), (GLint)ProgramOutputMode::DYNAMIC);
+            glUniform1i(pShaderProgram->getUniform("_outputMode"), (GLint)ProgramOutputMode::STATIC);
+            glBindImageTexture(0, m_voxelMapTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        },
+    };
 }
 
 ProcessedCamera::~ProcessedCamera()
@@ -227,6 +281,9 @@ void ProcessedCamera::preRender()
     // Shadow map pass
     renderShadowMap();
 
+    // Voxel lightmap pass
+    renderToVoxelMap();
+
     // First render pass
     glBindFramebuffer(GL_FRAMEBUFFER, m_primaryFrameBuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_primaryColorBuffer, 0);
@@ -282,11 +339,8 @@ void ProcessedCamera::renderShadowMap()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void ProcessedCamera::postRender()
+void ProcessedCamera::renderDeferred()
 {
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_BLEND);
-
     glBindVertexArray(m_quadVertexArrayObject);
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFrameBuffer);
@@ -321,8 +375,38 @@ void ProcessedCamera::postRender()
     glBindVertexArray(0);
 
     glEnable(GL_BLEND);
-    renderBlendedRenderables();
+    renderBlendedRenderables(getPrimaryRenderConfiguration());
     glDisable(GL_BLEND);
+}
+
+void ProcessedCamera::renderToVoxelMap()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, m_primaryFrameBuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_primaryColorBuffer, 0);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glViewport(0, 0, VOXEL_CAMERA_RESOLUTION, VOXEL_CAMERA_RESOLUTION);
+
+    glDepthMask(GL_FALSE);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+
+    m_voxelPerspectiveMatrix = getPerspectiveMatrix();
+    m_voxelViewMatrix = getViewMatrix();
+
+    // TODO: Render from 3 camera perspectives.
+    renderUnblendedRenderables(m_voxelMapRenderConfiguration);
+    renderBlendedRenderables(m_voxelMapRenderConfiguration);
+}
+
+void ProcessedCamera::postRender()
+{
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+
+    renderDeferred();
 
     glBindVertexArray(m_quadVertexArrayObject);
 
@@ -695,6 +779,39 @@ void ProcessedCamera::createFrameBuffers()
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Voxel frame buffer.
+    //glGenFramebuffers(1, &m_voxelFrameBuffer);
+    //glBindFramebuffer(GL_FRAMEBUFFER, m_voxelFrameBuffer);
+
+    // Voxel map texture.
+    glGenTextures(1, &m_voxelMapTexture);
+
+    glBindTexture(GL_TEXTURE_3D, m_voxelMapTexture);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA16F, VOXEL_MAP_DIMENSION, VOXEL_MAP_DIMENSION, VOXEL_MAP_DIMENSION, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    //glGenTextures(1, &m_voxelColorBuffer);
+
+    //glBindTexture(GL_TEXTURE_2D, m_voxelColorBuffer);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, VOXEL_CAMERA_RESOLUTION, VOXEL_CAMERA_RESOLUTION, 0, GL_RGBA, GL_FLOAT, NULL);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_voxelColorBuffer, 0);
+
+    //glDrawBuffers(1, attachments);
+
+    //frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+    //if (frameBufferStatus != GL_FRAMEBUFFER_COMPLETE)
+    //    std::cerr << "Unable to create voxel frame buffer: " << frameBufferStatus << std::endl;
+
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void ProcessedCamera::deleteBuffers()
@@ -706,6 +823,7 @@ void ProcessedCamera::deleteBuffers()
     glDeleteFramebuffers(1, &m_fxaaFrameBuffer);
     glDeleteFramebuffers(1, &m_hdrFrameBuffer);
     glDeleteFramebuffers(2, m_pingPongFrameBuffers);
+    //glDeleteFramebuffers(1, &m_voxelFrameBuffer);
     glDeleteRenderbuffers(1, &m_depthRenderBuffer);
     glDeleteTextures(1, &m_shadowMapDepthBuffer);
     glDeleteTextures(1, &m_deferredColorBuffer);
@@ -718,6 +836,8 @@ void ProcessedCamera::deleteBuffers()
     glDeleteTextures(1, &m_fxaaColorBuffer);
     glDeleteTextures(1, &m_hdrColorBuffer);
     glDeleteTextures(2, m_pingPongColorBuffers);
+    glDeleteTextures(1, &m_voxelMapTexture);
+    //glDeleteTextures(1, &m_voxelColorBuffer);
 }
 
 void ProcessedCamera::generateSsaoKernel(glm::vec3* kernel, unsigned int size)

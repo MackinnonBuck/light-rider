@@ -36,9 +36,7 @@ void main()
     //float occlusion = texture(ssaoTexture, texCoords).r;
 
     fragColor = texture(gColor, texCoords).rgb;
-    vec3 occlusionColor = fragColor * occlusion;
-    occlusionColor += vec3(0.1, 0.75, 1) * (1 - occlusion) * 3;
-    fragColor = fragColor * (1 - occlusionFactor) + occlusionColor * occlusionFactor;
-
+    float occlusionWeight = 2;
+    fragColor.rgb = (1 - occlusionWeight) * fragColor.rgb + occlusionWeight * occlusion * fragColor.rgb;
     // TODO: Additional post processing effects here.
 }

@@ -419,6 +419,9 @@
     <ClInclude Include="include\ContactHandler.h" />
     <ClInclude Include="include\Components\BikeController.h" />
     <ClInclude Include="include\GameConstants.h" />
+    <ClInclude Include="include\ProgramMetadata.h" />
+    <ClInclude Include="include\ProgramOutputMode.h" />
+    <ClInclude Include="include\RenderConfiguration.h" />
     <ClInclude Include="include\Scenes\GameScene.h" />
     <ClInclude Include="include\ConversionUtils.h" />
     <ClInclude Include="include\Components\FreeroamCamera.h" />
@@ -922,6 +925,7 @@
     <None Include="resources\line_vertex.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="resources\output.glsl" />
     <None Include="resources\plane.shape">
       <DeploymentContent>true</DeploymentContent>
     </None>

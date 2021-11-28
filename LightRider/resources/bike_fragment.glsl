@@ -1,9 +1,3 @@
-#version 430 core
-layout(location = 0) out vec4 color;
-layout(location = 1) out vec3 position;
-layout(location = 2) out vec3 normal;
-layout(location = 3) out int material;
-
 #define GRID_SPACING 0.05
 #define GRID_WIDTH 0.005
 #define GRID_INTENSITY_BASE 3
@@ -182,10 +176,9 @@ float cnoise(vec4 P)
 
 void main()
 {
-    color.a = 1;
-    color.rgb = texture(texture0, vertex_tex).rgb;
-    position = vertex_pos;
-    normal = vertex_normal;
+    vec4 outputColor;
+    outputColor.a = 1;
+    outputColor.rgb = texture(texture0, vertex_tex).rgb;
 
     if (transitionAmount < 0.99)
     {
@@ -207,8 +200,8 @@ void main()
                 mod(vertex_pos_raw.y, GRID_SPACING) < GRID_WIDTH ||
                 mod(vertex_pos_raw.z, GRID_SPACING) < GRID_WIDTH)
             {
-                material = 0;
-                color.rgb = gridColor * GRID_INTENSITY_BASE + (noise - transitionAmount) * GRID_INTENSITY_SCALE;
+                outputColor.rgb = gridColor * GRID_INTENSITY_BASE + (noise - transitionAmount) * GRID_INTENSITY_SCALE;
+                writeOutput(outputColor, vertex_pos, vertex_normal, 0);
             }
             else
             {
@@ -220,40 +213,34 @@ void main()
 
         if (noise > transitionAmount - BORDER_SIZE)
         {
-            material = 0;
-            color.rgb = gridColor * BORDER_INTENSITY;
+			writeOutput(vec4(gridColor * BORDER_INTENSITY, 1), vertex_pos, vertex_normal, 0);
             return;
         }
     }
 
-    if (color.r < 0.9) // Bike body
+    if (outputColor.r < 0.9) // Bike body
     {
-        material = 4;
-        color.rgb = vec3(0, 0, 0);
+		writeOutput(vec4(0, 0, 0, 0), vertex_pos, vertex_normal, 4);
     }
-    else if (color.g < 0.9) // Bike rider
+    else if (outputColor.g < 0.9) // Bike rider
     {
-        material = 5;
-        color.rgb = vec3(0, 0, 0);
+		writeOutput(vec4(0, 0, 0, 0), vertex_pos, vertex_normal, 5);
     }
-    else if (color.b < 0.9) // Bike headlights
+    else if (outputColor.b < 0.9) // Bike headlights
     {
-        material = 3;
-        color.rgb = vec3(0, 0, 0);
+		writeOutput(vec4(0, 0, 0, 0), vertex_pos, vertex_normal, 3);
     }
     else if (playerId == 0) // Player 1 accent
     {
-        material = 1;
-        color.rgb = vec3(1, 1, 1);
+		writeOutput(vec4(1, 1, 1, 1), vertex_pos, vertex_normal, 1);
     }
     else if (playerId == 1) // Player 2 accent
     {
-        material = 2;
-        color.rgb = vec3(1, 1, 1);
+		writeOutput(vec4(1, 1, 1, 1), vertex_pos, vertex_normal, 2);
     }
     else
     {
         // Unknown material.
-        material = 1000;
+		writeOutput(vec4(0, 0, 0, 0), vertex_pos, vertex_normal, 1000);
     }
 }

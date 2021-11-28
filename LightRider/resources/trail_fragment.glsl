@@ -1,10 +1,3 @@
-#version 430 core
-
-layout(location = 0) out vec4 color;
-layout(location = 1) out vec3 position;
-layout(location = 2) out vec3 normal;
-layout(location = 3) out int material;
-
 uniform int playerId;
 uniform float noiseSeed;
 uniform float currentTime;
@@ -164,10 +157,6 @@ float cnoise(vec4 P)
 
 void main()
 {
-	position = fragmentPosition;
-	normal = vec3(1, 1, 1);
-	material = 0;
-
     vec3 baseColor = playerId == 0
         ? vec3(0.0f, 0.75f, 1.0f)
         : vec3(1.0f, 0.25f, 0.0f);
@@ -181,6 +170,9 @@ void main()
     noiseFactor *= 0.6;
     noiseFactor = pow(noiseFactor, 8);
     noiseFactor += 0.35;
+	vec4 color;
     color.rgb = nBaseColor * (edgeFactor + (1 - edgeFactor) * (timeFactor * gradientFactor + (1 - timeFactor) * noiseFactor));
     color.a = (color.r + color.g + color.b) / 3;
+
+	writeOutput(color, fragmentPosition, vec3(1, 1, 1), 0);
 }

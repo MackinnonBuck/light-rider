@@ -137,6 +137,16 @@ private:
     // The depth render buffer for the shadow map.
     GLuint m_shadowMapDepthBuffer;
 
+    //// The framebuffer used to render to the voxel light map.
+    //GLuint m_voxelFrameBuffer;
+
+    //// The color buffer used in rendering the voxel light map.
+    //// This buffer is only attached in order to make the framebuffer valid - we don't write to it.
+    //GLuint m_voxelColorBuffer;
+
+    // The 3D texture storing the voxel light map.
+    GLuint m_voxelMapTexture;
+
     // The VAO for the quad to display the texture.
     GLuint m_quadVertexArrayObject;
 
@@ -162,6 +172,9 @@ private:
     // needs to be recreated.
     bool m_areFrameBuffersDirty;
 
+    // The render configuration used to render the voxel map.
+    RenderConfiguration m_voxelMapRenderConfiguration;
+
     // The offset ratio of the camera to screen size.
     glm::vec2 m_offsetRatio;
 
@@ -174,6 +187,12 @@ private:
     // The target exposure level.
     float m_targetExposure;
 
+    // The current perspective matrix used to render the voxel map.
+    glm::mat4 m_voxelPerspectiveMatrix;
+
+    // The current view matrix used to render the voxel map.
+    glm::mat4 m_voxelViewMatrix;
+
     // Whether HBAO is used. If false, SSAO is used instead.
     static bool s_isUsingHbao;
 
@@ -185,6 +204,12 @@ private:
     
     // Renders the current scene to the shadow map.
     void renderShadowMap();
+
+    // Performs a deferred rendering pass.
+    void renderDeferred();
+
+    // Renders the scene from the given camera matrices into the voxel light map.
+    void renderToVoxelMap();
 
     void generateSsaoKernel(glm::vec3* kernel, unsigned int size);
 

@@ -6,6 +6,8 @@
 
 #include "AssetManager.h"
 #include "Game.h"
+#include "ProgramMetadata.h"
+#include "ProgramOutputMode.h"
 
 Camera::Camera(bool enabled, float layerDepth) :
     m_pSkyTexture(nullptr),
@@ -37,6 +39,37 @@ Camera::Camera(bool enabled, float layerDepth) :
     const float zFar = 500.0f;
 
     m_sunPMatrix = glm::ortho(left, right, bottom, top, zNear, zFar);
+
+    m_primaryRenderConfiguration =
+    {
+        // canUseShader
+        m_primaryRenderConfiguration.canUseShader = [](Program* pShaderProgram) -> bool
+        {
+            return true;
+        },
+
+        // configureShader
+        [this](Program* pShaderProgram) -> void
+        {
+            pShaderProgram->setVerbose(false);
+
+            GLint pId = pShaderProgram->getUniform("P");
+            GLint vId = pShaderProgram->getUniform("V");
+
+            if (pId != -1)
+                glUniformMatrix4fv(pId, 1, GL_FALSE, &m_perspectiveMatrix[0][0]);
+
+            if (vId != -1)
+                glUniformMatrix4fv(vId, 1, GL_FALSE, &m_viewMatrix[0][0]);
+
+            pShaderProgram->setVerbose(true);
+
+            if (doesProgramHaveDynamicOutput(pShaderProgram))
+            {
+                glUniform1i(pShaderProgram->getUniform("_outputMode"), (GLint)ProgramOutputMode::STATIC);
+            }
+        },
+    };
 }
 
 Camera::~Camera()
@@ -122,7 +155,7 @@ void Camera::render()
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 
-    renderUnblendedRenderables();
+    renderUnblendedRenderables(m_primaryRenderConfiguration);
 
     Scene* pScene = Game::getInstance().getScene();
     
@@ -181,16 +214,25 @@ void Camera::renderSky(const glm::mat4& transformMatrix)
     m_pSkyShaderProgram->unbind();
 }
 
-void Camera::renderUnblendedRenderables()
+void Camera::renderUnblendedRenderables(const RenderConfiguration& configuration)
 {
     AssetManager* pAssets = Game::getInstance().getScene()->getAssetManager();
 
-    for (auto shaderProgramNode : Game::getInstance().getScene()->getAssetManager()->getRenderTree())
+    for (auto shaderProgramNode : pAssets->getRenderTree())
     {
         Program* pShaderProgram = shaderProgramNode.first;
 
         if (pShaderProgram)
-            setUpShaderProgram(pShaderProgram);
+        {
+            if (!configuration.canUseShader(pShaderProgram))
+            {
+                continue;
+            }
+
+            pShaderProgram->bind();
+
+            configuration.configureShader(pShaderProgram);
+        }
 
         for (auto textureNode : *shaderProgramNode.second)
         {
@@ -213,7 +255,7 @@ void Camera::renderUnblendedRenderables()
     }
 }
 
-void Camera::renderBlendedRenderables()
+void Camera::renderBlendedRenderables(const RenderConfiguration& configuration)
 {
     AssetManager* pAssets = Game::getInstance().getScene()->getAssetManager();
 
@@ -235,7 +277,15 @@ void Camera::renderBlendedRenderables()
 
             if (pShaderProgram)
             {
-                setUpShaderProgram(pShaderProgram);
+                if (!configuration.canUseShader(pShaderProgram))
+                {
+                    pShaderProgram = nullptr;
+                    continue;
+                }
+
+                pShaderProgram->bind();
+
+                configuration.configureShader(pShaderProgram);
             }
         }
 
@@ -260,23 +310,6 @@ void Camera::renderBlendedRenderables()
         pShaderProgram->unbind();
 }
 
-void Camera::setUpShaderProgram(Program* pShaderProgram)
-{
-    pShaderProgram->bind();
-    pShaderProgram->setVerbose(false);
-
-    GLint pId = pShaderProgram->getUniform("P");
-    GLint vId = pShaderProgram->getUniform("V");
-
-    if (pId != -1)
-        glUniformMatrix4fv(pId, 1, GL_FALSE, &m_perspectiveMatrix[0][0]);
-
-    if (vId != -1)
-        glUniformMatrix4fv(vId, 1, GL_FALSE, &m_viewMatrix[0][0]);
-
-    pShaderProgram->setVerbose(true);
-}
-
 void Camera::findAndSetUpTexture(AssetManager* pAssets, TextureType type, const std::string& textureId)
 {
     if (textureId.empty())
@@ -296,4 +329,10 @@ void Camera::setUpTexture(TextureType type, Texture* pTexture)
 {
     glActiveTexture((GLenum)type);
     glBindTexture(GL_TEXTURE_2D, pTexture->getTextureId());
+}
+
+bool Camera::doesProgramHaveDynamicOutput(Program* pShaderProgram)
+{
+    auto programMetadata = (ProgramMetadata)(uintptr_t)pShaderProgram->getUserPointer();
+    return programMetadata == ProgramMetadata::USES_DYNAMIC_OUTPUT;
 }
