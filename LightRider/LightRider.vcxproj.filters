@@ -773,6 +773,8 @@
     <None Include="resources\hbao_fragment.glsl" />
     <None Include="resources\hbao_vertex.glsl" />
     <None Include="resources\output.glsl" />
+    <None Include="resources\voxel_clear.glsl" />
+    <None Include="resources\voxel_combine.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ground_texture.png" />

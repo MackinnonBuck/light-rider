@@ -205,6 +205,7 @@ void GameScene::initScene()
     m_pPlayer1Camera = pPlayer1CameraObject->addComponent<PlayerCamera>(m_pPlayer1Bike, m_pPlayer2Bike, player1CameraControls);
     m_pPlayer1Camera->setSky("skyShader", "skyTexture", "sphereShape");
     m_pPlayer1Camera->setSizeRatio(glm::vec2(0.5f, 1.0f));
+    m_pPlayer1Camera->setSubject(m_pPlayer1Bike);
 
     GameObject* pPlayer2CameraObject = GameObject::create("Player2Camera");
     pPlayer2CameraObject->getTransform()->setPosition(GC::introCamera2Position);
@@ -214,6 +215,7 @@ void GameScene::initScene()
     m_pPlayer2Camera->setSky("skyShader", "skyTexture", "sphereShape");
     m_pPlayer2Camera->setOffsetRatio(glm::vec2(0.5f, 0.0f));
     m_pPlayer2Camera->setSizeRatio(glm::vec2(0.5f, 1.0f));
+    m_pPlayer2Camera->setSubject(m_pPlayer2Bike);
     
     GameObject* pDeathCameraObject = GameObject::create("DeathCamera");
     m_pDeathCamera = pDeathCameraObject->addComponent<DeathCamera>();

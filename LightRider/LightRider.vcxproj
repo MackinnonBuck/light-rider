@@ -958,6 +958,8 @@
     <None Include="resources\trail_vertex.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="resources\voxel_clear.glsl" />
+    <None Include="resources\voxel_combine.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\container_color_texture.png" />

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameObject.h"
 #include "ComputeProgram.h"
 #include "Camera.h"
 #include "Program.h"
@@ -15,6 +16,12 @@ public:
     
     // Destroys the ProcessedCamera instance.
     virtual ~ProcessedCamera();
+
+    // Sets the subject of the camera. This is used to determine the voxel light map origin.
+    void setSubject(GameObject* pSubject) { m_pSubject = pSubject; }
+
+    // Gets the subject of the camera. This is used to determine the voxel light map origin.
+    GameObject* getSubject() const { return m_pSubject; }
 
     // Sets the offset ratio of the camera to screen size (each axis has a range from 0 to 1).
     void setOffsetRatio(const glm::vec2& offsetRatio);
@@ -35,6 +42,9 @@ public:
 
 protected:
 
+    // Initializes the camera component.
+    virtual bool initialize();
+
     // Returns the viewport dimensions.
     virtual void getViewport(int& x, int& y, int& width, int& height);
 
@@ -45,6 +55,9 @@ protected:
     virtual void postRender();
 
 private:
+
+    // The subject of the camera. This dictates where the voxel light map should be centered.
+    GameObject* m_pSubject;
 
     // The shader used to render objects that cast shadows.
     Program* m_pShadowShader;
@@ -79,6 +92,12 @@ private:
 
     // The compute shader used to determine the overall luminance of the scene.
     ComputeProgram* m_pLuminanceComputeShader;
+
+    // The compute shader used to clear the voxel texture.
+    ComputeProgram* m_pVoxelClearComputeShader;
+
+    // The compute shader used to combine each voxel map component texture.
+    ComputeProgram* m_pVoxelCombineComputeShader;
 
     // The frame buffer that the scene gets rendered to.
     GLuint m_primaryFrameBuffer;
@@ -137,15 +156,18 @@ private:
     // The depth render buffer for the shadow map.
     GLuint m_shadowMapDepthBuffer;
 
-    //// The framebuffer used to render to the voxel light map.
-    //GLuint m_voxelFrameBuffer;
+    // The framebuffer used to render to the voxel light map.
+    GLuint m_voxelFrameBuffer;
 
-    //// The color buffer used in rendering the voxel light map.
-    //// This buffer is only attached in order to make the framebuffer valid - we don't write to it.
-    //GLuint m_voxelColorBuffer;
+    // The color buffer used in rendering the voxel light map.
+    // This buffer is only attached in order to make the framebuffer valid - we don't write to it.
+    GLuint m_voxelColorBuffer;
 
     // The 3D texture storing the voxel light map.
     GLuint m_voxelMapTexture;
+
+    // The 3D textures representing each component in the voxel light map.
+    GLuint m_voxelMapTextureComponents[4];
 
     // The VAO for the quad to display the texture.
     GLuint m_quadVertexArrayObject;

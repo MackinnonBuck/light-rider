@@ -142,6 +142,18 @@ void LightRiderScene::loadAssets()
     pLuminanceProgram->addBuffer("result", sizeof(glm::vec4));
     pLuminanceProgram->addUniform("colorImage");
 
+    ComputeProgram* pVoxelClearProgram = pAssets->loadComputeShaderProgram("voxelClear", "voxel_clear.glsl");
+    pVoxelClearProgram->addUniform("voxelMapR");
+    pVoxelClearProgram->addUniform("voxelMapG");
+    pVoxelClearProgram->addUniform("voxelMapB");
+    pVoxelClearProgram->addUniform("voxelMapA");
+
+    ComputeProgram* pVoxelCombineProgram = pAssets->loadComputeShaderProgram("voxelCombine", "voxel_combine.glsl");
+    pVoxelCombineProgram->addUniform("voxelMapR");
+    pVoxelCombineProgram->addUniform("voxelMapG");
+    pVoxelCombineProgram->addUniform("voxelMapB");
+    pVoxelCombineProgram->addUniform("voxelMapA");
+
     pAssets->loadShape("sphereShape", "sphere.shape");
     pAssets->loadShape("planeShape", "plane.shape");
     pAssets->loadShape("rampShape", "ramp.shape");
@@ -153,7 +165,11 @@ Program* LightRiderScene::loadShaderProgramWithDynamicOutput(const std::string& 
 {
     Program* pProgram = getAssetManager()->loadShaderProgram(id, vertexShaderFileName, { "output.glsl", fragmentShaderFileName }, defaultUniforms);
     pProgram->addUniform("_outputMode");
-    pProgram->addUniform("_voxelMap");
+    pProgram->addUniform("_voxelCenterPosition");
+    pProgram->addUniform("_voxelMapR");
+    pProgram->addUniform("_voxelMapG");
+    pProgram->addUniform("_voxelMapB");
+    pProgram->addUniform("_voxelMapA");
     pProgram->setUserPointer((void*)ProgramMetadata::USES_DYNAMIC_OUTPUT);
 
     return pProgram;
