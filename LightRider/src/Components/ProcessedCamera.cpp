@@ -11,6 +11,11 @@
 
 namespace GC = GameConstants;
 
+constexpr int constLog2(int n)
+{
+    return n < 2 ? 1 : 1 + constLog2(n >> 1);
+}
+
 constexpr int SHADOW_MAP_WIDTH = 8192;
 constexpr int SHADOW_MAP_HEIGHT = 8192;
 constexpr int SSAO_KERNEL_SIZE = 64;
@@ -18,6 +23,7 @@ constexpr int SSAO_NOISE_DIMENSION = 4;
 constexpr int SSAO_NOISE_SIZE = SSAO_NOISE_DIMENSION * SSAO_NOISE_DIMENSION;
 constexpr GLsizei VOXEL_MAP_DIMENSION = 128;
 constexpr GLsizei VOXEL_CAMERA_RESOLUTION = 1024;
+constexpr int VOXEL_MAP_MIP_LEVELS = constLog2(VOXEL_MAP_DIMENSION);
 constexpr float VOXEL_CAMERA_DISTANCE = 40.0f;
 constexpr float VOXEL_ORTHO_SIZE = 20.0f;
 constexpr float VOXEL_ORTHO_HALF_SIZE = VOXEL_ORTHO_SIZE * 0.5f;
@@ -73,6 +79,7 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
     m_pLuminanceComputeShader = pAssets->getComputeShaderProgram("luminanceCompute");
     m_pVoxelClearComputeShader = pAssets->getComputeShaderProgram("voxelClear");
     m_pVoxelCombineComputeShader = pAssets->getComputeShaderProgram("voxelCombine");
+    m_pVoxelMipmapComputeShader = pAssets->getComputeShaderProgram("voxelMipmap");
     m_pSkyTexture = pAssets->getTexture("skyTexture");
 
     m_pDeferredShader->bind();
@@ -219,10 +226,10 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
             glActiveTexture(GL_TEXTURE5);
             glBindTexture(GL_TEXTURE_2D, m_pSkyTexture->getTextureId());
 
-            glBindImageTexture(1, m_voxelMapTextureComponents[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I); // TODO: Should be GL_TRUE?
-            glBindImageTexture(2, m_voxelMapTextureComponents[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-            glBindImageTexture(3, m_voxelMapTextureComponents[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-            glBindImageTexture(4, m_voxelMapTextureComponents[3], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+            glBindImageTexture(1, m_voxelMapTextureComponents[0], 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32I);
+            glBindImageTexture(2, m_voxelMapTextureComponents[1], 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32I);
+            glBindImageTexture(3, m_voxelMapTextureComponents[2], 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32I);
+            glBindImageTexture(4, m_voxelMapTextureComponents[3], 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32I);
         },
     };
 }
@@ -416,14 +423,16 @@ void ProcessedCamera::renderDeferred()
 
 void ProcessedCamera::renderToVoxelMap()
 {
-    // Clear the voxel map.
-    m_pVoxelClearComputeShader->bind();
-    glBindImageTexture(1, m_voxelMapTextureComponents[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I); // TODO: Should be GL_TRUE?
-    glBindImageTexture(2, m_voxelMapTextureComponents[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-    glBindImageTexture(3, m_voxelMapTextureComponents[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-    glBindImageTexture(4, m_voxelMapTextureComponents[3], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+    // Work group size/dimensions for compute stages.
     glm::ivec3 localGroupSize(8, 4, 4);
     glm::ivec3 computeDimensions = glm::ivec3(VOXEL_MAP_DIMENSION) / localGroupSize;
+
+    // Clear the voxel map.
+    m_pVoxelClearComputeShader->bind();
+    glBindImageTexture(1, m_voxelMapTextureComponents[0], 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32I);
+    glBindImageTexture(2, m_voxelMapTextureComponents[1], 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32I);
+    glBindImageTexture(3, m_voxelMapTextureComponents[2], 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32I);
+    glBindImageTexture(4, m_voxelMapTextureComponents[3], 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32I);
     glDispatchCompute((GLuint)computeDimensions.x, (GLuint)computeDimensions.y, (GLuint)computeDimensions.z);
     m_pVoxelClearComputeShader->unbind();
 
@@ -454,15 +463,30 @@ void ProcessedCamera::renderToVoxelMap()
 
     // Combine each component.
     m_pVoxelCombineComputeShader->bind();
-    glBindImageTexture(1, m_voxelMapTextureComponents[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I); // TODO: Should be GL_TRUE?
-    glBindImageTexture(2, m_voxelMapTextureComponents[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-    glBindImageTexture(3, m_voxelMapTextureComponents[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-    glBindImageTexture(4, m_voxelMapTextureComponents[3], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-    glBindImageTexture(5, m_voxelMapTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F);
+    glBindImageTexture(1, m_voxelMapTextureComponents[0], 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32I);
+    glBindImageTexture(2, m_voxelMapTextureComponents[1], 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32I);
+    glBindImageTexture(3, m_voxelMapTextureComponents[2], 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32I);
+    glBindImageTexture(4, m_voxelMapTextureComponents[3], 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32I);
+    glBindImageTexture(5, m_voxelMapTexture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
     glDispatchCompute((GLuint)computeDimensions.x, (GLuint)computeDimensions.y, (GLuint)computeDimensions.z);
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     m_pVoxelCombineComputeShader->unbind();
 
-    // TODO: Apply shading in voxel map generation.
+    // Generate mipmaps.
+    m_pVoxelMipmapComputeShader->bind();
+
+    for (int i = 1; i < VOXEL_MAP_MIP_LEVELS; i++)
+    {
+        glBindImageTexture(0, m_voxelMapTexture, i - 1, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA16F);
+        glBindImageTexture(1, m_voxelMapTexture, i, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA16F);
+        glDispatchCompute(
+            (GLuint)glm::max(computeDimensions.x >> i, 1),
+            (GLuint)glm::max(computeDimensions.y >> i, 1),
+            (GLuint)glm::max(computeDimensions.z >> i, 1));
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+    }
+
+    m_pVoxelMipmapComputeShader->unbind();
 }
 
 void ProcessedCamera::postRender()
@@ -852,11 +876,17 @@ void ProcessedCamera::createFrameBuffers()
     glGenTextures(1, &m_voxelMapTexture);
 
     glBindTexture(GL_TEXTURE_3D, m_voxelMapTexture);
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA16F, VOXEL_MAP_DIMENSION, VOXEL_MAP_DIMENSION, VOXEL_MAP_DIMENSION, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, VOXEL_MAP_MIP_LEVELS - 1);
+
+    for (int i = 0; i < VOXEL_MAP_MIP_LEVELS; i++)
+    {
+        int dim = VOXEL_MAP_DIMENSION >> i;
+        glTexImage3D(GL_TEXTURE_3D, i, GL_RGBA16F, dim, dim, dim, 0, GL_RGBA, GL_FLOAT, NULL);
+    }
 
     // Voxel map texture components.
     for (int i = 0; i < 4; i++)

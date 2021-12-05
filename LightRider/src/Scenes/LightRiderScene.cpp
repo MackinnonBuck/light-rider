@@ -150,6 +150,10 @@ void LightRiderScene::loadAssets()
     pVoxelCombineProgram->addUniform("voxelMapB");
     pVoxelCombineProgram->addUniform("voxelMapA");
 
+    ComputeProgram* pVoxelMipmapProgram = pAssets->loadComputeShaderProgram("voxelMipmap", "voxel_mipmap.glsl");
+    pVoxelMipmapProgram->addUniform("inMip");
+    pVoxelMipmapProgram->addUniform("outMip");
+
     pAssets->loadShape("sphereShape", "sphere.shape");
     pAssets->loadShape("planeShape", "plane.shape");
     pAssets->loadShape("rampShape", "ramp.shape");

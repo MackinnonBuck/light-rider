@@ -99,6 +99,9 @@ private:
     // The compute shader used to combine each voxel map component texture.
     ComputeProgram* m_pVoxelCombineComputeShader;
 
+    // The compute shader used to generate a mipmap for the voxel texture.
+    ComputeProgram* m_pVoxelMipmapComputeShader;
+
     // The frame buffer that the scene gets rendered to.
     GLuint m_primaryFrameBuffer;
 

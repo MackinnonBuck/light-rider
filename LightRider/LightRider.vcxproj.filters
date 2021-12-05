@@ -776,6 +776,7 @@
     <None Include="resources\voxel_clear.glsl" />
     <None Include="resources\voxel_combine.glsl" />
     <None Include="resources\materials.glsl" />
+    <None Include="resources\voxel_mipmap.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ground_texture.png" />
