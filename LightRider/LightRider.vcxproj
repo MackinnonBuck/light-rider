@@ -925,6 +925,7 @@
     <None Include="resources\line_vertex.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="resources\materials.glsl" />
     <None Include="resources\output.glsl" />
     <None Include="resources\plane.shape">
       <DeploymentContent>true</DeploymentContent>

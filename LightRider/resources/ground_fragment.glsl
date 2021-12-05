@@ -5,11 +5,8 @@ in vec3 vertex_normal;
 in vec3 vertex_pos;
 in vec4 vertex_light_space_pos;
 
-const float M_PI = 3.1415926535;
-
 layout(location = 0) uniform sampler2D texture0;
 layout(location = 3) uniform sampler2D texture3;
-layout(location = 4) uniform sampler2D shadowMap;
 
 uniform vec3 campos;
 
@@ -35,7 +32,8 @@ float calcShadowFactor(vec4 lightSpacePosition)
 
     for (int i = 0; i < numSamples; i++)
     {
-        if (fragDepth > textureOffset(shadowMap, shifted.xy, offsets[i]).r)
+        // HACK: _shadowMap is defined externally, we're just reusing it here.
+        if (fragDepth > textureOffset(_shadowMap, shifted.xy, offsets[i]).r)
         {
             shadowFactor += 1;
         }

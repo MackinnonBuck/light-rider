@@ -11,11 +11,20 @@ layout(location = 3) out int _material;
 
 uniform int _outputMode;
 uniform vec3 _voxelCenterPosition;
+uniform vec3 _cameraPosition;
+uniform mat4 _lightPV;
+
+layout(location = 4) uniform sampler2D _shadowMap;
+layout(location = 5) uniform sampler2D _skyTexture;
 
 layout(r32i, binding = 1) uniform coherent iimage3D _voxelMapR;
 layout(r32i, binding = 2) uniform coherent iimage3D _voxelMapG;
 layout(r32i, binding = 3) uniform coherent iimage3D _voxelMapB;
 layout(r32i, binding = 4) uniform coherent iimage3D _voxelMapA;
+
+// Prototypes for externally-defined functions.
+bool computeSimpleMaterial(inout vec3 col, int mat);
+bool computeComplexMaterial(inout vec3 col, vec3 pos, vec3 norm, vec3 campos, mat4 lightPV, sampler2D shadowMap, sampler2D skyTexture, int mat);
 
 ivec3 worldToVoxelCoordinates(vec3 pos)
 {
@@ -41,6 +50,13 @@ void writeOutput(vec4 col, vec3 pos, vec3 norm, int mat)
         ivec3 voxelPos = worldToVoxelCoordinates(pos);
         if (voxelPos.x < 0 || voxelPos.y < 0 || voxelPos.z < 0 ||
             voxelPos.x >= VOXEL_MAP_DIMENSION || voxelPos.y >= VOXEL_MAP_DIMENSION || voxelPos.z >= VOXEL_MAP_DIMENSION)
+        {
+            return;
+        }
+
+        // 'col' is an inout parameter here.
+        // Try computing a simple material first, then a complex material. If the material is invalid, don't do anything.
+        if (!computeSimpleMaterial(col.rgb, mat) && !computeComplexMaterial(col.rgb, pos, norm, _cameraPosition, _lightPV, _shadowMap, _skyTexture, mat))
         {
             return;
         }

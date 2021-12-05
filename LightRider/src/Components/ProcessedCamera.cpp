@@ -211,6 +211,14 @@ ProcessedCamera::ProcessedCamera(bool enabled, float layerDepth) :
 
             glUniform1i(pShaderProgram->getUniform("_outputMode"), (GLint)ProgramOutputMode::DYNAMIC);
             glUniform3fv(pShaderProgram->getUniform("_voxelCenterPosition"), 1, &m_pSubject->getTransform()->getPosition()[0]);
+            glUniform3fv(pShaderProgram->getUniform("_cameraPosition"), 1, &getTransform()->getPosition()[0]);
+            glUniformMatrix4fv(pShaderProgram->getUniform("_lightPV"), 1, GL_FALSE, &getSunPvMatrix()[0][0]);
+
+            glActiveTexture(GL_TEXTURE4);
+            glBindTexture(GL_TEXTURE_2D, m_shadowMapDepthBuffer);
+            glActiveTexture(GL_TEXTURE5);
+            glBindTexture(GL_TEXTURE_2D, m_pSkyTexture->getTextureId());
+
             glBindImageTexture(1, m_voxelMapTextureComponents[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I); // TODO: Should be GL_TRUE?
             glBindImageTexture(2, m_voxelMapTextureComponents[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
             glBindImageTexture(3, m_voxelMapTextureComponents[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);

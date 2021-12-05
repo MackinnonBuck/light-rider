@@ -40,13 +40,9 @@ void LightRiderScene::loadAssets()
       | ShaderUniform::TEXTURE_0
       | ShaderUniform::TEXTURE_3);
     pGroundShader->addUniform("lightPV");
-    pGroundShader->addUniform("shadowMap");
     pGroundShader->addUniform("campos");
-    //pGroundShader->addUniform("lightPosition");
-    //pGroundShader->addUniform("lightDirection");
     pGroundShader->bind();
     glUniform1i(pGroundShader->getUniform("texture3"), 3);
-    glUniform1i(pGroundShader->getUniform("shadowMap"), 4);
     pGroundShader->unbind();
     
     pAssets->loadTexture("groundTexture", "ground_texture.png", TextureType::IMAGE);
@@ -84,7 +80,7 @@ void LightRiderScene::loadAssets()
       | ShaderUniform::M_MATRIX);
     pShadowShader->addAttribute("vertexPosition");
 
-    Program* pDeferredShader = pAssets->loadShaderProgram("deferredShader", "deferred_vertex.glsl", "deferred_fragment.glsl", ShaderUniform::NONE);
+    Program* pDeferredShader = pAssets->loadShaderProgram("deferredShader", "deferred_vertex.glsl", std::vector<std::string>{ "deferred_fragment.glsl", "materials.glsl" }, ShaderUniform::NONE);
     pDeferredShader->addUniform("gColor");
     pDeferredShader->addUniform("gPosition");
     pDeferredShader->addUniform("gNormal");
@@ -163,14 +159,23 @@ void LightRiderScene::loadAssets()
 Program* LightRiderScene::loadShaderProgramWithDynamicOutput(const std::string& id, const std::string& vertexShaderFileName,
     const std::string& fragmentShaderFileName, ShaderUniform defaultUniforms)
 {
-    Program* pProgram = getAssetManager()->loadShaderProgram(id, vertexShaderFileName, { "output.glsl", fragmentShaderFileName }, defaultUniforms);
+    Program* pProgram = getAssetManager()->loadShaderProgram(id, vertexShaderFileName, { "output.glsl", "materials.glsl", fragmentShaderFileName}, defaultUniforms);
     pProgram->addUniform("_outputMode");
     pProgram->addUniform("_voxelCenterPosition");
+    pProgram->addUniform("_cameraPosition");
+    pProgram->addUniform("_lightPV");
+    pProgram->addUniform("_shadowMap");
+    pProgram->addUniform("_skyTexture");
     pProgram->addUniform("_voxelMapR");
     pProgram->addUniform("_voxelMapG");
     pProgram->addUniform("_voxelMapB");
     pProgram->addUniform("_voxelMapA");
     pProgram->setUserPointer((void*)ProgramMetadata::USES_DYNAMIC_OUTPUT);
+
+    pProgram->bind();
+    glUniform1i(pProgram->getUniform("_shadowMap"), 4);
+    glUniform1i(pProgram->getUniform("_skyTexture"), 5);
+    pProgram->unbind();
 
     return pProgram;
 }
