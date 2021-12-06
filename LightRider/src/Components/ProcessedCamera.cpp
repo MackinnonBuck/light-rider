@@ -426,6 +426,9 @@ void ProcessedCamera::renderToVoxelMap()
 
     //auto position = m_pSubject->getTransform()->getPosition();
 
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+
     // Render from the X direction.
     m_voxelViewMatrix = glm::lookAt(m_snappedSubjectPosition + glm::vec3(VOXEL_CAMERA_DISTANCE, 0.0f, 0.0f), m_snappedSubjectPosition, glm::vec3(0.0f, 1.0f, 0.0f));
     renderUnblendedRenderables(m_voxelMapRenderConfiguration);
@@ -440,6 +443,9 @@ void ProcessedCamera::renderToVoxelMap()
     m_voxelViewMatrix = glm::lookAt(m_snappedSubjectPosition + glm::vec3(0.0f, 0.0f, VOXEL_CAMERA_DISTANCE), m_snappedSubjectPosition, glm::vec3(0.0f, 1.0f, 0.0f));
     renderUnblendedRenderables(m_voxelMapRenderConfiguration);
     renderBlendedRenderables(m_voxelMapRenderConfiguration);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
 
     // Combine each component.
     m_pVoxelCombineComputeShader->bind();
