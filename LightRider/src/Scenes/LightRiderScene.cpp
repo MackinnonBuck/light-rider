@@ -90,22 +90,15 @@ void LightRiderScene::loadAssets()
     pDeferredShader->addUniform("campos");
     pDeferredShader->addUniform("lightPV");
 
-    Program* pSsaoShader = pAssets->loadShaderProgram("ssaoShader", "ssao_vertex.glsl", "ssao_fragment.glsl", ShaderUniform::NONE);
-    pSsaoShader->addUniform("gPosition");
-    pSsaoShader->addUniform("gNormal");
-    pSsaoShader->addUniform("gMaterial");
-    pSsaoShader->addUniform("noise");
-    pSsaoShader->addUniform("samples");
-    pSsaoShader->addUniform("projection");
-    pSsaoShader->addUniform("view");
-
-    Program* pHbaoShader = pAssets->loadShaderProgram("hbaoShader", "hbao_vertex.glsl", "hbao_fragment.glsl", ShaderUniform::NONE);
-    pHbaoShader->addUniform("gPosition");
-    pHbaoShader->addUniform("gNormal");
-    pHbaoShader->addUniform("gMaterial");
-    pHbaoShader->addUniform("noise");
-    pHbaoShader->addUniform("view");
-    pHbaoShader->addUniform("focalLength");
+    Program* pGiShader = pAssets->loadShaderProgram("giShader", "gi_vertex.glsl", "gi_fragment.glsl", ShaderUniform::NONE);
+    pGiShader->addUniform("gPosition");
+    pGiShader->addUniform("gNormal");
+    pGiShader->addUniform("gMaterial");
+    pGiShader->addUniform("noise");
+    pGiShader->addUniform("voxelMap");
+    pGiShader->addUniform("view");
+    pGiShader->addUniform("focalLength");
+    pGiShader->addUniform("voxelCenterPosition");
 
     Program* pBlendedDeferredShader = pAssets->loadShaderProgram("blendedDeferredShader", "blended_deferred_vertex.glsl", "blended_deferred_fragment.glsl", ShaderUniform::NONE);
     pBlendedDeferredShader->addUniform("gColor");
@@ -113,6 +106,7 @@ void LightRiderScene::loadAssets()
     pBlendedDeferredShader->addUniform("gNormal");
     pBlendedDeferredShader->addUniform("gMaterial");
     pBlendedDeferredShader->addUniform("ssaoTexture");
+    pBlendedDeferredShader->addUniform("indirectTexture");
     pBlendedDeferredShader->addUniform("occlusionFactor");
 
     Program* pPostShader = pAssets->loadShaderProgram("postShader", "post_vertex.glsl", "post_fragment.glsl", ShaderUniform::NONE);

@@ -11,5 +11,5 @@ uniform sampler2D texture3;
 void main()
 {
     color = texture(texture3, vertex_tex).rgb;
-    material = 0;
+    material = 8;
 }

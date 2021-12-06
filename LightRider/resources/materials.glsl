@@ -68,7 +68,9 @@ bool computeSimpleMaterial(inout vec3 col, int mat)
 {
     switch (mat)
     {
-        case 0:
+        case 0: // Default material.
+        case 8: // Sky material.
+        case 9: // Ground material.
             // No material; in color = out color.
             return true;
         case 1:

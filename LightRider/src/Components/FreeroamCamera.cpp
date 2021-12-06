@@ -71,5 +71,5 @@ void FreeroamCamera::postUpdate(float deltaTime)
         glfwSetCursorPos(game.getWindowHandle(), m_initialCursorX, m_initialCursorY);
     }
 
-    Camera::postUpdate(deltaTime);
+    ProcessedCamera::postUpdate(deltaTime);
 }

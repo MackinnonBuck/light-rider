@@ -40,6 +40,8 @@ public:
 
     virtual void update(float deltaTime);
 
+    virtual void postUpdate(float deltaTime);
+
 protected:
 
     // Initializes the camera component.
@@ -65,11 +67,8 @@ private:
     // The shader program used for deferred rendering.
     Program* m_pDeferredShader;
 
-    // The shader used to compute SSAO.
-    Program* m_pSsaoShader;
-
-    // The shader used to compute HBAO.
-    Program* m_pHbaoShader;
+    // The shader used to compute global illumination.
+    Program* m_pGiShader;
 
     // The shader program used for deferred rendering, including blended objects.
     Program* m_pBlendedDeferredShader;
@@ -126,14 +125,17 @@ private:
     // The color buffer for the deferred frame buffer.
     GLuint m_deferredColorBuffer;
 
-    // The texture containing the SSAO noise.
-    GLuint m_ssaoNoiseTexture;
+    // The texture containing noise for HBAO and global illumination.
+    GLuint m_noiseTexture;
 
-    // The frame buffer used to render SSAO.
-    GLuint m_ssaoFrameBuffer;
+    // The frame buffer used to render global illumination.
+    GLuint m_giFrameBuffer;
 
-    // The color buffer for storing the SSAO output.
-    GLuint m_ssaoColorBuffer;
+    // The color buffer for storing the ambient occlusion output.
+    GLuint m_giAoColorBuffer;
+
+    // The color buffer for storing indirect lighting output.
+    GLuint m_giIndirectColorBuffer;
 
     // The frame buffer to store the antialiased scene.
     GLuint m_fxaaFrameBuffer;
@@ -212,14 +214,14 @@ private:
     // The target exposure level.
     float m_targetExposure;
 
+    // The subject position snapped to the voxel grid.
+    glm::vec3 m_snappedSubjectPosition;
+
     // The current perspective matrix used to render the voxel map.
     glm::mat4 m_voxelPerspectiveMatrix;
 
     // The current view matrix used to render the voxel map.
     glm::mat4 m_voxelViewMatrix;
-
-    // Whether HBAO is used. If false, SSAO is used instead.
-    static bool s_isUsingHbao;
 
     // Creates a new frame buffer, freeing the old one if it exists.
     void createFrameBuffers();
@@ -236,7 +238,7 @@ private:
     // Renders the scene from the given camera matrices into the voxel light map.
     void renderToVoxelMap();
 
-    void generateSsaoKernel(glm::vec3* kernel, unsigned int size);
+    glm::vec3 getVoxelSnappedSubjectPosition() const;
 
-    void generateSsaoNoise(glm::vec3* noise, unsigned int size);
+    void generateNoise(glm::vec3* noise, unsigned int size);
 };

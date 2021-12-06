@@ -71,5 +71,5 @@ void main()
     color.rgb *= 1 - shadowFactor * SHADOW_STRENGTH;
     color.a = OPACITY + (shadowFactor * SHADOW_STRENGTH) * (1 - OPACITY);
 
-    writeOutput(color, vertex_pos, normal, 0);
+    writeOutput(color, vertex_pos, normal, 9);
 }

@@ -157,8 +157,11 @@ void GameScene::physicsTick(float physicsTimeStep)
             m_pPlayer2Camera->disable();
             m_pFreeroamCamera->disable();
 
+            auto pDeadBike = player1Dead ? m_pPlayer1Bike : m_pPlayer2Bike;
+
             m_pDeathCamera->enable(0.0f);
-            m_pDeathCamera->setDeadObject(player1Dead ? m_pPlayer1Bike : m_pPlayer2Bike);
+            m_pDeathCamera->setDeadObject(pDeadBike);
+            m_pDeathCamera->setSubject(pDeadBike);
 
             m_ticksUntilReset = GC::deathSequenceTicks;
         }
