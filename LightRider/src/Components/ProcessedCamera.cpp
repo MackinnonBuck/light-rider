@@ -424,8 +424,6 @@ void ProcessedCamera::renderToVoxelMap()
 
     glViewport(0, 0, VOXEL_CAMERA_RESOLUTION, VOXEL_CAMERA_RESOLUTION);
 
-    //auto position = m_pSubject->getTransform()->getPosition();
-
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
 
