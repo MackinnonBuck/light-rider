@@ -723,6 +723,9 @@
     <ClInclude Include="include\ComputeProgram.h" />
     <ClInclude Include="include\ContainerGroupBuilder.h" />
     <ClInclude Include="include\Components\GroundRenderer.h" />
+    <ClInclude Include="include\ProgramMetadata.h" />
+    <ClInclude Include="include\ProgramOutputMode.h" />
+    <ClInclude Include="include\RenderConfiguration.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\line_fragment.glsl" />
@@ -765,10 +768,13 @@
     <None Include="resources\container_vertex.glsl" />
     <None Include="resources\blended_deferred_fragment.glsl" />
     <None Include="resources\blended_deferred_vertex.glsl" />
-    <None Include="resources\ssao_fragment.glsl" />
-    <None Include="resources\ssao_vertex.glsl" />
-    <None Include="resources\hbao_fragment.glsl" />
-    <None Include="resources\hbao_vertex.glsl" />
+    <None Include="resources\gi_fragment.glsl" />
+    <None Include="resources\gi_vertex.glsl" />
+    <None Include="resources\output.glsl" />
+    <None Include="resources\voxel_clear.glsl" />
+    <None Include="resources\voxel_combine.glsl" />
+    <None Include="resources\materials.glsl" />
+    <None Include="resources\voxel_mipmap.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ground_texture.png" />

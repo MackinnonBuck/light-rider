@@ -419,6 +419,9 @@
     <ClInclude Include="include\ContactHandler.h" />
     <ClInclude Include="include\Components\BikeController.h" />
     <ClInclude Include="include\GameConstants.h" />
+    <ClInclude Include="include\ProgramMetadata.h" />
+    <ClInclude Include="include\ProgramOutputMode.h" />
+    <ClInclude Include="include\RenderConfiguration.h" />
     <ClInclude Include="include\Scenes\GameScene.h" />
     <ClInclude Include="include\ConversionUtils.h" />
     <ClInclude Include="include\Components\FreeroamCamera.h" />
@@ -891,8 +894,8 @@
     <None Include="resources\container_vertex.glsl" />
     <None Include="resources\deferred_fragment.glsl" />
     <None Include="resources\deferred_vertex.glsl" />
-    <None Include="resources\hbao_fragment.glsl" />
-    <None Include="resources\hbao_vertex.glsl" />
+    <None Include="resources\gi_fragment.glsl" />
+    <None Include="resources\gi_vertex.glsl" />
     <None Include="resources\luminance_compute.glsl" />
     <None Include="resources\fxaa_fragment.glsl">
       <DeploymentContent>true</DeploymentContent>
@@ -922,6 +925,8 @@
     <None Include="resources\line_vertex.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="resources\materials.glsl" />
+    <None Include="resources\output.glsl" />
     <None Include="resources\plane.shape">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -946,14 +951,15 @@
     <None Include="resources\sphere.shape">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="resources\ssao_fragment.glsl" />
-    <None Include="resources\ssao_vertex.glsl" />
     <None Include="resources\trail_fragment.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="resources\trail_vertex.glsl">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="resources\voxel_clear.glsl" />
+    <None Include="resources\voxel_combine.glsl" />
+    <None Include="resources\voxel_mipmap.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\container_color_texture.png" />

@@ -1,16 +1,17 @@
 #include "Scenes/LightRiderScene.h"
 #include "ComputeProgram.h"
+#include "ProgramMetadata.h"
 
 void LightRiderScene::loadAssets()
 {
     AssetManager* pAssets = getAssetManager();
 
     // Bike assets.
-    Program* pBikeShader = pAssets->loadShaderProgram("bikeShader", "bike_vertex.glsl", "bike_fragment.glsl");
+    Program* pBikeShader = loadShaderProgramWithDynamicOutput("bikeShader", "bike_vertex.glsl", "bike_fragment.glsl");
     pBikeShader->addUniform("playerId");
     pBikeShader->addUniform("transitionAmount");
 
-    Program* pTrailShader = pAssets->loadShaderProgram("trailShader", "trail_vertex.glsl", "trail_fragment.glsl",
+    Program* pTrailShader = loadShaderProgramWithDynamicOutput("trailShader", "trail_vertex.glsl", "trail_fragment.glsl",
         ShaderUniform::P_MATRIX
       | ShaderUniform::V_MATRIX
     );
@@ -21,7 +22,7 @@ void LightRiderScene::loadAssets()
     pAssets->loadTexture("bikeTexture", "light_cycle_texture.png", TextureType::IMAGE);
     pAssets->loadShape("bikeShape", "light_cycle.shape");
 
-    Program* pChunkShader = pAssets->loadShaderProgram("chunkShader", "chunk_vertex.glsl", "chunk_fragment.glsl",
+    Program* pChunkShader = loadShaderProgramWithDynamicOutput("chunkShader", "chunk_vertex.glsl", "chunk_fragment.glsl",
         ShaderUniform::P_MATRIX
       | ShaderUniform::V_MATRIX
       | ShaderUniform::M_MATRIX
@@ -32,32 +33,28 @@ void LightRiderScene::loadAssets()
     pAssets->loadShape("chunkShape", "chunk_particle.shape");
 
     // Ground assets.
-    Program* pGroundShader = pAssets->loadShaderProgram("groundShader", "ground_vertex.glsl", "ground_fragment.glsl",
+    Program* pGroundShader = loadShaderProgramWithDynamicOutput("groundShader", "ground_vertex.glsl", "ground_fragment.glsl",
         ShaderUniform::P_MATRIX
       | ShaderUniform::V_MATRIX
       | ShaderUniform::M_MATRIX
       | ShaderUniform::TEXTURE_0
       | ShaderUniform::TEXTURE_3);
     pGroundShader->addUniform("lightPV");
-    pGroundShader->addUniform("shadowMap");
     pGroundShader->addUniform("campos");
-    //pGroundShader->addUniform("lightPosition");
-    //pGroundShader->addUniform("lightDirection");
     pGroundShader->bind();
     glUniform1i(pGroundShader->getUniform("texture3"), 3);
-    glUniform1i(pGroundShader->getUniform("shadowMap"), 4);
     pGroundShader->unbind();
     
     pAssets->loadTexture("groundTexture", "ground_texture.png", TextureType::IMAGE);
 
-    Program* pRampShader = pAssets->loadShaderProgram("rampShader", "ramp_vertex.glsl", "ramp_fragment.glsl",
+    Program* pRampShader = loadShaderProgramWithDynamicOutput("rampShader", "ramp_vertex.glsl", "ramp_fragment.glsl",
         ShaderUniform::P_MATRIX
       | ShaderUniform::V_MATRIX
       | ShaderUniform::M_MATRIX);
     pRampShader->addUniform("time");
 
     // Container assets.
-    pAssets->loadShaderProgram("containerShader", "container_vertex.glsl", "container_fragment.glsl",
+    loadShaderProgramWithDynamicOutput("containerShader", "container_vertex.glsl", "container_fragment.glsl",
         ShaderUniform::P_MATRIX
       | ShaderUniform::V_MATRIX
       | ShaderUniform::M_MATRIX
@@ -83,7 +80,7 @@ void LightRiderScene::loadAssets()
       | ShaderUniform::M_MATRIX);
     pShadowShader->addAttribute("vertexPosition");
 
-    Program* pDeferredShader = pAssets->loadShaderProgram("deferredShader", "deferred_vertex.glsl", "deferred_fragment.glsl", ShaderUniform::NONE);
+    Program* pDeferredShader = pAssets->loadShaderProgram("deferredShader", "deferred_vertex.glsl", std::vector<std::string>{ "deferred_fragment.glsl", "materials.glsl" }, ShaderUniform::NONE);
     pDeferredShader->addUniform("gColor");
     pDeferredShader->addUniform("gPosition");
     pDeferredShader->addUniform("gNormal");
@@ -93,22 +90,15 @@ void LightRiderScene::loadAssets()
     pDeferredShader->addUniform("campos");
     pDeferredShader->addUniform("lightPV");
 
-    Program* pSsaoShader = pAssets->loadShaderProgram("ssaoShader", "ssao_vertex.glsl", "ssao_fragment.glsl", ShaderUniform::NONE);
-    pSsaoShader->addUniform("gPosition");
-    pSsaoShader->addUniform("gNormal");
-    pSsaoShader->addUniform("gMaterial");
-    pSsaoShader->addUniform("noise");
-    pSsaoShader->addUniform("samples");
-    pSsaoShader->addUniform("projection");
-    pSsaoShader->addUniform("view");
-
-    Program* pHbaoShader = pAssets->loadShaderProgram("hbaoShader", "hbao_vertex.glsl", "hbao_fragment.glsl", ShaderUniform::NONE);
-    pHbaoShader->addUniform("gPosition");
-    pHbaoShader->addUniform("gNormal");
-    pHbaoShader->addUniform("gMaterial");
-    pHbaoShader->addUniform("noise");
-    pHbaoShader->addUniform("view");
-    pHbaoShader->addUniform("focalLength");
+    Program* pGiShader = pAssets->loadShaderProgram("giShader", "gi_vertex.glsl", "gi_fragment.glsl", ShaderUniform::NONE);
+    pGiShader->addUniform("gPosition");
+    pGiShader->addUniform("gNormal");
+    pGiShader->addUniform("gMaterial");
+    pGiShader->addUniform("noise");
+    pGiShader->addUniform("voxelMap");
+    pGiShader->addUniform("view");
+    pGiShader->addUniform("focalLength");
+    pGiShader->addUniform("voxelCenterPosition");
 
     Program* pBlendedDeferredShader = pAssets->loadShaderProgram("blendedDeferredShader", "blended_deferred_vertex.glsl", "blended_deferred_fragment.glsl", ShaderUniform::NONE);
     pBlendedDeferredShader->addUniform("gColor");
@@ -116,6 +106,7 @@ void LightRiderScene::loadAssets()
     pBlendedDeferredShader->addUniform("gNormal");
     pBlendedDeferredShader->addUniform("gMaterial");
     pBlendedDeferredShader->addUniform("ssaoTexture");
+    pBlendedDeferredShader->addUniform("indirectTexture");
     pBlendedDeferredShader->addUniform("occlusionFactor");
 
     Program* pPostShader = pAssets->loadShaderProgram("postShader", "post_vertex.glsl", "post_fragment.glsl", ShaderUniform::NONE);
@@ -141,8 +132,48 @@ void LightRiderScene::loadAssets()
     pLuminanceProgram->addBuffer("result", sizeof(glm::vec4));
     pLuminanceProgram->addUniform("colorImage");
 
+    ComputeProgram* pVoxelClearProgram = pAssets->loadComputeShaderProgram("voxelClear", "voxel_clear.glsl");
+    pVoxelClearProgram->addUniform("voxelMapR");
+    pVoxelClearProgram->addUniform("voxelMapG");
+    pVoxelClearProgram->addUniform("voxelMapB");
+    pVoxelClearProgram->addUniform("voxelMapA");
+
+    ComputeProgram* pVoxelCombineProgram = pAssets->loadComputeShaderProgram("voxelCombine", "voxel_combine.glsl");
+    pVoxelCombineProgram->addUniform("voxelMapR");
+    pVoxelCombineProgram->addUniform("voxelMapG");
+    pVoxelCombineProgram->addUniform("voxelMapB");
+    pVoxelCombineProgram->addUniform("voxelMapA");
+
+    ComputeProgram* pVoxelMipmapProgram = pAssets->loadComputeShaderProgram("voxelMipmap", "voxel_mipmap.glsl");
+    pVoxelMipmapProgram->addUniform("inMip");
+    pVoxelMipmapProgram->addUniform("outMip");
+
     pAssets->loadShape("sphereShape", "sphere.shape");
     pAssets->loadShape("planeShape", "plane.shape");
     pAssets->loadShape("rampShape", "ramp.shape");
     pAssets->loadShape("rampShapeCollision", "ramp_collision.shape");
+}
+
+Program* LightRiderScene::loadShaderProgramWithDynamicOutput(const std::string& id, const std::string& vertexShaderFileName,
+    const std::string& fragmentShaderFileName, ShaderUniform defaultUniforms)
+{
+    Program* pProgram = getAssetManager()->loadShaderProgram(id, vertexShaderFileName, { "output.glsl", "materials.glsl", fragmentShaderFileName}, defaultUniforms);
+    pProgram->addUniform("_outputMode");
+    pProgram->addUniform("_voxelCenterPosition");
+    pProgram->addUniform("_cameraPosition");
+    pProgram->addUniform("_lightPV");
+    pProgram->addUniform("_shadowMap");
+    pProgram->addUniform("_skyTexture");
+    pProgram->addUniform("_voxelMapR");
+    pProgram->addUniform("_voxelMapG");
+    pProgram->addUniform("_voxelMapB");
+    pProgram->addUniform("_voxelMapA");
+    pProgram->setUserPointer((void*)ProgramMetadata::USES_DYNAMIC_OUTPUT);
+
+    pProgram->bind();
+    glUniform1i(pProgram->getUniform("_shadowMap"), 4);
+    glUniform1i(pProgram->getUniform("_skyTexture"), 5);
+    pProgram->unbind();
+
+    return pProgram;
 }

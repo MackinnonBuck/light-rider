@@ -4,6 +4,7 @@
 #include "Program.h"
 #include "Texture.h"
 #include "Shape.h"
+#include "RenderConfiguration.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -63,6 +64,9 @@ public:
 
     // Gets the PV matrix of the sun.
     const glm::mat4& getSunPvMatrix() const { return m_sunPvMatrix; }
+    
+    // Gets the render configuration used for the primary render pass.
+    const RenderConfiguration& getPrimaryRenderConfiguration() const { return m_primaryRenderConfiguration; }
 
     // Sets the camera's field of view.
     void setFieldOfView(float fieldOfView) { m_fieldOfView = fieldOfView; }
@@ -97,10 +101,19 @@ protected:
     virtual void postRender() { }
 
     // Renders Renderables with blending disabled.
-    void renderUnblendedRenderables();
+    void renderUnblendedRenderables(const RenderConfiguration& configuration);
 
     // Renders Renderables with blending enabled.
-    void renderBlendedRenderables();
+    void renderBlendedRenderables(const RenderConfiguration& configuration);
+
+    // Finds and sets up a texture for use.
+    void findAndSetUpTexture(AssetManager* pAssets, TextureType type, const std::string& textureId);
+
+    // Sets up the given texture for use.
+    void setUpTexture(TextureType type, Texture* pTexture);
+
+    // Returns true if the provided shader program has dynamic output.
+    bool doesProgramHaveDynamicOutput(Program* pShaderProgram);
 
 private:
 
@@ -112,6 +125,9 @@ private:
 
     // The shape used to render the sky (i.e. sphre, box, etc.)
     Shape* m_pSkyShape;
+
+    // The render configuration used for the primary render pass.
+    RenderConfiguration m_primaryRenderConfiguration;
 
     // If true, the camera is enabled and actively rendering in the current scene.
     bool m_isEnabled;
@@ -161,13 +177,4 @@ private:
 
     // Computes the sun's PV matrix.
     void computeSunPvMatrix();
-
-    // Sets up the given shader program for use.
-    void setUpShaderProgram(Program* pShaderProgram);
-
-    // Finds and sets up a texture for use.
-    void findAndSetUpTexture(AssetManager* pAssets, TextureType type, const std::string& textureId);
-
-    // Sets up the given texture for use.
-    void setUpTexture(TextureType type, Texture* pTexture);
 };

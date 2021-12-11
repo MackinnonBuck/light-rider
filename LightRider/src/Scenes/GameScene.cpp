@@ -87,7 +87,7 @@ void GameScene::update(float deltaTime)
         m_pPlayer1Camera->enable(0.0f);
         m_pPlayer2Camera->enable(0.0f);
 
-        setDebugDrawEnabled(false);
+        //setDebugDrawEnabled(false);
     }
     else if (Game::getInstance().isKeyDown(GLFW_KEY_1))
     {
@@ -95,7 +95,7 @@ void GameScene::update(float deltaTime)
         m_pPlayer2Camera->disable();
         m_pFreeroamCamera->enable(0.0f);
 
-        setDebugDrawEnabled(true);
+        //setDebugDrawEnabled(true);
     }
 
     LightRiderScene::update(deltaTime);
@@ -157,8 +157,11 @@ void GameScene::physicsTick(float physicsTimeStep)
             m_pPlayer2Camera->disable();
             m_pFreeroamCamera->disable();
 
+            auto pDeadBike = player1Dead ? m_pPlayer1Bike : m_pPlayer2Bike;
+
             m_pDeathCamera->enable(0.0f);
-            m_pDeathCamera->setDeadObject(player1Dead ? m_pPlayer1Bike : m_pPlayer2Bike);
+            m_pDeathCamera->setDeadObject(pDeadBike);
+            m_pDeathCamera->setSubject(pDeadBike);
 
             m_ticksUntilReset = GC::deathSequenceTicks;
         }
@@ -205,6 +208,7 @@ void GameScene::initScene()
     m_pPlayer1Camera = pPlayer1CameraObject->addComponent<PlayerCamera>(m_pPlayer1Bike, m_pPlayer2Bike, player1CameraControls);
     m_pPlayer1Camera->setSky("skyShader", "skyTexture", "sphereShape");
     m_pPlayer1Camera->setSizeRatio(glm::vec2(0.5f, 1.0f));
+    m_pPlayer1Camera->setSubject(m_pPlayer1Bike);
 
     GameObject* pPlayer2CameraObject = GameObject::create("Player2Camera");
     pPlayer2CameraObject->getTransform()->setPosition(GC::introCamera2Position);
@@ -214,6 +218,7 @@ void GameScene::initScene()
     m_pPlayer2Camera->setSky("skyShader", "skyTexture", "sphereShape");
     m_pPlayer2Camera->setOffsetRatio(glm::vec2(0.5f, 0.0f));
     m_pPlayer2Camera->setSizeRatio(glm::vec2(0.5f, 1.0f));
+    m_pPlayer2Camera->setSubject(m_pPlayer2Bike);
     
     GameObject* pDeathCameraObject = GameObject::create("DeathCamera");
     m_pDeathCamera = pDeathCameraObject->addComponent<DeathCamera>();

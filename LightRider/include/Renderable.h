@@ -8,7 +8,6 @@
 class Renderable : public Component
 {
 public:
-
     // Instantiates a new Renderable instance, adding it to the scene's asset manager render tree.
     Renderable(
         const std::string& shaderProgramId,

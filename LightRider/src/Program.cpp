@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cassert>
 #include <fstream>
+#include <sstream>
 
 #include "GLSL.h"
 
@@ -24,7 +25,13 @@ std::string readFileAsString(const std::string &fileName)
 void Program::setShaderNames(const std::string &v, const std::string &f)
 {
     vShaderName = v;
-    fShaderName = f;
+    fShaderNames = { f };
+}
+
+void Program::setShaderNames(const std::string &v, const std::vector<std::string> &f)
+{
+    vShaderName = v;
+    fShaderNames = f;
 }
 
 bool Program::init()
@@ -35,11 +42,19 @@ bool Program::init()
     GLuint VS = glCreateShader(GL_VERTEX_SHADER);
     GLuint FS = glCreateShader(GL_FRAGMENT_SHADER);
 
+    std::string fShaderString;
+    for (auto& fileName : fShaderNames)
+    {
+        fShaderString += readFileAsString(fileName);
+    }
+
     // Read shader sources
     std::string vShaderString = readFileAsString(vShaderName);
-    std::string fShaderString = readFileAsString(fShaderName);
+    //std::string fShaderString = readFileAsString(fShaderName);
     const char *vshader = vShaderString.c_str();
     const char *fshader = fShaderString.c_str();
+
+
     CHECKED_GL_CALL(glShaderSource(VS, 1, &vshader, NULL));
     CHECKED_GL_CALL(glShaderSource(FS, 1, &fshader, NULL));
 
@@ -64,7 +79,14 @@ bool Program::init()
         if (isVerbose())
         {
             GLSL::printShaderInfoLog(FS);
-            std::cout << "Error compiling fragment shader " << fShaderName << std::endl;
+            std::cout << "Error compiling fragment shader from ";
+
+            for (auto& fShaderName : fShaderNames)
+            {
+                std::cout << ", \"" << fShaderName << '"';
+            }
+
+            std::cout << std::endl;
         }
         return false;
     }
@@ -80,7 +102,14 @@ bool Program::init()
         if (isVerbose())
         {
             GLSL::printProgramInfoLog(pid);
-            std::cout << "Error linking shaders " << vShaderName << " and " << fShaderName << std::endl;
+            std::cout << "Error linking shaders " << vShaderName << "'";
+
+            for (auto& fShaderName : fShaderNames)
+            {
+                std::cout << ", \"" << fShaderName << '"';
+            }
+
+            std::cout << std::endl;
         }
         return false;
     }

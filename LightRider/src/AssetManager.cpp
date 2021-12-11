@@ -56,7 +56,7 @@ AssetManager::~AssetManager()
 }
 
 Program* AssetManager::loadShaderProgram(const std::string& id, const std::string& vertexShaderFileName,
-        const std::string& fragmentShaderFileName, ShaderUniform defaultUniforms)
+    const std::vector<std::string>& fragmentShaderFileNames, ShaderUniform defaultUniforms)
 {
     if (id.empty())
     {
@@ -64,15 +64,28 @@ Program* AssetManager::loadShaderProgram(const std::string& id, const std::strin
         return nullptr;
     }
 
+    std::vector<std::string> fragmentShaderFilePaths;
+    fragmentShaderFilePaths.reserve(fragmentShaderFileNames.size());
+
+    for (auto& fileName : fragmentShaderFileNames)
+    {
+        fragmentShaderFilePaths.push_back(m_gameConfig.resourceDirectory + fileName);
+    }
+
     Program* pProgram = new Program();
     pProgram->setVerbose(true);
-    pProgram->setShaderNames(m_gameConfig.resourceDirectory + vertexShaderFileName,
-        m_gameConfig.resourceDirectory + fragmentShaderFileName);
+    pProgram->setShaderNames(m_gameConfig.resourceDirectory + vertexShaderFileName, fragmentShaderFilePaths);
 
     if (!pProgram->init())
     {
-        std::cerr << "Could not initialize shader from \"" << vertexShaderFileName <<
-            "\" and \"" << fragmentShaderFileName << "\"." << std::endl;
+        std::cerr << "Could not initialize shader from \"" << vertexShaderFileName << '"';
+
+        for (auto& fragmentShaderName : fragmentShaderFileNames)
+        {
+            std::cerr << ", \"" << fragmentShaderName << '"';
+        }
+
+        std::cerr << std::endl;
 
         delete pProgram;
         return nullptr;
@@ -112,6 +125,13 @@ Program* AssetManager::loadShaderProgram(const std::string& id, const std::strin
     m_shaderPrograms[id] = pProgram;
 
     return pProgram;
+
+}
+
+Program* AssetManager::loadShaderProgram(const std::string& id, const std::string& vertexShaderFileName,
+        const std::string& fragmentShaderFileName, ShaderUniform defaultUniforms)
+{
+    return loadShaderProgram(id, vertexShaderFileName, std::vector<std::string>({ fragmentShaderFileName }), defaultUniforms);
 }
 
 ComputeProgram* AssetManager::loadComputeShaderProgram(const std::string& id, const std::string& fileName)

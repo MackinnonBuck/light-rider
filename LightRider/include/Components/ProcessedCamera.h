@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameObject.h"
 #include "ComputeProgram.h"
 #include "Camera.h"
 #include "Program.h"
@@ -15,6 +16,12 @@ public:
     
     // Destroys the ProcessedCamera instance.
     virtual ~ProcessedCamera();
+
+    // Sets the subject of the camera. This is used to determine the voxel light map origin.
+    void setSubject(GameObject* pSubject) { m_pSubject = pSubject; }
+
+    // Gets the subject of the camera. This is used to determine the voxel light map origin.
+    GameObject* getSubject() const { return m_pSubject; }
 
     // Sets the offset ratio of the camera to screen size (each axis has a range from 0 to 1).
     void setOffsetRatio(const glm::vec2& offsetRatio);
@@ -33,7 +40,12 @@ public:
 
     virtual void update(float deltaTime);
 
+    virtual void postUpdate(float deltaTime);
+
 protected:
+
+    // Initializes the camera component.
+    virtual bool initialize();
 
     // Returns the viewport dimensions.
     virtual void getViewport(int& x, int& y, int& width, int& height);
@@ -46,17 +58,17 @@ protected:
 
 private:
 
+    // The subject of the camera. This dictates where the voxel light map should be centered.
+    GameObject* m_pSubject;
+
     // The shader used to render objects that cast shadows.
     Program* m_pShadowShader;
 
     // The shader program used for deferred rendering.
     Program* m_pDeferredShader;
 
-    // The shader used to compute SSAO.
-    Program* m_pSsaoShader;
-
-    // The shader used to compute HBAO.
-    Program* m_pHbaoShader;
+    // The shader used to compute global illumination.
+    Program* m_pGiShader;
 
     // The shader program used for deferred rendering, including blended objects.
     Program* m_pBlendedDeferredShader;
@@ -79,6 +91,15 @@ private:
 
     // The compute shader used to determine the overall luminance of the scene.
     ComputeProgram* m_pLuminanceComputeShader;
+
+    // The compute shader used to clear the voxel texture.
+    ComputeProgram* m_pVoxelClearComputeShader;
+
+    // The compute shader used to combine each voxel map component texture.
+    ComputeProgram* m_pVoxelCombineComputeShader;
+
+    // The compute shader used to generate a mipmap for the voxel texture.
+    ComputeProgram* m_pVoxelMipmapComputeShader;
 
     // The frame buffer that the scene gets rendered to.
     GLuint m_primaryFrameBuffer;
@@ -104,14 +125,17 @@ private:
     // The color buffer for the deferred frame buffer.
     GLuint m_deferredColorBuffer;
 
-    // The texture containing the SSAO noise.
-    GLuint m_ssaoNoiseTexture;
+    // The texture containing noise for HBAO and global illumination.
+    GLuint m_noiseTexture;
 
-    // The frame buffer used to render SSAO.
-    GLuint m_ssaoFrameBuffer;
+    // The frame buffer used to render global illumination.
+    GLuint m_giFrameBuffer;
 
-    // The color buffer for storing the SSAO output.
-    GLuint m_ssaoColorBuffer;
+    // The color buffer for storing the ambient occlusion output.
+    GLuint m_giAoColorBuffer;
+
+    // The color buffer for storing indirect lighting output.
+    GLuint m_giIndirectColorBuffer;
 
     // The frame buffer to store the antialiased scene.
     GLuint m_fxaaFrameBuffer;
@@ -136,6 +160,19 @@ private:
 
     // The depth render buffer for the shadow map.
     GLuint m_shadowMapDepthBuffer;
+
+    // The framebuffer used to render to the voxel light map.
+    GLuint m_voxelFrameBuffer;
+
+    // The color buffer used in rendering the voxel light map.
+    // This buffer is only attached in order to make the framebuffer valid - we don't write to it.
+    GLuint m_voxelColorBuffer;
+
+    // The 3D texture storing the voxel light map.
+    GLuint m_voxelMapTexture;
+
+    // The 3D textures representing each component in the voxel light map.
+    GLuint m_voxelMapTextureComponents[4];
 
     // The VAO for the quad to display the texture.
     GLuint m_quadVertexArrayObject;
@@ -162,6 +199,9 @@ private:
     // needs to be recreated.
     bool m_areFrameBuffersDirty;
 
+    // The render configuration used to render the voxel map.
+    RenderConfiguration m_voxelMapRenderConfiguration;
+
     // The offset ratio of the camera to screen size.
     glm::vec2 m_offsetRatio;
 
@@ -174,8 +214,14 @@ private:
     // The target exposure level.
     float m_targetExposure;
 
-    // Whether HBAO is used. If false, SSAO is used instead.
-    static bool s_isUsingHbao;
+    // The subject position snapped to the voxel grid.
+    glm::vec3 m_snappedSubjectPosition;
+
+    // The current perspective matrix used to render the voxel map.
+    glm::mat4 m_voxelPerspectiveMatrix;
+
+    // The current view matrix used to render the voxel map.
+    glm::mat4 m_voxelViewMatrix;
 
     // Creates a new frame buffer, freeing the old one if it exists.
     void createFrameBuffers();
@@ -186,7 +232,13 @@ private:
     // Renders the current scene to the shadow map.
     void renderShadowMap();
 
-    void generateSsaoKernel(glm::vec3* kernel, unsigned int size);
+    // Performs a deferred rendering pass.
+    void renderDeferred();
 
-    void generateSsaoNoise(glm::vec3* noise, unsigned int size);
+    // Renders the scene from the given camera matrices into the voxel light map.
+    void renderToVoxelMap();
+
+    glm::vec3 getVoxelSnappedSubjectPosition() const;
+
+    void generateNoise(glm::vec3* noise, unsigned int size);
 };

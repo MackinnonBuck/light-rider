@@ -17,7 +17,7 @@ void main()
 {
     position = vertex_pos;
     normal = vertex_normal;
-    material = 0;
+    material = 8;
 
     color = texture(texture0, vertex_tex);
     color.rgb *= pow((color.r + color.g + color.b), bloomFactor);

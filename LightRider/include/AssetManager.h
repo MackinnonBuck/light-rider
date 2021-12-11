@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 #include <unordered_map>
 
 #include "GameConfig.h"
@@ -61,6 +62,11 @@ public:
     // Uniforms will be added according to the specified defaultUniforms argument.
     Program* loadShaderProgram(const std::string& id, const std::string& vertexShaderFileName,
         const std::string& fragmentShaderFileName, ShaderUniform defaultUniforms = ShaderUniform::DEFAULT);
+
+    // Loads a shader program from the given vertex and fragment shader file names.
+    // Uniforms will be added according to the specified defaultUniforms argument.
+    Program* loadShaderProgram(const std::string& id, const std::string& vertexShaderFileName,
+        const std::vector<std::string>& fragmentShaderFileNames, ShaderUniform defaultUniforms = ShaderUniform::DEFAULT);
 
     // Loads a compute shader program from the given file name.
     ComputeProgram* loadComputeShaderProgram(const std::string& id, const std::string& fileName);

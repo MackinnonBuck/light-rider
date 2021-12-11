@@ -6,6 +6,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include <glad/glad.h>
 
@@ -21,6 +22,7 @@ public:
     bool isVerbose() const { return verbose; }
 
     void setShaderNames(const std::string &v, const std::string &f);
+    void setShaderNames(const std::string &v, const std::vector<std::string> &f);
     virtual bool init();
     virtual void bind();
     virtual void unbind();
@@ -31,10 +33,13 @@ public:
     GLint getUniform(const std::string &name) const;
     GLuint getPid() const;
 
+    void* getUserPointer() const { return userPointer; }
+    void setUserPointer(void* userPointer) { this->userPointer = userPointer; }
+
 protected:
 
     std::string vShaderName;
-    std::string fShaderName;
+    std::vector<std::string> fShaderNames;
 
 private:
 
@@ -42,7 +47,7 @@ private:
     std::map<std::string, GLint> attributes;
     std::map<std::string, GLint> uniforms;
     bool verbose = true;
-
+    void* userPointer = nullptr;
 };
 
 #endif // LAB471_PROGRAM_H_INCLUDED
